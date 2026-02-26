@@ -1,0 +1,70 @@
+# docker-compose.yml — x402 Stellar Simple Paywall Example
+#
+# Launches three services:
+#   facilitator  – x402 payment facilitator (internal, port 4022)
+#   server       – Express paywall server  (exposed on port 3001)
+#   client       – React SPA via nginx     (exposed on port 8080)
+#
+# Usage:
+#   docker compose up --build
+#
+# Reads secrets from ../../.env (repo root).
+# Build context is the repo root (../../) because the pnpm workspace
+# and vendors/x402 must be in scope.
+
+services:
+  facilitator:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      target: facilitator
+    env_file: ../../.env
+    environment:
+      - PORT=4022
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://localhost:4022/health').then(r=>{if(!r.ok)throw 1})"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      target: server
+    ports:
+      - "3001:3001"
+    env_file: ../../.env
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - CORS_ORIGINS=*
+      - FACILITATOR_URL=http://facilitator:4022
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>{if(!r.ok)throw 1})"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      facilitator:
+        condition: service_healthy
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      target: client
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_SERVER_URL=http://localhost:3001
+    depends_on:
+      server:
+        condition: service_healthy
+    restart: unless-stopped
