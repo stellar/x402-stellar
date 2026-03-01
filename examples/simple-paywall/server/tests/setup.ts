@@ -1,0 +1,4 @@
+import { vi } from "vitest";
+
+vi.stubEnv("NODE_ENV", "test");
+vi.stubEnv("SERVER_STELLAR_ADDRESS", "GTEST000000000000000000000000000000000000000000000000000");
