@@ -1,8 +1,11 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
+    "codegen": {
+      "outputs": ["src/gen/**", "src/browser/dist/**"]
+    },
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["codegen", "^build"],
       "outputs": ["dist/**"]
     },
     "dev": {
@@ -11,7 +14,9 @@
     },
     "lint": {},
     "lint:fix": {},
-    "typecheck": {},
+    "typecheck": {
+      "dependsOn": ["codegen", "^build"]
+    },
     "test": {}
   }
 }

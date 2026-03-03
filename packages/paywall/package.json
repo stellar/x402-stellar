@@ -4,8 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build:paywall": "tsx src/browser/build.ts",
-    "build": "pnpm run build:paywall && tsup",
+    "codegen": "tsx src/browser/build.ts",
+    "build": "tsup",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ignore-pattern src/browser/",
     "lint:fix": "eslint src/ --ignore-pattern src/browser/ --fix"
