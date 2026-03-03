@@ -1,0 +1,29 @@
+{
+  "name": "x402-stellar",
+  "private": true,
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@10.7.0",
+  "scripts": {
+    "build": "turbo run build --filter='@x402-stellar/*'",
+    "dev": "turbo run dev --filter='@x402-stellar/*'",
+    "lint": "turbo run lint --filter='@x402-stellar/*'",
+    "lint:fix": "turbo run lint:fix --filter='@x402-stellar/*'",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "turbo run typecheck --filter='@x402-stellar/*'",
+    "test": "turbo run test --filter='@x402-stellar/*'"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@creit.tech/stellar-wallets-kit@2.0.0": "patches/@creit.tech__stellar-wallets-kit@2.0.0.patch"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.3",
+    "eslint": "^9.39.3",
+    "prettier": "^3.8.1",
+    "turbo": "^2.8.12",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  }
+}

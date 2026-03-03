@@ -1,0 +1,15 @@
+diff --git a/package.json b/package.json
+index 0000000..0000001 100644
+--- a/package.json
++++ b/package.json
+@@ -56,6 +56,10 @@
+     "./modules/klever": {
+       "import": "./esm/sdk/modules/klever.module.js",
+       "require": "./script/sdk/modules/klever.module.js"
++    },
++    "./modules/onekey": {
++      "import": "./esm/sdk/modules/onekey.module.js",
++      "require": "./script/sdk/modules/onekey.module.js"
+     },
+     "./modules/ledger": {
+       "import": "./esm/sdk/modules/ledger.module.js",

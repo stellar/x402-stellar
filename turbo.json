@@ -1,0 +1,22 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "codegen": {
+      "outputs": ["src/gen/**", "src/browser/dist/**"]
+    },
+    "build": {
+      "dependsOn": ["codegen", "^build"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "lint": {},
+    "lint:fix": {},
+    "typecheck": {
+      "dependsOn": ["codegen", "^build"]
+    },
+    "test": {}
+  }
+}
