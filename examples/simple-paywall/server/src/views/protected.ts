@@ -81,14 +81,14 @@ export function protectedPageHtml(): string {
         src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/2044190296&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
       ></iframe>
       <div class="attribution">
-        <a href="https://soundcloud.com/dan-kim-675678711" title="danXkim" target="_blank">danXkim</a> · <a href="https://soundcloud.com/dan-kim-675678711/x402" title="x402 (DJ Reppel Remix)" target="_blank">x402 (DJ Reppel Remix)</a>
+        <a href="https://soundcloud.com/dan-kim-675678711" title="danXkim" target="_blank" rel="noopener noreferrer">danXkim</a> · <a href="https://soundcloud.com/dan-kim-675678711/x402" title="x402 (DJ Reppel Remix)" target="_blank" rel="noopener noreferrer">x402 (DJ Reppel Remix)</a>
       </div>
     </div>
     <p class="footer">
-      Powered by <a href="https://www.x402.org/" target="_blank" style="color:#38bdf8;text-decoration:none;">x402</a>
-      on <a href="https://stellar.org/" target="_blank" style="color:#38bdf8;text-decoration:none;">Stellar</a>
+      Powered by <a href="https://www.x402.org/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;text-decoration:none;">x402</a>
+      on <a href="https://stellar.org/" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;text-decoration:none;">Stellar</a>
       &mdash; learn more in the
-      <a href="https://developers.stellar.org/docs/build/apps/x402" target="_blank" style="color:#38bdf8;text-decoration:none;">Stellar docs</a>.
+      <a href="https://developers.stellar.org/docs/build/apps/x402" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;text-decoration:none;">Stellar docs</a>.
     </p>
   </div>
 </body>

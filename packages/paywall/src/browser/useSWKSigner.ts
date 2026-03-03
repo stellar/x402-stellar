@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
-import type { SignAuthEntry, SignTransaction } from "@stellar/stellar-sdk/contract";
+import type { SignAuthEntry } from "@stellar/stellar-sdk/contract";
 import type { Network } from "@x402/core/types";
 import { getNetworkPassphrase, type ClientStellarSigner } from "@x402/stellar";
 
@@ -42,7 +42,7 @@ export function useSWKSigner({
           networkPassphrase: opts?.networkPassphrase || getNetworkPassphrase(network),
         });
 
-        let { signedAuthEntry } = signingResult;
+        const { signedAuthEntry } = signingResult;
         if (!signedAuthEntry) {
           const selectedModule = StellarWalletsKit.selectedModule;
           return {
@@ -69,14 +69,9 @@ export function useSWKSigner({
       }
     };
 
-    const signTransactionFunc = async () => {
-      throw new Error("SWK signTransaction should not be called directly in this application.");
-    };
-
     return {
       address,
       signAuthEntry: signAuthEntryFunc,
-      signTransaction: signTransactionFunc as SignTransaction,
     };
   }, [address, network, kitReady]);
 }

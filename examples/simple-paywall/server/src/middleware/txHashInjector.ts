@@ -12,31 +12,59 @@ import type { Request, Response, NextFunction } from "express";
  */
 export function txHashInjector() {
   return (_req: Request, res: Response, next: NextFunction) => {
+    const originalWrite = res.write.bind(res) as Response["write"];
     const originalEnd = res.end.bind(res);
     type WriteFn = typeof res.write;
-    const chunks: string[] = [];
-    let isHtml = false;
+    const chunks: Buffer[] = [];
 
     res.write = function (...args: Parameters<WriteFn>) {
-      const [chunk] = args;
+      const [chunk, encodingOrCb] = args;
       if (chunk != null) {
-        chunks.push(typeof chunk === "string" ? chunk : String(chunk));
+        if (Buffer.isBuffer(chunk)) {
+          chunks.push(chunk);
+        } else {
+          const encoding =
+            typeof encodingOrCb === "string" ? (encodingOrCb as BufferEncoding) : "utf-8";
+          chunks.push(Buffer.from(chunk as string, encoding));
+        }
       }
       return true;
     } as WriteFn;
 
     res.end = function (...args: Parameters<typeof originalEnd>) {
-      const [chunk] = args;
-      if (chunk != null) {
-        chunks.push(typeof chunk === "string" ? chunk : String(chunk));
+      const [chunk, encodingOrCb] = args as [unknown, unknown, ...unknown[]];
+      if (chunk != null && typeof chunk !== "function") {
+        if (Buffer.isBuffer(chunk)) {
+          chunks.push(chunk);
+        } else {
+          const encoding =
+            typeof encodingOrCb === "string" ? (encodingOrCb as BufferEncoding) : "utf-8";
+          chunks.push(Buffer.from(chunk as string, encoding));
+        }
       }
 
       const contentType = res.getHeader("content-type");
-      isHtml = typeof contentType === "string" && contentType.includes("text/html");
+      const isHtml = typeof contentType === "string" && contentType.includes("text/html");
 
-      let body = chunks.join("");
+      if (!isHtml) {
+        // Non-HTML: replay original buffers without transformation
+        res.write = originalWrite;
+        res.end = originalEnd;
+        for (const buf of chunks) {
+          originalWrite(buf);
+        }
+        const cb =
+          typeof chunk === "function"
+            ? chunk
+            : typeof encodingOrCb === "function"
+              ? encodingOrCb
+              : undefined;
+        return originalEnd(cb as (() => void) | undefined);
+      }
 
-      if (isHtml && body.includes("{{TX_LINK}}")) {
+      let body = Buffer.concat(chunks).toString("utf-8");
+
+      if (body.includes("{{TX_LINK}}")) {
         const header = res.getHeader("payment-response") as string | undefined;
         body = injectTxLink(body, header);
       }

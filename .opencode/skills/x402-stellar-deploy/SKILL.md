@@ -13,12 +13,12 @@ Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + E
 
 **Required**:
 
-| Var                               | Description                           |
-| --------------------------------- | ------------------------------------- |
-| `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator Stellar secret key        |
-| `SERVER_STELLAR_ADDRESS`          | Server Stellar public address         |
-| `STELLAR_NETWORK`                 | `stellar:testnet` or `stellar:pubnet` |
-| `PAYMENT_PRICE`                   | Price in XLM (e.g. `0.01`)            |
+| Var                               | Description                                                     |
+| --------------------------------- | --------------------------------------------------------------- |
+| `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator Stellar secret key                                  |
+| `SERVER_STELLAR_ADDRESS`          | Server Stellar public address                                   |
+| `STELLAR_NETWORK`                 | `stellar:testnet` or `stellar:pubnet`                           |
+| `PAYMENT_PRICE`                   | Price in USDC on Stellar (SEP-41, 7 decimals, e.g. `0.0100000`) |
 
 **Optional**:
 

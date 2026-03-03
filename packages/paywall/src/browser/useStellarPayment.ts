@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import { x402Client } from "@x402/core/client";
+import { encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
 import { statusError, statusInfo, statusSuccess, type Status } from "./status";
@@ -48,13 +49,12 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
 
       const paymentPayload = await client.createPaymentPayload(paymentRequired);
 
-      const paymentHeader = btoa(JSON.stringify(paymentPayload));
+      const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
 
       setStatus(statusInfo("Settling payment..."));
       const response = await fetch(x402.currentUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
-          "Access-Control-Expose-Headers": "PAYMENT-RESPONSE",
         },
       });
 
@@ -70,12 +70,11 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
           setStatus(statusInfo("Retrying payment..."));
 
           const retryPayload = await client.createPaymentPayload(paymentRequired);
-          const retryHeader = btoa(JSON.stringify(retryPayload));
+          const retryHeader = encodePaymentSignatureHeader(retryPayload);
 
           const retryResponse = await fetch(x402.currentUrl, {
             headers: {
               "PAYMENT-SIGNATURE": retryHeader,
-              "Access-Control-Expose-Headers": "PAYMENT-RESPONSE",
             },
           });
 

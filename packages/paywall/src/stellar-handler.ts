@@ -25,6 +25,17 @@ interface StellarPaywallOptions {
   appLogo?: string;
 }
 
+/**
+ * Serializes a value as JSON safe for embedding inside HTML `<script>` tags.
+ *
+ * Escapes `<` → `\u003c` so that a `</script>` sequence inside the data
+ * cannot close the script block (the standard XSS vector for inline JSON).
+ * The output is still valid JavaScript.
+ */
+function jsonForScript(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 function getStellarPaywallHtml(options: StellarPaywallOptions): string {
   if (!STELLAR_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>Stellar Paywall template not available</h1></body></html>`;
@@ -42,14 +53,14 @@ function getStellarPaywallHtml(options: StellarPaywallOptions): string {
   <script>
     window.x402 = {
       amount: ${amount},
-      paymentRequired: ${JSON.stringify(paymentRequired)},
+      paymentRequired: ${jsonForScript(paymentRequired)},
       testnet: ${testnet},
-      currentUrl: ${JSON.stringify(currentUrl)},
+      currentUrl: ${jsonForScript(currentUrl)},
       config: {
-        chainConfig: ${JSON.stringify(config)},
+        chainConfig: ${jsonForScript(config)},
       },
-      appName: ${JSON.stringify(appName || "")},
-      appLogo: ${JSON.stringify(appLogo || "")},
+      appName: ${jsonForScript(appName || "")},
+      appLogo: ${jsonForScript(appLogo || "")},
     };
     ${logOnTestnet}
   </script>`;
