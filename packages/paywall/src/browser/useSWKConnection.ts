@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
-import { defaultModules } from "@creit.tech/stellar-wallets-kit/modules/utils";
+import { FreighterModule } from "@creit.tech/stellar-wallets-kit/modules/freighter";
+import { HanaModule } from "@creit.tech/stellar-wallets-kit/modules/hana";
+import { KleverModule } from "@creit.tech/stellar-wallets-kit/modules/klever";
+import { OneKeyModule } from "@creit.tech/stellar-wallets-kit/modules/onekey";
 import { Networks } from "@creit.tech/stellar-wallets-kit/types";
 import type { Network } from "@x402/core/types";
 import { getNetworkPassphrase } from "@x402/stellar";
 import { statusClear, statusError, statusInfo, type Status } from "./status";
-
-const SIGN_AUTH_ENTRY_MODULE_IDS: string[] = ["freighter", "hana", "klever", "onekey"];
 
 export type UseSWKConnectionParams = {
   network: Network;
@@ -45,9 +46,7 @@ export function useSWKConnection({
       const networkPassphrase = getNetworkPassphrase(network);
       StellarWalletsKit.init({
         network: networkPassphrase as Networks,
-        modules: defaultModules({
-          filterBy: (m) => SIGN_AUTH_ENTRY_MODULE_IDS.includes(m.productId),
-        }),
+        modules: [new FreighterModule(), new HanaModule(), new KleverModule(), new OneKeyModule()],
       });
 
       setKitReady(true);

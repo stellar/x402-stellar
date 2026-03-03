@@ -32,6 +32,7 @@ WORKDIR /app
 
 # Copy workspace manifests first for layer caching
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json tsconfig.base.json ./
+COPY patches/ patches/
 
 # Activate pnpm version from package.json
 RUN corepack install

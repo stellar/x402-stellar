@@ -13,6 +13,11 @@
     "typecheck": "turbo run typecheck --filter='@x402-stellar/*'",
     "test": "turbo run test --filter='@x402-stellar/*'"
   },
+  "pnpm": {
+    "patchedDependencies": {
+      "@creit.tech/stellar-wallets-kit@2.0.0": "patches/@creit.tech__stellar-wallets-kit@2.0.0.patch"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.3",
     "eslint": "^9.39.3",
