@@ -1,1 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata:wght@600;700&family=Inter:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+:root {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: #171717;
+  background-color: #f8f8f8;
+}
