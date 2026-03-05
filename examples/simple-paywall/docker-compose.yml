@@ -41,7 +41,7 @@ services:
     environment:
       - PORT=3001
       - NODE_ENV=production
-      - CORS_ORIGINS=*
+      - CORS_ORIGINS=http://localhost:8080
       - TESTNET_FACILITATOR_URL=http://facilitator:4022
     healthcheck:
       test:

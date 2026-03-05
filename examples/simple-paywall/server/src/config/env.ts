@@ -110,7 +110,7 @@ export class Env {
   }
 
   static get corsOrigins(): string | string[] {
-    const raw = process.env.CORS_ORIGINS ?? "*";
+    const raw = process.env.CORS_ORIGINS ?? "http://localhost:5173";
     return raw === "*" ? "*" : raw.split(",");
   }
 

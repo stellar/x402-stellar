@@ -53,7 +53,7 @@ describe("Env", () => {
 
   it("returns defaults for optional fields", () => {
     expect(Env.nodeEnv).toBe("test");
-    expect(Env.corsOrigins).toBe("*");
+    expect(Env.corsOrigins).toEqual(["http://localhost:5173"]);
     expect(Env.paymentPrice).toBe("0.01");
     expect(Env.paymentDescription).toBe("Access to protected content");
   });
