@@ -33,7 +33,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
   const [isPaying, setIsPaying] = useState(false);
 
   const x402 = window.x402;
-  const runtimeRpcUrl = x402?.config?.rpcUrl?.trim() || undefined;
+  const runtimeRpcUrl = x402?.config?.rpcUrl;
 
   const submitPayment = useCallback(async () => {
     if (!x402 || !walletSigner || !paymentRequired) {
@@ -53,7 +53,8 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
 
       setStatus(statusInfo("Settling payment..."));
-      const response = await fetch(x402.currentUrl, {
+      const targetUrl = x402.currentUrl || window.location.href;
+      const response = await fetch(targetUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
         },
@@ -73,7 +74,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
           const retryPayload = await client.createPaymentPayload(paymentRequired);
           const retryHeader = encodePaymentSignatureHeader(retryPayload);
 
-          const retryResponse = await fetch(x402.currentUrl, {
+          const retryResponse = await fetch(targetUrl, {
             headers: {
               "PAYMENT-SIGNATURE": retryHeader,
             },

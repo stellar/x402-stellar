@@ -44,7 +44,7 @@ export function useStellarBalance({
   asset,
   onStatus,
 }: UseBalanceParams): UseBalanceReturn {
-  const runtimeRpcUrl = window.x402?.config?.rpcUrl?.trim() || undefined;
+  const runtimeRpcUrl = window.x402?.config?.rpcUrl;
   const [tokenBalanceRaw, setTokenBalanceRaw] = useState<bigint | null>(null);
   const [tokenBalanceFormatted, setTokenBalanceFormatted] = useState<string>("");
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);

@@ -6,7 +6,7 @@ declare global {
       amount?: number;
       testnet?: boolean;
       paymentRequired: PaymentRequired;
-      currentUrl: string;
+      currentUrl?: string;
       appName?: string;
       appLogo?: string;
       config: {
