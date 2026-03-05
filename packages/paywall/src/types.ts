@@ -11,6 +11,7 @@ export interface PaywallConfig {
   appLogo?: string;
   currentUrl?: string;
   testnet?: boolean;
+  stellarRpcUrl?: string;
 }
 
 export interface PaymentRequirements {

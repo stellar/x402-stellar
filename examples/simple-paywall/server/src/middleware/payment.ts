@@ -17,7 +17,10 @@ export function createPaymentMiddleware() {
   });
   const paywall = createPaywall()
     .withNetwork(stellarPaywall)
-    .withConfig({ appName: "Simple Paywall Demo" })
+    .withConfig({
+      appName: "Simple Paywall Demo",
+      stellarRpcUrl: Env.stellarRpcUrl,
+    })
     .build();
 
   const server = new x402ResourceServer(facilitatorClient).register(

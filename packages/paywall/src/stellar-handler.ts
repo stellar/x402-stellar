@@ -23,6 +23,7 @@ interface StellarPaywallOptions {
   currentUrl: string;
   appName?: string;
   appLogo?: string;
+  stellarRpcUrl?: string;
 }
 
 /**
@@ -41,7 +42,8 @@ function getStellarPaywallHtml(options: StellarPaywallOptions): string {
     return `<!DOCTYPE html><html><body><h1>Stellar Paywall template not available</h1></body></html>`;
   }
 
-  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo } = options;
+  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, stellarRpcUrl } =
+    options;
 
   const logOnTestnet = testnet
     ? "console.log('Stellar Payment required initialized:', window.x402);"
@@ -57,6 +59,7 @@ function getStellarPaywallHtml(options: StellarPaywallOptions): string {
       testnet: ${testnet},
       currentUrl: ${jsonForScript(currentUrl)},
       config: {
+        rpcUrl: ${jsonForScript(stellarRpcUrl || "")},
         chainConfig: ${jsonForScript(config)},
       },
       appName: ${jsonForScript(appName || "")},
@@ -98,6 +101,7 @@ export const stellarPaywall: PaywallNetworkHandler = {
       testnet: config.testnet ?? true,
       appName: config.appName,
       appLogo: config.appLogo,
+      stellarRpcUrl: config.stellarRpcUrl,
     });
   },
 };

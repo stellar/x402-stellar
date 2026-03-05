@@ -11,6 +11,16 @@ import { protectedRouter } from "./routes/protected.js";
 
 export function createApp(): Express {
   const app = express();
+  const connectSrc = ["'self'", "https://*.stellar.org", "https://*.stellar.expert"];
+
+  try {
+    const rpcOrigin = new URL(Env.stellarRpcUrl).origin;
+    if (!connectSrc.includes(rpcOrigin)) {
+      connectSrc.push(rpcOrigin);
+    }
+  } catch {
+    logger.warn({ stellarRpcUrl: Env.stellarRpcUrl }, "Invalid STELLAR_RPC_URL for CSP");
+  }
 
   // Trust reverse proxies (Heroku router, nginx) so req.protocol reflects
   // the client's actual scheme (https) via X-Forwarded-Proto.
@@ -37,7 +47,7 @@ export function createApp(): Express {
           scriptSrc: ["'self'", "'unsafe-inline'", "https://w.soundcloud.com"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           frameSrc: ["https://w.soundcloud.com"],
-          connectSrc: ["'self'", "https://*.stellar.org", "https://*.stellar.expert"],
+          connectSrc,
           imgSrc: ["'self'", "data:", "https:"],
         },
       },

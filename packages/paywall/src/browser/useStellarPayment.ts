@@ -33,6 +33,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
   const [isPaying, setIsPaying] = useState(false);
 
   const x402 = window.x402;
+  const runtimeRpcUrl = x402?.config?.rpcUrl?.trim() || undefined;
 
   const submitPayment = useCallback(async () => {
     if (!x402 || !walletSigner || !paymentRequired) {
@@ -45,7 +46,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       setStatus(statusInfo("Waiting for user signature..."));
 
       const client = new x402Client();
-      client.register("stellar:*", new ExactStellarScheme(walletSigner));
+      client.register("stellar:*", new ExactStellarScheme(walletSigner, { url: runtimeRpcUrl }));
 
       const paymentPayload = await client.createPaymentPayload(paymentRequired);
 
@@ -98,7 +99,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
     } finally {
       setIsPaying(false);
     }
-  }, [walletSigner, x402, paymentRequired, onSuccessfulResponse, setStatus]);
+  }, [walletSigner, x402, paymentRequired, onSuccessfulResponse, setStatus, runtimeRpcUrl]);
 
   return { isPaying, submitPayment };
 }

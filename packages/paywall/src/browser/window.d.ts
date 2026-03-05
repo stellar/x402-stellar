@@ -10,6 +10,7 @@ declare global {
       appName?: string;
       appLogo?: string;
       config: {
+        rpcUrl?: string;
         chainConfig: Record<
           string,
           {
