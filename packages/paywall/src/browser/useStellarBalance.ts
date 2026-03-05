@@ -44,6 +44,7 @@ export function useStellarBalance({
   asset,
   onStatus,
 }: UseBalanceParams): UseBalanceReturn {
+  const runtimeRpcUrl = window.x402?.config?.rpcUrl;
   const [tokenBalanceRaw, setTokenBalanceRaw] = useState<bigint | null>(null);
   const [tokenBalanceFormatted, setTokenBalanceFormatted] = useState<string>("");
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
@@ -61,7 +62,7 @@ export function useStellarBalance({
    */
   const fetchAssetMetadata = useCallback(async (): Promise<void> => {
     const networkPassphrase = getNetworkPassphrase(network);
-    const rpcUrl = getRpcUrl(network);
+    const rpcUrl = getRpcUrl(network, { url: runtimeRpcUrl });
 
     try {
       const nameTx = await AssembledTransaction.build({
@@ -86,7 +87,7 @@ export function useStellarBalance({
     } catch (error) {
       console.error("Failed to fetch SAC metadata", error);
     }
-  }, [network, asset]);
+  }, [network, asset, runtimeRpcUrl]);
 
   const refreshBalance = useCallback(async (): Promise<void> => {
     if (!address) {
@@ -100,7 +101,7 @@ export function useStellarBalance({
 
     try {
       const networkPassphrase = getNetworkPassphrase(network);
-      const rpcUrl = getRpcUrl(network);
+      const rpcUrl = getRpcUrl(network, { url: runtimeRpcUrl });
       const contractId = asset;
 
       // Simulate to fetch the balance and decimals in parallel
@@ -154,7 +155,7 @@ export function useStellarBalance({
     } finally {
       setIsFetchingBalance(false);
     }
-  }, [address, network, asset, onStatus, resetBalance, fetchAssetMetadata]);
+  }, [address, network, asset, onStatus, resetBalance, fetchAssetMetadata, runtimeRpcUrl]);
 
   useEffect(() => {
     if (address) {

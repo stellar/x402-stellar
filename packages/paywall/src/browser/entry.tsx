@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import type {} from "./window";
 import { StellarPaywall } from "./StellarPaywall";
+import { validateX402Config } from "./validate";
 
 // Stellar-specific paywall entry point
 window.addEventListener("load", () => {
@@ -10,13 +11,29 @@ window.addEventListener("load", () => {
     return;
   }
 
-  const x402 = window.x402;
-  const paymentRequired = x402.paymentRequired;
+  const validationError = validateX402Config();
+  if (validationError) {
+    console.error("x402 config validation failed:", validationError);
 
-  if (!paymentRequired?.accepts?.[0]) {
-    console.error("No payment requirements found");
+    const container = document.createElement("div");
+    container.style.cssText = "padding:2rem;font-family:system-ui,sans-serif;color:#b91c1c";
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Payment Configuration Error";
+
+    const message = document.createElement("p");
+    message.textContent = validationError;
+
+    container.appendChild(heading);
+    container.appendChild(message);
+
+    rootElement.innerHTML = "";
+    rootElement.appendChild(container);
     return;
   }
+
+  const x402 = window.x402;
+  const paymentRequired = x402.paymentRequired;
 
   const root = createRoot(rootElement);
   root.render(
