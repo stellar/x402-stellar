@@ -100,15 +100,16 @@ The Dockerfile is a multi-target build with targets for `facilitator`, `server`,
 
 ### Server
 
-| Variable           | Default                 | Description                                 |
-| ------------------ | ----------------------- | ------------------------------------------- |
-| `PORT`             | `3001`                  | Server port                                 |
-| `NODE_ENV`         | `development`           | Environment                                 |
-| `LOG_LEVEL`        | `info`                  | Pino log level                              |
-| `CORS_ORIGINS`     | `http://localhost:5173` | Allowed CORS origins (comma-separated)      |
-| `PAYWALL_DISABLED` | —                       | Set to `true` to disable the paywall        |
-| `PAYMENT_PRICE`    | `0.01`                  | Price for protected content                 |
-| `CLIENT_HOME_URL`  | —                       | Client home page URL for paywall brand link |
+| Variable           | Default                          | Description                                 |
+| ------------------ | -------------------------------- | ------------------------------------------- |
+| `PORT`             | `3001`                           | Server port                                 |
+| `NODE_ENV`         | `development`                    | Environment                                 |
+| `LOG_LEVEL`        | `info`                           | Pino log level                              |
+| `CORS_ORIGINS`     | `http://localhost:5173`          | Allowed CORS origins (comma-separated)      |
+| `PAYWALL_DISABLED` | —                                | Set to `true` to disable the paywall        |
+| `PAYMENT_PRICE`    | `0.01`                           | Price for protected content                 |
+| `CLIENT_HOME_URL`  | —                                | Client home page URL for paywall brand link |
+| `TRUST_PROXY`      | `loopback,linklocal,uniquelocal` | Express trust proxy setting                 |
 
 ### Per-Network (Testnet / Mainnet)
 
@@ -123,11 +124,12 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 
 ### Facilitator
 
-| Variable                              | Default | Description                              |
-| ------------------------------------- | ------- | ---------------------------------------- |
-| `FACILITATOR_STELLAR_PRIVATE_KEY`     | —       | Facilitator wallet private key           |
-| `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —       | Fee-bump signer secret (high-throughput) |
-| `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —       | Channel account secrets, comma-separated |
+| Variable                              | Default                          | Description                              |
+| ------------------------------------- | -------------------------------- | ---------------------------------------- |
+| `FACILITATOR_STELLAR_PRIVATE_KEY`     | —                                | Facilitator wallet private key           |
+| `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —                                | Fee-bump signer secret (high-throughput) |
+| `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —                                | Channel account secrets, comma-separated |
+| `TRUST_PROXY`                         | `loopback,linklocal,uniquelocal` | Express trust proxy setting              |
 
 ### Client
 
