@@ -21,12 +21,15 @@ This repo provides:
 ```
 Client                    Server                  Facilitator         Stellar
   |                         |                         |                 |
-  |-- GET /protected ------>|                         |                 |
+  |-- GET /networks ------->|                         |                 |
+  |<-- { networks: [...] } -|                         |                 |
+  |                         |                         |                 |
+  |-- GET /protected/:net ->|                         |                 |
   |<-- 402 + requirements --|                         |                 |
   |                         |                         |                 |
   | (user signs tx in wallet)                         |                 |
   |                         |                         |                 |
-  |-- GET /protected ------>|                         |                 |
+  |-- GET /protected/:net ->|                         |                 |
   | (PAYMENT-SIGNATURE hdr)|-- POST /verify -------->|                 |
   |                         |<-- { valid: true } -----|                 |
   |                         |                         |                 |
@@ -36,14 +39,15 @@ Client                    Server                  Facilitator         Stellar
   |<-- 200 + PAYMENT-RESPONSE + content -------------|                 |
 ```
 
-1. Client requests a protected resource
-2. Server responds with `402 Payment Required` + `PAYMENT-REQUIRED` header (base64 `PaymentRequired` payload: price, network, payTo address)
-3. Client renders a paywall page where the user connects a Stellar wallet and signs a transaction
-4. Client retries the request with the signed payment in the `PAYMENT-SIGNATURE` header
-5. Server forwards the payment to the facilitator for verification
-6. Facilitator checks the transaction is valid (correct amount, recipient, not expired)
-7. Server serves the content; facilitator settles (submits) the transaction on-chain
-8. Server returns content with `PAYMENT-RESPONSE` header (base64 `SettlementResponse`) and injects the transaction hash link via `txHashInjector` middleware
+1. Client fetches `GET /networks` to discover which networks are available (testnet, mainnet, or both)
+2. Client requests a protected resource via `GET /protected/testnet` or `GET /protected/mainnet`
+3. Server responds with `402 Payment Required` + `PAYMENT-REQUIRED` header (base64 `PaymentRequired` payload: price, network, payTo address)
+4. Client renders a paywall page where the user connects a Stellar wallet and signs a transaction
+5. Client retries the request with the signed payment in the `PAYMENT-SIGNATURE` header
+6. Server forwards the payment to the facilitator for verification
+7. Facilitator checks the transaction is valid (correct amount, recipient, not expired)
+8. Server serves the content; facilitator settles (submits) the transaction on-chain
+9. Server returns content with `PAYMENT-RESPONSE` header (base64 `SettlementResponse`) and injects the transaction hash link via `txHashInjector` middleware
 
 ### Header compatibility note
 
@@ -61,12 +65,12 @@ pnpm 10.7.0 monorepo with Turborepo. All own packages are scoped `@x402-stellar/
 
 ### Packages
 
-| Package                               | Path                              | Purpose                                                                                                                                                                                                                                                                  |
-| ------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `@x402-stellar/paywall`               | `packages/paywall/`               | Builds the paywall HTML page. Uses a builder pattern: `createPaywall().withNetwork(stellarPaywall).build()`. The `stellarPaywall` handler uses `@creit.tech/stellar-wallets-kit` for wallet connection. Bundles React + wallet UI into a single HTML string via esbuild. |
-| `@x402-stellar/facilitator`           | `examples/facilitator/`           | Express service that wraps `x402Facilitator` from `@x402/core`. Registers the `ExactStellarScheme` with a Stellar signer derived from `FACILITATOR_STELLAR_PRIVATE_KEY`. Exposes `/verify`, `/settle`, `/supported`, `/health`.                                          |
-| `@x402-stellar/simple-paywall-server` | `examples/simple-paywall/server/` | Express service that uses `@x402/express` `paymentMiddleware` to protect `GET /protected`. Configures an `x402ResourceServer` with `HTTPFacilitatorClient` pointing at the facilitator. Also uses the paywall package to generate the 402 response HTML.                 |
-| `@x402-stellar/simple-paywall-client` | `examples/simple-paywall/client/` | React/Vite SPA. Three-page demo: Home, Try It (explains the flow), and the protected content page.                                                                                                                                                                       |
+| Package                               | Path                              | Purpose                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@x402-stellar/paywall`               | `packages/paywall/`               | Builds the paywall HTML page. Uses a builder pattern: `createPaywall().withNetwork(stellarPaywall).build()`. The `stellarPaywall` handler uses `@creit.tech/stellar-wallets-kit` for wallet connection. Bundles React + wallet UI into a single HTML string via esbuild.                                                                                                |
+| `@x402-stellar/facilitator`           | `examples/facilitator/`           | Express service that wraps `x402Facilitator` from `@x402/core`. Registers the `ExactStellarScheme` with a Stellar signer derived from `FACILITATOR_STELLAR_PRIVATE_KEY`. Exposes `/verify`, `/settle`, `/supported`, `/health`.                                                                                                                                         |
+| `@x402-stellar/simple-paywall-server` | `examples/simple-paywall/server/` | Express service that uses `@x402/express` `paymentMiddleware` to protect `GET /protected/:network` (testnet and/or mainnet). Configures per-network `x402ResourceServer` instances with `HTTPFacilitatorClient` pointing at each network's facilitator. Exposes `GET /networks` for network discovery. Also uses the paywall package to generate the 402 response HTML. |
+| `@x402-stellar/simple-paywall-client` | `examples/simple-paywall/client/` | React/Vite SPA. Three-page demo: Home, Try It (fetches `GET /networks` and shows buttons for each available network), and the protected content page.                                                                                                                                                                                                                   |
 
 ### Vendored Packages
 
@@ -89,7 +93,7 @@ Turborepo resolves `^build` dependencies. In practice: `paywall` builds first (e
 
 **txHashInjector middleware**: Registered before the `@x402/express` middleware. It wraps `res.end`/`res.write` to intercept the response body after payment settlement and replaces `{{TX_LINK}}` with a Stellar Expert transaction link. This lets the protected content reference its own payment transaction.
 
-**Facilitator is internal**: In the Heroku all-in-one deploy, nginx only proxies `/health` and `/protected` to Express. Facilitator routes (`/verify`, `/settle`, `/supported`) are NOT externally accessible — they run on `localhost:4022` inside the container. This is intentional: the facilitator is an internal service, not a public API.
+**Facilitator is internal**: In the Heroku all-in-one deploy, nginx only proxies `/health`, `/networks`, and `/protected/` to Express. Facilitator routes (`/verify`, `/settle`, `/supported`) are NOT externally accessible — they run on `localhost:4022` inside the container. This is intentional: the facilitator is an internal service, not a public API.
 
 **Startup ordering**: The server's `@x402/express` middleware eagerly calls `x402ResourceServer.initialize()` at import time, which fetches `/supported` from the facilitator. If the facilitator isn't ready, the server crashes. The `start.sh` script handles this with a readiness loop.
 
@@ -125,7 +129,7 @@ x402-stellar/
 │       │       │   └── txHashInjector.ts  # Replaces {{TX_LINK}} in responses
 │       │       ├── routes/
 │       │       │   ├── health.ts  # GET /health
-│       │       │   └── protected.ts  # GET /protected (paywalled content)
+│       │       │   └── protected.ts  # GET /protected/:network (paywalled content)
 │       │       └── utils/logger.ts
 │       ├── client/                # React/Vite SPA
 │       └── docker-compose.yml     # 3-container local setup
@@ -133,7 +137,7 @@ x402-stellar/
 │   └── typescript/packages/{core,extensions,http/express,mechanisms/stellar}
 ├── infra/heroku/
 │   ├── start.sh                   # Launches facilitator + server + nginx
-│   └── nginx.conf.template        # Proxies /health, /protected; serves SPA
+│   └── nginx.conf.template        # Proxies /health, /networks, /protected/; serves SPA
 ├── Dockerfile                     # Multi-target: facilitator, server, client, heroku
 ├── heroku.yml                     # Container deploy manifest
 ├── Makefile                       # check = install + format + lint + typecheck + test + build
@@ -155,22 +159,25 @@ x402-stellar/
 
 Minimum required for the system to function:
 
-| Variable                          | Used By           | Purpose                                       |
-| --------------------------------- | ----------------- | --------------------------------------------- |
-| `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator       | Signs and submits Stellar transactions        |
-| `SERVER_STELLAR_ADDRESS`          | Server            | Stellar public address that receives payments |
-| `CLIENT_STELLAR_PRIVATE_KEY`      | Client (dev only) | Wallet key for testing (never in production)  |
+| Variable                          | Used By           | Purpose                                      |
+| --------------------------------- | ----------------- | -------------------------------------------- |
+| `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator       | Signs and submits Stellar transactions       |
+| `TESTNET_SERVER_STELLAR_ADDRESS`  | Server            | Stellar public address for testnet payments  |
+| `MAINNET_SERVER_STELLAR_ADDRESS`  | Server            | Stellar public address for mainnet payments  |
+| `CLIENT_STELLAR_PRIVATE_KEY`      | Client (dev only) | Wallet key for testing (never in production) |
+
+Per-network server variables use `TESTNET_` or `MAINNET_` prefixes: `<NET>_SERVER_STELLAR_ADDRESS`, `<NET>_STELLAR_NETWORK`, `<NET>_STELLAR_RPC_URL`, `<NET>_FACILITATOR_URL`, `<NET>_FACILITATOR_API_KEY`. Provide at least one set to enable that network.
 
 Full reference in the root `README.md` and per-service `.env.example` files.
 
 ## Test Coverage
 
-56 tests across 5 files:
+87 tests across 5 files:
 
-- `examples/facilitator/tests/config/env.test.ts` — 13 tests (Env class validation)
-- `examples/facilitator/tests/routes/facilitator.test.ts` — 9 tests (route behavior)
-- `examples/simple-paywall/server/tests/config/env.test.ts` — 16 tests (Env + trustProxy)
-- `examples/simple-paywall/server/tests/middleware/txHashInjector.test.ts` — 8 tests
-- `examples/simple-paywall/server/tests/routes/` — 10 tests (health + protected routes)
+- `examples/facilitator/tests/config/env.test.ts` — 25 tests (Env class validation)
+- `examples/facilitator/tests/routes/facilitator.test.ts` — 10 tests (route behavior)
+- `examples/simple-paywall/server/tests/config/env.test.ts` — 30 tests (Env + dual-network config + address validation)
+- `examples/simple-paywall/server/tests/middleware/txHashInjector.test.ts` — 10 tests
+- `examples/simple-paywall/server/tests/routes/protected.test.ts` — 12 tests (health + networks + protected routes per network)
 
 Run with `pnpm test` (Turborepo runs vitest in each package).

@@ -12,7 +12,7 @@
 export function getNetworkDisplayName(network: string): string {
   if (network.startsWith("stellar:")) {
     const ref = network.split(":")[1];
-    return ref === "testnet" ? "Stellar Testnet" : "Stellar Pubnet";
+    return ref === "testnet" ? "Stellar Testnet" : "Stellar Mainnet";
   }
   return network;
 }
