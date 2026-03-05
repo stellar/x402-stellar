@@ -109,8 +109,8 @@ export function injectTxLink(body: string, paymentResponseHeader: string | undef
     const url = `${base}/${txHash}`;
 
     const link =
-      `<a href="${url}" target="_blank" rel="noopener noreferrer" ` +
-      `style="color:#38bdf8;text-decoration:none;">View transaction on Stellar Expert &rarr;</a>`;
+      `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
+      `View transaction on Stellar Expert <span aria-hidden="true">&#8599;</span></a>`;
 
     return body.replace("{{TX_LINK}}", link);
   } catch {

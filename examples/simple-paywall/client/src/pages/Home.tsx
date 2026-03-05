@@ -1,5 +1,15 @@
 import { Link } from "react-router";
-import { APP_NAME } from "../constants";
+
+const walletLinks = {
+  authEntry:
+    "https://developers.stellar.org/docs/build/guides/transactions/signing-soroban-invocations",
+  freighter: "https://www.freighter.app/",
+  albedo: "https://albedo.link/",
+  hana: "https://www.hana.money/",
+  hot: "https://hot-labs.org/chains/stellar",
+  klever: "https://klever.io/crypto-wallet/stellar-xlm/",
+  onekey: "https://onekey.so/cryptos/stellar/",
+};
 
 const features = [
   {
@@ -33,9 +43,9 @@ const resources = [
   },
   {
     label: "@x402/stellar Package",
-    href: "https://github.com/coinbase/x402/pull/711",
+    href: "https://github.com/coinbase/x402/tree/main/typescript/packages/mechanisms/stellar",
     description:
-      "The pull request adding Stellar blockchain support to the x402 protocol (client, facilitator, and server).",
+      "TypeScript package providing Stellar blockchain support for the x402 protocol (client, facilitator, and server).",
   },
   {
     label: "x402 Protocol",
@@ -45,149 +55,223 @@ const resources = [
 ];
 
 const compatibleWallets = [
-  "Freighter (browser extension)",
-  "Albedo",
-  "Hana",
-  "HOT",
-  "Klever",
-  "One Key",
+  {
+    label: "Freighter (browser extension)",
+    href: "https://www.freighter.app/",
+  },
+  {
+    label: "Albedo",
+    href: "https://albedo.link/",
+  },
+  {
+    label: "Hana",
+    href: "https://www.hana.money/",
+  },
+  {
+    label: "HOT",
+    href: "https://hot-labs.org/chains/stellar",
+  },
+  {
+    label: "Klever",
+    href: "https://klever.io/crypto-wallet/stellar-xlm/",
+  },
+  {
+    label: "OneKey",
+    href: "https://onekey.so/cryptos/stellar/",
+  },
 ];
 
 export function Home() {
+  const heroTitle = "x402";
+
   return (
-    <div className="max-w-5xl mx-auto px-6 py-20">
-      {/* Hero */}
-      <section className="text-center mb-20">
-        <h1 className="text-5xl font-bold text-white mb-4">{APP_NAME}</h1>
-        <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-8">
+    <div className="max-w-[960px] mx-auto px-6 py-[80px] flex flex-col items-center gap-[80px]">
+      <section className="text-center flex flex-col items-center gap-[24px]">
+        <div className="flex items-end gap-2 justify-center">
+          <h1 className="text-[64px] leading-[54px] font-semibold tracking-[-1.28px] font-[Inconsolata]">
+            {heroTitle}
+          </h1>
+          <span className="text-[16px] leading-[24px] font-medium text-[#171717]">on Stellar</span>
+        </div>
+        <div className="text-[16px] leading-[24px] font-medium text-[#171717] max-w-[600px]">
           HTTP-native payments on the Stellar network. This demo shows a working paywall powered by
           the{" "}
           <a
             href="https://www.x402.org/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sky-400 hover:text-sky-300 underline"
+            className="text-[#5746af] font-medium inline-flex items-center gap-1"
           >
             x402 protocol
+            <span aria-hidden>↗</span>
           </a>{" "}
           and Soroban smart contracts.
-        </p>
+        </div>
         <Link
           to="/try"
-          className="inline-block bg-sky-500 hover:bg-sky-400 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+          className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
         >
-          Try the Demo &rarr;
+          Try the demo
+          <span aria-hidden>→</span>
         </Link>
       </section>
 
-      {/* Feature cards */}
-      <section className="grid md:grid-cols-3 gap-8 mb-20">
+      <section className="w-full grid gap-[32px] md:grid-cols-3">
         {features.map((f) => (
-          <div key={f.title} className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-2">{f.title}</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">{f.description}</p>
+          <div
+            key={f.title}
+            className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] text-left"
+          >
+            <h3 className="text-[18px] leading-[26px] font-semibold text-[#171717] mb-[8px]">
+              {f.title}
+            </h3>
+            <p className="text-[16px] leading-[24px] font-medium text-[#6f6f6f]">{f.description}</p>
           </div>
         ))}
       </section>
 
-      {/* How x402 works */}
-      <section className="mb-20">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">How x402 Works</h2>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 max-w-3xl mx-auto">
-          <ol className="space-y-4 text-slate-300 text-sm leading-relaxed list-decimal list-inside">
-            <li>Client requests a protected resource from the server.</li>
-            <li>
-              Server responds with <code className="text-sky-400">HTTP 402</code> and payment
-              requirements (asset, amount, recipient).
-            </li>
-            <li>
-              Client builds a Soroban <code className="text-sky-400">transfer()</code> call, signs
-              the authorization entries, and sends the transaction in the request header.
-            </li>
-            <li>
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          How x402 Works
+        </h2>
+        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] w-full max-w-[960px] flex flex-col gap-[24px]">
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+              1
+            </span>
+            <span>Client requests a protected resource from the server.</span>
+          </div>
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+              2
+            </span>
+            <span>
+              Server responds with{" "}
+              <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
+                HTTP 402
+              </span>{" "}
+              and payment requirements (asset, amount, recipient).
+            </span>
+          </div>
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+              3
+            </span>
+            <span>
+              Client builds a Soroban{" "}
+              <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
+                transfer()
+              </span>
+              call, signs the authorization entries, and sends the transaction in the request
+              header.
+            </span>
+          </div>
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+              4
+            </span>
+            <span>
               Server forwards the payment to a facilitator, which verifies and settles it on
               Stellar.
-            </li>
-            <li>
-              Server returns <code className="text-sky-400">200 OK</code> with the requested
-              content.
-            </li>
-          </ol>
+            </span>
+          </div>
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+              5
+            </span>
+            <span>
+              Server returns{" "}
+              <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
+                200 OK
+              </span>{" "}
+              with the requested content.
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* Compatible wallets */}
-      <section className="mb-20">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Compatible Wallets</h2>
-        <p className="text-slate-400 text-sm text-center mb-6 max-w-2xl mx-auto">
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          Compatible Wallets
+        </h2>
+        <div className="text-[16px] leading-[24px] font-medium text-center">
           x402 on Stellar requires wallets that support{" "}
           <a
-            href="https://developers.stellar.org/docs/build/guides/transactions/signing-soroban-invocations"
+            href={walletLinks.authEntry}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sky-400 hover:text-sky-300 underline"
+            className="text-[#5746af] font-medium inline-flex items-center gap-1"
           >
             auth-entry signing
+            <span aria-hidden>↗</span>
           </a>{" "}
           (Soroban authorization entry signing).
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          {compatibleWallets.map((w) => (
-            <span
-              key={w}
-              className="bg-slate-900 border border-slate-800 text-slate-300 text-sm px-4 py-2 rounded-lg"
+        </div>
+        <div className="flex flex-wrap justify-center gap-[12px]">
+          {compatibleWallets.map((wallet) => (
+            <a
+              key={wallet.label}
+              href={wallet.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#fcfcfc] border border-[#e2e2e2] text-[#171717] text-[14px] leading-[20px] px-[12px] py-[8px] rounded-[8px] inline-flex items-center gap-2"
             >
-              {w}
-            </span>
+              {wallet.label}
+              <span aria-hidden>↗</span>
+            </a>
           ))}
         </div>
       </section>
 
-      {/* OpenZeppelin facilitator -- coming soon */}
-      <section className="mb-20">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Facilitator</h2>
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 max-w-3xl mx-auto text-center">
-          <p className="text-slate-300 text-sm leading-relaxed mb-4">
-            <a
-              href="https://www.openzeppelin.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-400 hover:text-sky-300 underline font-semibold"
-            >
-              OpenZeppelin
-            </a>{" "}
-            is building a hosted Stellar facilitator using their{" "}
-            <a
-              href="https://github.com/OpenZeppelin/relayer-plugin-x402-facilitator"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-400 hover:text-sky-300 underline"
-            >
-              Relayer x402 Facilitator Plugin
-            </a>
-            . Once live, you will be able to point your server at their facilitator URL instead of
-            running your own.
-          </p>
-          <span className="inline-block bg-amber-500/20 text-amber-300 text-xs font-semibold px-3 py-1 rounded-full">
-            Coming Soon
-          </span>
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          Facilitator
+        </h2>
+        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] w-full max-w-[960px] text-center text-[16px] leading-[24px] font-medium">
+          The x402 Facilitator Service is now live. Under the hood, the plugin leverages{" "}
+          <a
+            href="https://www.openzeppelin.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#5746af] font-medium inline-flex items-center gap-1"
+          >
+            OpenZeppelin
+            <span aria-hidden>↗</span>
+          </a>{" "}
+          channels to submit transactions onchain via a managed Relayer and Facilitator setup. Check
+          out{" "}
+          <a
+            href="https://developers.stellar.org/docs/build/apps/x402"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#5746af] font-medium inline-flex items-center gap-1"
+          >
+            Stellar Developer docs
+            <span aria-hidden>↗</span>
+          </a>
+          .
         </div>
       </section>
 
-      {/* Resources */}
-      <section>
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Resources</h2>
-        <div className="grid md:grid-cols-2 gap-6">
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          Resources
+        </h2>
+        <div className="grid gap-[32px] md:grid-cols-2 w-full max-w-[960px]">
           {resources.map((r) => (
             <a
               key={r.label}
               href={r.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-slate-900 border border-slate-800 rounded-xl p-6 hover:border-sky-500/50 transition-colors block"
+              className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] block"
             >
-              <h3 className="text-sm font-semibold text-sky-400 mb-1">{r.label}</h3>
-              <p className="text-slate-400 text-sm leading-relaxed">{r.description}</p>
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#5746af] mb-[8px]">
+                {r.label}
+              </h3>
+              <p className="text-[16px] leading-[24px] font-medium text-[#6f6f6f]">
+                {r.description}
+              </p>
             </a>
           ))}
         </div>

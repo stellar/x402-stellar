@@ -78,6 +78,11 @@ function StellarPaywallMain({
 
   const x402 = window.x402;
   const { network, asset } = stellarRequirement;
+  const networkKey = network.split(":")[1] ?? "";
+  const chainConfig = x402.config?.chainConfig;
+  const assetCode = chainConfig?.[networkKey]?.usdcName || "USDC";
+  const isTestnetUsdc =
+    network === "stellar:testnet" && asset === chainConfig?.testnet?.usdcAddress;
 
   const { kitReady, address, connect, disconnect } = useSWKConnection({
     network,
@@ -143,11 +148,13 @@ function StellarPaywallMain({
     }
 
     if (tokenBalanceFormatted === "") {
-      setStatus(statusInfo("Checking USDC balance..."));
-      await refreshBalance();
-      if (Number(tokenBalanceFormatted) < amount) {
+      setStatus(statusInfo(`Checking ${assetCode} balance...`));
+      const freshBalance = await refreshBalance();
+      if (Number(freshBalance) < amount) {
         setStatus(
-          statusError(`Insufficient balance. Make sure you have enough USDC on ${chainName}.`),
+          statusError(
+            `Insufficient balance. Make sure you have enough ${assetCode} on ${chainName}.`,
+          ),
         );
       }
     }
@@ -163,6 +170,7 @@ function StellarPaywallMain({
     address,
     tokenBalanceFormatted,
     amount,
+    assetCode,
     chainName,
     refreshBalance,
     submitPayment,
@@ -174,16 +182,16 @@ function StellarPaywallMain({
         <h1 className="title">Payment Required</h1>
         <p>
           {paymentRequired.resource?.description && `${paymentRequired.resource.description}.`} To
-          access this content, please pay ${amount} {chainName} USDC.
+          access this content, please pay ${amount} {chainName} {assetCode}.
+          {isTestnetUsdc && (
+            <span>
+              {" "}
+              <a href="https://faucet.circle.com/" target="_blank" rel="noopener noreferrer">
+                Fund USDC ↗
+              </a>
+            </span>
+          )}
         </p>
-        {network === "stellar:testnet" && (
-          <p className="instructions">
-            Need Stellar Testnet USDC?{" "}
-            <a href="https://faucet.circle.com/" target="_blank" rel="noopener noreferrer">
-              Request some <u>here</u>.
-            </a>
-          </p>
-        )}
       </div>
 
       <div className="content w-full">
@@ -200,10 +208,10 @@ function StellarPaywallMain({
               {address ? (
                 <button className="balance-button" onClick={() => setHideBalance((prev) => !prev)}>
                   {!hideBalance && tokenBalanceFormatted
-                    ? `$${tokenBalanceFormatted} USDC`
+                    ? `$${tokenBalanceFormatted} ${assetCode}`
                     : isFetchingBalance
                       ? "Loading..."
-                      : "••••• USDC"}
+                      : `••••• ${assetCode}`}
                 </button>
               ) : (
                 "-"
@@ -212,7 +220,9 @@ function StellarPaywallMain({
           </div>
           <div className="payment-row">
             <span className="payment-label">Amount:</span>
-            <span className="payment-value">${amount} USDC</span>
+            <span className="payment-value">
+              ${amount} {assetCode}
+            </span>
           </div>
           <div className="payment-row">
             <span className="payment-label">Network:</span>

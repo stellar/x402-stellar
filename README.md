@@ -113,6 +113,7 @@ The Dockerfile is a multi-target build with targets for `facilitator`, `server`,
 | `FACILITATOR_STELLAR_PRIVATE_KEY`     | —                       | Facilitator wallet private key               |
 | `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —                       | Fee-bump signer secret (high-throughput)     |
 | `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —                       | Channel account secrets, comma-separated     |
+| `CLIENT_HOME_URL`                     | —                       | Client home page URL for paywall brand link  |
 | `VITE_SERVER_URL`                     | `http://localhost:3001` | Server URL for the client SPA (build time)   |
 | `VITE_APP_NAME`                       | `x402 on Stellar`       | App name for the client SPA (build time)     |
 
