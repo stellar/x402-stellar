@@ -1,5 +1,13 @@
 export function protectedPageHtml(homeUrl?: string): string {
-  const brandHref = homeUrl || "/";
+  const brand = homeUrl
+    ? `<a href="${homeUrl}" class="nav-link">
+        <span class="nav-brand">Stellar</span>
+        <span class="nav-badge">x402</span>
+      </a>`
+    : `<span class="nav-link">
+        <span class="nav-brand">Stellar</span>
+        <span class="nav-badge">x402</span>
+      </span>`;
 
   return (
     `<!DOCTYPE html>
@@ -185,10 +193,7 @@ export function protectedPageHtml(homeUrl?: string): string {
 <body>
   <header>
     <nav>
-      <a href="${brandHref}" class="nav-link">
-        <span class="nav-brand">Stellar</span>
-        <span class="nav-badge">x402</span>
-      </a>
+      ${brand}
     </nav>
   </header>
 
