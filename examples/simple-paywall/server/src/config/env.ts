@@ -74,4 +74,10 @@ export class Env {
   static get paywallDisabled(): boolean {
     return process.env.PAYWALL_DISABLED?.toLowerCase() === "true";
   }
+
+  /** Optional URL for the client home page. Used in the nav brand link on server-rendered pages. */
+  static get clientHomeUrl(): string | undefined {
+    const url = process.env.CLIENT_HOME_URL?.trim();
+    return url || undefined;
+  }
 }
