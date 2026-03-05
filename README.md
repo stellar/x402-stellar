@@ -40,7 +40,7 @@ pnpm install
 pnpm build
 
 # Copy env template and fill in your values
-cp .env.example examples/simple-paywall/server/.env
+cp examples/simple-paywall/server/.env.example examples/simple-paywall/server/.env
 ```
 
 ### Running the Simple Paywall Example
@@ -68,7 +68,7 @@ cd examples/simple-paywall/client
 pnpm dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) and navigate through Home, Try It, then access the protected content.
+Open [http://localhost:5173](http://localhost:5173) and navigate through Home → Try It. The page dynamically shows buttons for each configured network (testnet, mainnet, or both) based on which `TESTNET_*` / `MAINNET_*` env vars are set.
 
 ## Examples
 
@@ -98,24 +98,43 @@ The Dockerfile is a multi-target build with targets for `facilitator`, `server`,
 
 ## Environment Variables
 
-| Variable                              | Default                 | Description                                  |
-| ------------------------------------- | ----------------------- | -------------------------------------------- |
-| `PORT`                                | `3001`                  | Server port                                  |
-| `NODE_ENV`                            | `development`           | Environment                                  |
-| `LOG_LEVEL`                           | `info`                  | Pino log level                               |
-| `CORS_ORIGINS`                        | `http://localhost:5173` | Allowed CORS origins (comma-separated)       |
-| `PAYWALL_DISABLED`                    | —                       | Set to `true` to disable the paywall         |
-| `SERVER_STELLAR_ADDRESS`              | _required_              | Stellar address to receive payments          |
-| `STELLAR_NETWORK`                     | `stellar:testnet`       | CAIP-2 network identifier                    |
-| `STELLAR_RPC_URL`                     | testnet RPC             | Custom Soroban RPC URL (required for pubnet) |
-| `PAYMENT_PRICE`                       | `0.01`                  | Price for protected content                  |
-| `FACILITATOR_URL`                     | `http://localhost:4022` | x402 facilitator URL                         |
-| `FACILITATOR_STELLAR_PRIVATE_KEY`     | —                       | Facilitator wallet private key               |
-| `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —                       | Fee-bump signer secret (high-throughput)     |
-| `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —                       | Channel account secrets, comma-separated     |
-| `CLIENT_HOME_URL`                     | —                       | Client home page URL for paywall brand link  |
-| `VITE_SERVER_URL`                     | `http://localhost:3001` | Server URL for the client SPA (build time)   |
-| `VITE_APP_NAME`                       | `x402 on Stellar`       | App name for the client SPA (build time)     |
+### Server
+
+| Variable           | Default                 | Description                                 |
+| ------------------ | ----------------------- | ------------------------------------------- |
+| `PORT`             | `3001`                  | Server port                                 |
+| `NODE_ENV`         | `development`           | Environment                                 |
+| `LOG_LEVEL`        | `info`                  | Pino log level                              |
+| `CORS_ORIGINS`     | `http://localhost:5173` | Allowed CORS origins (comma-separated)      |
+| `PAYWALL_DISABLED` | —                       | Set to `true` to disable the paywall        |
+| `PAYMENT_PRICE`    | `0.01`                  | Price for protected content                 |
+| `CLIENT_HOME_URL`  | —                       | Client home page URL for paywall brand link |
+
+### Per-Network (Testnet / Mainnet)
+
+The server supports multiple Stellar networks simultaneously. Each network is configured with a `TESTNET_` or `MAINNET_` prefix. Provide at least one set to enable that network's `/protected/<network>` endpoint.
+
+| Variable (replace `<NETWORK>_` with `TESTNET_` or `MAINNET_`) | Default                    | Description                                   |
+| ------------------------------------------------------------- | -------------------------- | --------------------------------------------- |
+| `<NETWORK>_SERVER_STELLAR_ADDRESS`                            | _required per network_     | Stellar address to receive payments           |
+| `<NETWORK>_STELLAR_RPC_URL`                                   | testnet RPC (testnet only) | Custom Soroban RPC URL (required for mainnet) |
+| `<NETWORK>_FACILITATOR_URL`                                   | —                          | x402 facilitator URL                          |
+| `<NETWORK>_FACILITATOR_API_KEY`                               | —                          | Facilitator API key (optional)                |
+
+### Facilitator
+
+| Variable                              | Default | Description                              |
+| ------------------------------------- | ------- | ---------------------------------------- |
+| `FACILITATOR_STELLAR_PRIVATE_KEY`     | —       | Facilitator wallet private key           |
+| `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —       | Fee-bump signer secret (high-throughput) |
+| `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —       | Channel account secrets, comma-separated |
+
+### Client
+
+| Variable          | Default                 | Description                                |
+| ----------------- | ----------------------- | ------------------------------------------ |
+| `VITE_SERVER_URL` | `http://localhost:3001` | Server URL for the client SPA (build time) |
+| `VITE_APP_NAME`   | `x402 on Stellar`       | App name for the client SPA (build time)   |
 
 ## High-Throughput Facilitator Setup (Recommended)
 

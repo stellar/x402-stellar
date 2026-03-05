@@ -1,42 +1,53 @@
+import type { RequestHandler } from "express";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { ExactStellarScheme } from "@x402/stellar/exact/server";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { createPaywall } from "@x402-stellar/paywall";
 import { stellarPaywall } from "@x402-stellar/paywall/stellar";
-import { Env } from "../config/env.js";
+import { type NetworkConfig, NETWORK_META, Env } from "../config/env.js";
 
-export function createPaymentMiddleware() {
+export interface NetworkMiddleware {
+  network: string;
+  routePath: string;
+  handler: RequestHandler;
+}
+
+function buildMiddleware(netConfig: NetworkConfig): NetworkMiddleware {
   const facilitatorClient = new HTTPFacilitatorClient({
-    url: Env.facilitatorUrl,
-    createAuthHeaders: Env.facilitatorApiKey
+    url: netConfig.facilitatorUrl,
+    createAuthHeaders: netConfig.facilitatorApiKey
       ? async () => {
-          const headers = { Authorization: `Bearer ${Env.facilitatorApiKey}` };
+          const headers = { Authorization: `Bearer ${netConfig.facilitatorApiKey}` };
           return { verify: headers, settle: headers, supported: headers };
         }
       : undefined,
   });
+
   const paywall = createPaywall()
     .withNetwork(stellarPaywall)
     .withConfig({
       appName: "Simple Paywall Demo",
-      stellarRpcUrl: Env.stellarRpcUrl,
+      stellarRpcUrl: netConfig.stellarRpcUrl,
     })
     .build();
 
   const server = new x402ResourceServer(facilitatorClient).register(
-    Env.stellarNetwork,
+    netConfig.network,
     new ExactStellarScheme(),
   );
 
-  return paymentMiddleware(
+  const { routeSuffix } = NETWORK_META[netConfig.network];
+  const routePath = `/protected/${routeSuffix}`;
+
+  const handler = paymentMiddleware(
     {
-      "GET /protected": {
+      [`GET ${routePath}`]: {
         accepts: [
           {
             scheme: "exact",
             price: Env.paymentPrice,
-            network: Env.stellarNetwork,
-            payTo: Env.serverStellarAddress,
+            network: netConfig.network,
+            payTo: netConfig.serverStellarAddress,
           },
         ],
         description: Env.paymentDescription,
@@ -47,4 +58,10 @@ export function createPaymentMiddleware() {
     paywall,
     true,
   );
+
+  return { network: netConfig.network, routePath, handler };
+}
+
+export function createPaymentMiddlewares(): NetworkMiddleware[] {
+  return Env.networksConfig.map(buildMiddleware);
 }

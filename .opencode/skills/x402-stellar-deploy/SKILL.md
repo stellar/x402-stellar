@@ -7,7 +7,7 @@ description: Deployment procedures for the x402-stellar project. Use when deploy
 
 ## Heroku (Container Stack)
 
-Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + Express server + facilitator through `infra/heroku/start.sh`. The start script waits for the facilitator to be healthy before launching the server.
+Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + Express server + facilitator through `infra/heroku/start.sh`. The start script waits for the facilitator to be healthy before launching the server. The server also validates facilitator reachability at startup via `Env.validateFacilitators()` (fetches `GET /supported` from each configured facilitator), providing defense-in-depth.
 
 ### Config Vars
 
@@ -16,19 +16,34 @@ Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + E
 | Var                               | Description                                                     |
 | --------------------------------- | --------------------------------------------------------------- |
 | `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator Stellar secret key                                  |
-| `SERVER_STELLAR_ADDRESS`          | Server Stellar public address                                   |
-| `STELLAR_NETWORK`                 | `stellar:testnet` or `stellar:pubnet`                           |
+| `TESTNET_SERVER_STELLAR_ADDRESS`  | Testnet Stellar public address (enables `/protected/testnet`)   |
 | `PAYMENT_PRICE`                   | Price in USDC on Stellar (SEP-41, 7 decimals, e.g. `0.0100000`) |
 
-**Optional**:
+Note: `TESTNET_FACILITATOR_URL` and `MAINNET_FACILITATOR_URL` are auto-set to `http://localhost:4022` by `start.sh` in the Heroku all-in-one container — no need to configure them manually.
 
-| Var               | Default                          | Description                     |
-| ----------------- | -------------------------------- | ------------------------------- |
-| `VITE_SERVER_URL` | same origin (nginx proxy)        | Override SPA API URL            |
-| `VITE_APP_NAME`   | --                               | Display name in SPA             |
-| `CORS_ORIGINS`    | `*`                              | Comma-separated allowed origins |
-| `TRUST_PROXY`     | `loopback,linklocal,uniquelocal` | Proxy trust CIDRs               |
-| `LOG_LEVEL`       | `info`                           | Pino log level                  |
+**Optional (per-network — enables `/protected/<network>` endpoints)**:
+
+| Var                              | Description                                                   |
+| -------------------------------- | ------------------------------------------------------------- |
+| `TESTNET_STELLAR_RPC_URL`        | Custom testnet Soroban RPC URL (has built-in default)         |
+| `TESTNET_FACILITATOR_URL`        | Testnet facilitator URL (auto-set in Heroku all-in-one)       |
+| `TESTNET_FACILITATOR_API_KEY`    | Testnet facilitator API key                                   |
+| `MAINNET_SERVER_STELLAR_ADDRESS` | Mainnet Stellar public address (enables `/protected/mainnet`) |
+| `MAINNET_STELLAR_RPC_URL`        | Mainnet Soroban RPC URL (required for mainnet)                |
+| `MAINNET_FACILITATOR_URL`        | Mainnet facilitator URL (auto-set in Heroku all-in-one)       |
+| `MAINNET_FACILITATOR_API_KEY`    | Mainnet facilitator API key                                   |
+
+**Optional (general)**:
+
+| Var                   | Default                          | Description                                 |
+| --------------------- | -------------------------------- | ------------------------------------------- |
+| `VITE_SERVER_URL`     | same origin (nginx proxy)        | Override SPA API URL                        |
+| `VITE_APP_NAME`       | --                               | Display name in SPA                         |
+| `CORS_ORIGINS`        | `*`                              | Comma-separated allowed origins             |
+| `TRUST_PROXY`         | `loopback,linklocal,uniquelocal` | Proxy trust CIDRs                           |
+| `LOG_LEVEL`           | `info`                           | Pino log level                              |
+| `PAYMENT_DESCRIPTION` | `Access to protected content`    | Payment description in 402 response         |
+| `CLIENT_HOME_URL`     | --                               | Client home page URL for paywall brand link |
 
 ### Deploy
 

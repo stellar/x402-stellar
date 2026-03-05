@@ -1,20 +1,81 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { PAYMENT_PRICE, SERVER_URL } from "../constants.ts";
 
-const steps = [
-  { step: "1", text: "Click the button above to request the protected resource." },
-  {
-    step: "2",
-    text: "The server responds with HTTP 402 and a paywall page. Connect a compatible wallet (e.g. Freighter browser extension).",
-  },
-  { step: "3", text: `Approve a $${PAYMENT_PRICE} USDC payment on Stellar testnet.` },
-  {
-    step: "4",
-    text: "The facilitator verifies and settles the payment on-chain. The content unlocks automatically.",
-  },
-];
+const NETWORK_DISPLAY_NAMES: Record<string, string> = {
+  "stellar:testnet": "Testnet",
+  "stellar:pubnet": "Mainnet",
+};
+
+const NETWORK_ROUTE_SUFFIXES: Record<string, string> = {
+  "stellar:testnet": "testnet",
+  "stellar:pubnet": "mainnet",
+};
+
+type NetworksStatus = "loading" | "ready" | "error";
+
+function useAvailableNetworks(): { networks: string[]; status: NetworksStatus } {
+  const [networks, setNetworks] = useState<string[]>([]);
+  const [status, setStatus] = useState<NetworksStatus>("loading");
+
+  useEffect(() => {
+    fetch(`${SERVER_URL}/networks`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`GET /networks responded with ${r.status}`);
+        return r.json();
+      })
+      .then((data: { networks: string[] }) => {
+        setNetworks(data.networks);
+        setStatus("ready");
+      })
+      .catch((err) => {
+        console.error("Failed to fetch available networks:", err);
+        setStatus("error");
+      });
+  }, []);
+
+  return { networks, status };
+}
+
+function displayName(network: string): string {
+  return NETWORK_DISPLAY_NAMES[network] ?? network;
+}
+
+function routeSuffix(network: string): string | undefined {
+  return NETWORK_ROUTE_SUFFIXES[network];
+}
+
+function buildSteps(networks: string[]) {
+  const hasTestnet = networks.includes("stellar:testnet");
+  const hasMainnet = networks.includes("stellar:pubnet");
+
+  let networkName: string;
+  if (hasTestnet && hasMainnet) {
+    networkName = "Stellar testnet or mainnet";
+  } else if (hasMainnet) {
+    networkName = "Stellar mainnet";
+  } else {
+    networkName = "Stellar testnet";
+  }
+
+  return [
+    { step: "1", text: "Click one of the buttons above to request the protected resource." },
+    {
+      step: "2",
+      text: "The server responds with HTTP 402 and a paywall page. Connect a compatible wallet (e.g. Freighter browser extension).",
+    },
+    { step: "3", text: `Approve a $${PAYMENT_PRICE} USDC payment on ${networkName}.` },
+    {
+      step: "4",
+      text: "The facilitator verifies and settles the payment on-chain. The content unlocks automatically.",
+    },
+  ];
+}
 
 export function TryIt() {
+  const { networks, status } = useAvailableNetworks();
+  const steps = buildSteps(networks);
+
   return (
     <div className="max-w-[960px] mx-auto px-6 lg:px-8 py-[80px] flex flex-col gap-[48px]">
       <div className="flex flex-col gap-[16px]">
@@ -29,18 +90,37 @@ export function TryIt() {
           Try the Paywall Demo
         </h1>
         <p className="text-[16px] leading-[24px] text-[#171717] font-medium">
-          This demo gates a page behind a ${PAYMENT_PRICE} USDC micropayment on Stellar testnet.
-          When you request the protected resource, the server returns HTTP 402 with a paywall page
-          where you can sign and submit the payment.
+          This demo gates a page behind a ${PAYMENT_PRICE} USDC micropayment on Stellar. When you
+          request the protected resource, the server returns HTTP 402 with a paywall page where you
+          can sign and submit the payment.
         </p>
-        <div>
-          <a
-            href={`${SERVER_URL}/protected`}
-            className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
-          >
-            Access Protected Content
-            <span aria-hidden>→</span>
-          </a>
+        <div className="flex flex-wrap gap-[12px]">
+          {status === "loading" && (
+            <span className="text-[14px] text-[#6f6f6f] font-medium">
+              Loading available networks…
+            </span>
+          )}
+          {status === "error" && (
+            <span className="text-[14px] text-[#b91c1c] font-medium">
+              Could not reach the server. Check that the server is running and reload the page.
+            </span>
+          )}
+          {status === "ready" && networks.length === 0 && (
+            <span className="text-[14px] text-[#6f6f6f] font-medium">
+              No networks configured. Set TESTNET_* or MAINNET_* env vars on the server.
+            </span>
+          )}
+          {networks
+            .filter((n) => routeSuffix(n) !== undefined)
+            .map((n) => (
+              <a
+                key={n}
+                href={`${SERVER_URL}/protected/${routeSuffix(n)}`}
+                className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
+              >
+                Unlock Content ({displayName(n)})<span aria-hidden>→</span>
+              </a>
+            ))}
         </div>
       </div>
 

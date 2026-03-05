@@ -21,11 +21,11 @@ pnpm 10.7.0 monorepo with Turborepo. Filter: `--filter='@x402-stellar/*'`.
 
 **Endpoints**:
 
-| Service     | Port | Routes                                                          |
-| ----------- | ---- | --------------------------------------------------------------- |
-| Facilitator | 4022 | `POST /verify`, `POST /settle`, `GET /supported`, `GET /health` |
-| Server      | 3001 | `GET /health`, `GET /protected` (paywalled)                     |
-| Client      | 5173 | SPA (dev), 8080 (docker)                                        |
+| Service     | Port | Routes                                                                |
+| ----------- | ---- | --------------------------------------------------------------------- |
+| Facilitator | 4022 | `POST /verify`, `POST /settle`, `GET /supported`, `GET /health`       |
+| Server      | 3001 | `GET /health`, `GET /networks`, `GET /protected/:network` (paywalled) |
+| Client      | 5173 | SPA (dev), 8080 (docker)                                              |
 
 ## Full Check
 
@@ -33,7 +33,7 @@ pnpm 10.7.0 monorepo with Turborepo. Filter: `--filter='@x402-stellar/*'`.
 make check   # install -> format -> lint -> typecheck -> test -> build
 ```
 
-Expected: all 4 packages pass. ~56 tests total (34 server + 22 facilitator), all green.
+Expected: all 4 packages pass. 101 tests total (66 server + 35 facilitator), all green.
 
 `packages/paywall/src/gen/template.ts` formatting diffs are expected (auto-generated).
 
@@ -106,8 +106,10 @@ Per-service examples: `examples/facilitator/.env.example`, `examples/simple-payw
 Minimum required variables:
 
 - `FACILITATOR_STELLAR_PRIVATE_KEY` -- facilitator Stellar secret key
-- `SERVER_STELLAR_ADDRESS` -- server Stellar public address (payment recipient)
+- `TESTNET_SERVER_STELLAR_ADDRESS` -- server Stellar public address for testnet payments
 - `CLIENT_STELLAR_PRIVATE_KEY` -- client Stellar secret key (payer)
+
+Per-network server variables use `TESTNET_` or `MAINNET_` prefixes (e.g. `TESTNET_FACILITATOR_URL`, `MAINNET_SERVER_STELLAR_ADDRESS`). Provide at least one set.
 
 Generate testnet keypairs: https://laboratory.stellar.org/#account-creator
 

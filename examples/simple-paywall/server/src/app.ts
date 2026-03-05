@@ -4,23 +4,13 @@ import helmet from "helmet";
 import proxyAddr from "proxy-addr";
 import { Env } from "./config/env.js";
 import { logger, httpLogger } from "./utils/logger.js";
-import { createPaymentMiddleware } from "./middleware/payment.js";
+import { createPaymentMiddlewares } from "./middleware/payment.js";
 import { txHashInjector } from "./middleware/txHashInjector.js";
 import { healthRouter } from "./routes/health.js";
 import { protectedRouter } from "./routes/protected.js";
 
 export function createApp(): Express {
   const app = express();
-  const connectSrc = ["'self'", "https://*.stellar.org", "https://*.stellar.expert"];
-
-  try {
-    const rpcOrigin = new URL(Env.stellarRpcUrl).origin;
-    if (!connectSrc.includes(rpcOrigin)) {
-      connectSrc.push(rpcOrigin);
-    }
-  } catch {
-    logger.warn({ stellarRpcUrl: Env.stellarRpcUrl }, "Invalid STELLAR_RPC_URL for CSP");
-  }
 
   // Trust reverse proxies (Heroku router, nginx) so req.protocol reflects
   // the client's actual scheme (https) via X-Forwarded-Proto.
@@ -28,16 +18,36 @@ export function createApp(): Express {
   // and unique-local addresses (matching laboratory-backend).
   app.set("trust proxy", proxyAddr.compile(Env.trustProxy));
 
+  // CORS must be registered before Helmet so that preflight OPTIONS requests
+  // receive Access-Control-Allow-Origin headers before Helmet can interfere.
+  app.use(cors({ origin: Env.corsOrigins }));
   // Helmet with default CSP for non-HTML API routes (health, etc.)
   app.use(helmet());
-  app.use(cors({ origin: Env.corsOrigins }));
   app.use(httpLogger);
 
   app.use(healthRouter);
 
-  // Relax CSP for /protected — both the 402 paywall response (which loads
-  // wallet icons and connects to Stellar RPC endpoints) and the paid content
-  // page (which embeds a SoundCloud iframe) need a permissive policy.
+  // Discovery endpoint: returns which networks are configured so the
+  // client can dynamically render one or two "Access Protected Content" buttons.
+  app.get("/networks", (_req, res) => {
+    const networks = Env.paywallDisabled ? [] : Env.networksConfig.map((n) => n.network);
+    res.json({ networks });
+  });
+
+  // Relax CSP for /protected:
+  const connectSrc = ["'self'", "https://*.stellar.org", "https://*.stellar.expert"];
+  if (!Env.paywallDisabled) {
+    for (const rpcUrl of Env.allStellarRpcUrls) {
+      try {
+        const rpcOrigin = new URL(rpcUrl).origin;
+        if (!connectSrc.includes(rpcOrigin)) {
+          connectSrc.push(rpcOrigin);
+        }
+      } catch {
+        logger.warn({ stellarRpcUrl: rpcUrl }, "Invalid STELLAR_RPC_URL for CSP");
+      }
+    }
+  }
   app.use(
     "/protected",
     helmet({
@@ -61,7 +71,15 @@ export function createApp(): Express {
     // txHashInjector must be registered before x402 middleware to wrap res.end/res.write at the outermost layer.
     // After payment settlement, it intercepts the response body and replaces {{TX_LINK}} with a Stellar Expert link.
     app.use(txHashInjector());
-    app.use(createPaymentMiddleware());
+
+    const middlewares = createPaymentMiddlewares();
+    for (const mw of middlewares) {
+      app.use(mw.handler);
+      logger.info(
+        { route: `GET ${mw.routePath}`, network: mw.network },
+        "Registered payment route",
+      );
+    }
   }
 
   app.use(protectedRouter);
