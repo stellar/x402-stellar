@@ -40,7 +40,7 @@ if [ "$FACILITATOR_READY" = false ]; then
 fi
 
 # Start Express server
-PORT=3001 TESTNET_FACILITATOR_URL=http://localhost:4022 node /app/server/dist/index.js &
+PORT=3001 TESTNET_FACILITATOR_URL=http://localhost:4022 MAINNET_FACILITATOR_URL=http://localhost:4022 node /app/server/dist/index.js &
 SERVER_PID=$!
 
 # Start nginx (foreground mode, as PID will be tracked)

@@ -166,18 +166,19 @@ Minimum required for the system to function:
 | `MAINNET_SERVER_STELLAR_ADDRESS`  | Server            | Stellar public address for mainnet payments  |
 | `CLIENT_STELLAR_PRIVATE_KEY`      | Client (dev only) | Wallet key for testing (never in production) |
 
-Per-network server variables use `TESTNET_` or `MAINNET_` prefixes: `<NET>_SERVER_STELLAR_ADDRESS`, `<NET>_STELLAR_NETWORK`, `<NET>_STELLAR_RPC_URL`, `<NET>_FACILITATOR_URL`, `<NET>_FACILITATOR_API_KEY`. Provide at least one set to enable that network.
+Per-network server variables use `TESTNET_` or `MAINNET_` prefixes: `<NET>_SERVER_STELLAR_ADDRESS`, `<NET>_STELLAR_RPC_URL`, `<NET>_FACILITATOR_URL`, `<NET>_FACILITATOR_API_KEY`. Provide at least one set to enable that network.
 
 Full reference in the root `README.md` and per-service `.env.example` files.
 
 ## Test Coverage
 
-87 tests across 5 files:
+90 tests across 6 files:
 
 - `examples/facilitator/tests/config/env.test.ts` — 25 tests (Env class validation)
 - `examples/facilitator/tests/routes/facilitator.test.ts` — 10 tests (route behavior)
 - `examples/simple-paywall/server/tests/config/env.test.ts` — 30 tests (Env + dual-network config + address validation)
 - `examples/simple-paywall/server/tests/middleware/txHashInjector.test.ts` — 10 tests
 - `examples/simple-paywall/server/tests/routes/protected.test.ts` — 12 tests (health + networks + protected routes per network)
+- `examples/simple-paywall/server/tests/routes/protected-single-network.test.ts` — 3 tests (single-network deployment behavior)
 
 Run with `pnpm test` (Turborepo runs vitest in each package).

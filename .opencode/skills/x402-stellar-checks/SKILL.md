@@ -33,7 +33,7 @@ pnpm 10.7.0 monorepo with Turborepo. Filter: `--filter='@x402-stellar/*'`.
 make check   # install -> format -> lint -> typecheck -> test -> build
 ```
 
-Expected: all 4 packages pass. 87 tests total (52 server + 35 facilitator), all green.
+Expected: all 4 packages pass. 90 tests total (55 server + 35 facilitator), all green.
 
 `packages/paywall/src/gen/template.ts` formatting diffs are expected (auto-generated).
 

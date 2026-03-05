@@ -130,7 +130,11 @@ export class Env {
     return readNetworkConfig(STELLAR_PUBNET_CAIP2);
   }
 
+  private static _networksConfigCache: NetworkConfig[] | undefined;
+
   static get networksConfig(): NetworkConfig[] {
+    if (Env._networksConfigCache !== undefined) return Env._networksConfigCache;
+
     const nets: NetworkConfig[] = [];
     const t = Env.testnetConfig;
     if (t) nets.push(t);
@@ -142,7 +146,13 @@ export class Env {
           "Set TESTNET_SERVER_STELLAR_ADDRESS and/or MAINNET_SERVER_STELLAR_ADDRESS.",
       );
     }
+    Env._networksConfigCache = nets;
     return nets;
+  }
+
+  /** Reset cached config. Used by tests that stub env vars between runs. */
+  static resetCache(): void {
+    Env._networksConfigCache = undefined;
   }
 
   static get allStellarRpcUrls(): string[] {

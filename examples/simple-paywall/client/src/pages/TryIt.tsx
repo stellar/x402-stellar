@@ -41,8 +41,8 @@ function displayName(network: string): string {
   return NETWORK_DISPLAY_NAMES[network] ?? network;
 }
 
-function routeSuffix(network: string): string {
-  return NETWORK_ROUTE_SUFFIXES[network] ?? network;
+function routeSuffix(network: string): string | undefined {
+  return NETWORK_ROUTE_SUFFIXES[network];
 }
 
 function buildSteps(networks: string[]) {
@@ -110,15 +110,17 @@ export function TryIt() {
               No networks configured. Set TESTNET_* or MAINNET_* env vars on the server.
             </span>
           )}
-          {networks.map((n) => (
-            <a
-              key={n}
-              href={`${SERVER_URL}/protected/${routeSuffix(n)}`}
-              className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
-            >
-              Unlock Content ({displayName(n)})<span aria-hidden>→</span>
-            </a>
-          ))}
+          {networks
+            .filter((n) => routeSuffix(n) !== undefined)
+            .map((n) => (
+              <a
+                key={n}
+                href={`${SERVER_URL}/protected/${routeSuffix(n)}`}
+                className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
+              >
+                Unlock Content ({displayName(n)})<span aria-hidden>→</span>
+              </a>
+            ))}
         </div>
       </div>
 

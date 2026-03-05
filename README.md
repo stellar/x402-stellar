@@ -114,13 +114,12 @@ The Dockerfile is a multi-target build with targets for `facilitator`, `server`,
 
 The server supports multiple Stellar networks simultaneously. Each network is configured with a `TESTNET_` or `MAINNET_` prefix. Provide at least one set to enable that network's `/protected/<network>` endpoint.
 
-| Variable (replace `<NETWORK>_` with `TESTNET_` or `MAINNET_`) | Default                    | Description                                        |
-| ------------------------------------------------------------- | -------------------------- | -------------------------------------------------- |
-| `<NETWORK>_SERVER_STELLAR_ADDRESS`                            | _required per network_     | Stellar address to receive payments                |
-| `<NETWORK>_STELLAR_NETWORK`                                   | —                          | CAIP-2 network identifier (e.g. `stellar:testnet`) |
-| `<NETWORK>_STELLAR_RPC_URL`                                   | testnet RPC (testnet only) | Custom Soroban RPC URL (required for mainnet)      |
-| `<NETWORK>_FACILITATOR_URL`                                   | —                          | x402 facilitator URL                               |
-| `<NETWORK>_FACILITATOR_API_KEY`                               | —                          | Facilitator API key (optional)                     |
+| Variable (replace `<NETWORK>_` with `TESTNET_` or `MAINNET_`) | Default                    | Description                                   |
+| ------------------------------------------------------------- | -------------------------- | --------------------------------------------- |
+| `<NETWORK>_SERVER_STELLAR_ADDRESS`                            | _required per network_     | Stellar address to receive payments           |
+| `<NETWORK>_STELLAR_RPC_URL`                                   | testnet RPC (testnet only) | Custom Soroban RPC URL (required for mainnet) |
+| `<NETWORK>_FACILITATOR_URL`                                   | —                          | x402 facilitator URL                          |
+| `<NETWORK>_FACILITATOR_API_KEY`                               | —                          | Facilitator API key (optional)                |
 
 ### Facilitator
 

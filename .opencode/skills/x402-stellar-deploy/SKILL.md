@@ -13,33 +13,37 @@ Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + E
 
 **Required**:
 
-| Var                               | Description                                                                   |
-| --------------------------------- | ----------------------------------------------------------------------------- |
-| `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator Stellar secret key                                                |
-| `TESTNET_SERVER_STELLAR_ADDRESS`  | Testnet Stellar public address (enables `/protected/testnet`)                 |
-| `TESTNET_STELLAR_NETWORK`         | `stellar:testnet`                                                             |
-| `TESTNET_FACILITATOR_URL`         | Testnet facilitator URL (set to `http://localhost:4022` in Heroku all-in-one) |
-| `PAYMENT_PRICE`                   | Price in USDC on Stellar (SEP-41, 7 decimals, e.g. `0.0100000`)               |
+| Var                               | Description                                                     |
+| --------------------------------- | --------------------------------------------------------------- |
+| `FACILITATOR_STELLAR_PRIVATE_KEY` | Facilitator Stellar secret key                                  |
+| `TESTNET_SERVER_STELLAR_ADDRESS`  | Testnet Stellar public address (enables `/protected/testnet`)   |
+| `PAYMENT_PRICE`                   | Price in USDC on Stellar (SEP-41, 7 decimals, e.g. `0.0100000`) |
 
-**Optional (mainnet — enables `/protected/mainnet`)**:
+Note: `TESTNET_FACILITATOR_URL` and `MAINNET_FACILITATOR_URL` are auto-set to `http://localhost:4022` by `start.sh` in the Heroku all-in-one container — no need to configure them manually.
 
-| Var                              | Description                    |
-| -------------------------------- | ------------------------------ |
-| `MAINNET_SERVER_STELLAR_ADDRESS` | Mainnet Stellar public address |
-| `MAINNET_STELLAR_NETWORK`        | `stellar:pubnet`               |
-| `MAINNET_STELLAR_RPC_URL`        | Mainnet Soroban RPC URL        |
-| `MAINNET_FACILITATOR_URL`        | Mainnet facilitator URL        |
-| `MAINNET_FACILITATOR_API_KEY`    | Mainnet facilitator API key    |
+**Optional (per-network — enables `/protected/<network>` endpoints)**:
+
+| Var                              | Description                                                   |
+| -------------------------------- | ------------------------------------------------------------- |
+| `TESTNET_STELLAR_RPC_URL`        | Custom testnet Soroban RPC URL (has built-in default)         |
+| `TESTNET_FACILITATOR_URL`        | Testnet facilitator URL (auto-set in Heroku all-in-one)       |
+| `TESTNET_FACILITATOR_API_KEY`    | Testnet facilitator API key                                   |
+| `MAINNET_SERVER_STELLAR_ADDRESS` | Mainnet Stellar public address (enables `/protected/mainnet`) |
+| `MAINNET_STELLAR_RPC_URL`        | Mainnet Soroban RPC URL (required for mainnet)                |
+| `MAINNET_FACILITATOR_URL`        | Mainnet facilitator URL (auto-set in Heroku all-in-one)       |
+| `MAINNET_FACILITATOR_API_KEY`    | Mainnet facilitator API key                                   |
 
 **Optional (general)**:
 
-| Var               | Default                          | Description                     |
-| ----------------- | -------------------------------- | ------------------------------- |
-| `VITE_SERVER_URL` | same origin (nginx proxy)        | Override SPA API URL            |
-| `VITE_APP_NAME`   | --                               | Display name in SPA             |
-| `CORS_ORIGINS`    | `*`                              | Comma-separated allowed origins |
-| `TRUST_PROXY`     | `loopback,linklocal,uniquelocal` | Proxy trust CIDRs               |
-| `LOG_LEVEL`       | `info`                           | Pino log level                  |
+| Var                   | Default                          | Description                                 |
+| --------------------- | -------------------------------- | ------------------------------------------- |
+| `VITE_SERVER_URL`     | same origin (nginx proxy)        | Override SPA API URL                        |
+| `VITE_APP_NAME`       | --                               | Display name in SPA                         |
+| `CORS_ORIGINS`        | `*`                              | Comma-separated allowed origins             |
+| `TRUST_PROXY`         | `loopback,linklocal,uniquelocal` | Proxy trust CIDRs                           |
+| `LOG_LEVEL`           | `info`                           | Pino log level                              |
+| `PAYMENT_DESCRIPTION` | `Access to protected content`    | Payment description in 402 response         |
+| `CLIENT_HOME_URL`     | --                               | Client home page URL for paywall brand link |
 
 ### Deploy
 

@@ -4,6 +4,7 @@ import { Env } from "../../src/config/env.js";
 describe("Env", () => {
   beforeEach(() => {
     vi.unstubAllEnvs();
+    Env.resetCache();
     delete process.env.CORS_ORIGINS;
     delete process.env.PORT;
     delete process.env.LOG_LEVEL;
