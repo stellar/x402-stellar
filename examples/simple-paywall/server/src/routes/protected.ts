@@ -7,7 +7,7 @@ const router: RouterType = Router();
 const validSuffixes = Env.networksConfig.map((n) => NETWORK_META[n.network].routeSuffix);
 
 router.get("/protected/:network", (req, res) => {
-  if (!validSuffixes.includes(req.params.network)) {
+  if (!Env.paywallDisabled && !validSuffixes.includes(req.params.network)) {
     res.status(404).json({ error: "Network not found" });
     return;
   }

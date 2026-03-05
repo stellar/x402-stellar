@@ -111,7 +111,12 @@ export class Env {
 
   static get corsOrigins(): string | string[] {
     const raw = process.env.CORS_ORIGINS ?? "http://localhost:5173";
-    return raw === "*" ? "*" : raw.split(",");
+    return raw === "*"
+      ? "*"
+      : raw
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
   }
 
   static get paymentPrice(): string {

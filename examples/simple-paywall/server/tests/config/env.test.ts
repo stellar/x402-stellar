@@ -58,6 +58,21 @@ describe("Env", () => {
     expect(Env.paymentDescription).toBe("Access to protected content");
   });
 
+  it("returns '*' when CORS_ORIGINS is set to '*'", () => {
+    vi.stubEnv("CORS_ORIGINS", "*");
+    expect(Env.corsOrigins).toBe("*");
+  });
+
+  it("trims whitespace from CORS_ORIGINS entries", () => {
+    vi.stubEnv("CORS_ORIGINS", " https://a.com , https://b.com ");
+    expect(Env.corsOrigins).toEqual(["https://a.com", "https://b.com"]);
+  });
+
+  it("filters empty entries from CORS_ORIGINS", () => {
+    vi.stubEnv("CORS_ORIGINS", "https://a.com,,https://b.com");
+    expect(Env.corsOrigins).toEqual(["https://a.com", "https://b.com"]);
+  });
+
   it("paywallDisabled defaults to false when unset", () => {
     expect(Env.paywallDisabled).toBe(false);
   });

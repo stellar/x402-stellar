@@ -7,7 +7,13 @@ import { logger } from "./utils/logger.js";
 import { createApp } from "./app.js";
 
 (async () => {
-  await Env.validateFacilitators();
+  try {
+    await Env.validateFacilitators();
+  } catch (err) {
+    logger.fatal({ err }, "Startup failed: facilitator validation error");
+    process.exitCode = 1;
+    return;
+  }
 
   const app = createApp();
 
