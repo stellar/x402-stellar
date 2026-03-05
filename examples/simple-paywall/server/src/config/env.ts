@@ -52,18 +52,37 @@ function readNetworkConfig(network: StellarNetwork): NetworkConfig | undefined {
   const addr = readPrefixed(meta.envPrefix, "SERVER_STELLAR_ADDRESS");
   if (!addr) return undefined;
 
+  const errors: string[] = [];
+
   if (!validateStellarDestinationAddress(addr)) {
+    errors.push(
+      `${meta.envPrefix}SERVER_STELLAR_ADDRESS: "${addr}" is not a valid ` +
+        "Stellar public key (G...), contract (C...), or muxed account (M...)",
+    );
+  }
+
+  const facilitatorUrl = readPrefixed(meta.envPrefix, "FACILITATOR_URL");
+  if (!facilitatorUrl) {
+    errors.push(`${meta.envPrefix}FACILITATOR_URL is required`);
+  }
+
+  const isMainnet = network === STELLAR_PUBNET_CAIP2;
+  const rpcUrl = readPrefixed(meta.envPrefix, "STELLAR_RPC_URL");
+  if (isMainnet && !rpcUrl) {
+    errors.push(`${meta.envPrefix}STELLAR_RPC_URL is required for mainnet`);
+  }
+
+  if (errors.length > 0) {
     throw new Error(
-      `Invalid ${meta.envPrefix}SERVER_STELLAR_ADDRESS: "${addr}". ` +
-        "Must be a valid Stellar public key (G...), contract (C...), or muxed account (M...).",
+      `${meta.displayName} configuration errors:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
     );
   }
 
   return {
     network,
     serverStellarAddress: addr,
-    stellarRpcUrl: readPrefixed(meta.envPrefix, "STELLAR_RPC_URL") ?? meta.defaultRpcUrl,
-    facilitatorUrl: readPrefixed(meta.envPrefix, "FACILITATOR_URL") ?? "http://localhost:4022",
+    stellarRpcUrl: rpcUrl ?? meta.defaultRpcUrl,
+    facilitatorUrl: facilitatorUrl!,
     facilitatorApiKey: readPrefixed(meta.envPrefix, "FACILITATOR_API_KEY"),
   };
 }
@@ -153,6 +172,49 @@ export class Env {
   /** Reset cached config. Used by tests that stub env vars between runs. */
   static resetCache(): void {
     Env._networksConfigCache = undefined;
+  }
+
+  /**
+   * Validate that every configured facilitator is reachable by calling GET /supported.
+   * Sends the optional API key as a Bearer token when configured.
+   * Aggregates all errors and throws once with full diagnostics.
+   * Call this at startup before creating the Express app.
+   */
+  static async validateFacilitators(): Promise<void> {
+    const configs = Env.networksConfig;
+    if (configs.length === 0) return;
+
+    const errors: string[] = [];
+
+    await Promise.all(
+      configs.map(async (cfg) => {
+        const { displayName } = NETWORK_META[cfg.network];
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (cfg.facilitatorApiKey) {
+          headers["Authorization"] = `Bearer ${cfg.facilitatorApiKey}`;
+        }
+
+        try {
+          const res = await fetch(`${cfg.facilitatorUrl}/supported`, { method: "GET", headers });
+          if (!res.ok) {
+            errors.push(
+              `${displayName} facilitator at ${cfg.facilitatorUrl} returned HTTP ${res.status}`,
+            );
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          errors.push(
+            `${displayName} facilitator at ${cfg.facilitatorUrl} is unreachable: ${message}`,
+          );
+        }
+      }),
+    );
+
+    if (errors.length > 0) {
+      throw new Error(
+        `Facilitator validation failed:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
+      );
+    }
   }
 
   static get allStellarRpcUrls(): string[] {

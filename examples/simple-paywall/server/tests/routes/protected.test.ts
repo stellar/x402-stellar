@@ -62,10 +62,13 @@ beforeAll(async () => {
     "TESTNET_SERVER_STELLAR_ADDRESS",
     "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
   );
+  vi.stubEnv("TESTNET_FACILITATOR_URL", "http://localhost:4022");
   vi.stubEnv(
     "MAINNET_SERVER_STELLAR_ADDRESS",
     "GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
   );
+  vi.stubEnv("MAINNET_FACILITATOR_URL", "http://localhost:4022");
+  vi.stubEnv("MAINNET_STELLAR_RPC_URL", "https://mainnet.sorobanrpc.com");
   const { createApp } = await import("../../src/app.js");
   app = createApp();
 });

@@ -7,7 +7,7 @@ description: Deployment procedures for the x402-stellar project. Use when deploy
 
 ## Heroku (Container Stack)
 
-Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + Express server + facilitator through `infra/heroku/start.sh`. The start script waits for the facilitator to be healthy before launching the server.
+Single Docker container (`heroku` target) via `heroku.yml`. Runs nginx (SPA) + Express server + facilitator through `infra/heroku/start.sh`. The start script waits for the facilitator to be healthy before launching the server. The server also validates facilitator reachability at startup via `Env.validateFacilitators()` (fetches `GET /supported` from each configured facilitator), providing defense-in-depth.
 
 ### Config Vars
 

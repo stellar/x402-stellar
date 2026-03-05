@@ -65,6 +65,7 @@ beforeAll(async () => {
     "TESTNET_SERVER_STELLAR_ADDRESS",
     "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
   );
+  vi.stubEnv("TESTNET_FACILITATOR_URL", "http://localhost:4022");
   delete process.env.MAINNET_SERVER_STELLAR_ADDRESS;
 
   const { createApp } = await import("../../src/app.js");

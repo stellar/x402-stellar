@@ -95,7 +95,7 @@ Turborepo resolves `^build` dependencies. In practice: `paywall` builds first (e
 
 **Facilitator is internal**: In the Heroku all-in-one deploy, nginx only proxies `/health`, `/networks`, and `/protected/` to Express. Facilitator routes (`/verify`, `/settle`, `/supported`) are NOT externally accessible — they run on `localhost:4022` inside the container. This is intentional: the facilitator is an internal service, not a public API.
 
-**Startup ordering**: The server's `@x402/express` middleware eagerly calls `x402ResourceServer.initialize()` at import time, which fetches `/supported` from the facilitator. If the facilitator isn't ready, the server crashes. The `start.sh` script handles this with a readiness loop.
+**Startup validation**: Before creating the Express app, the server calls `Env.validateFacilitators()` which fetches `GET /supported` from every configured facilitator (with optional `Authorization: Bearer` header). If any facilitator is unreachable or returns a non-200 status, the server throws with aggregated diagnostics. The `start.sh` script also has a readiness loop for the facilitator, providing defense-in-depth.
 
 **`trust proxy` via `proxy-addr`**: Both server and facilitator use the `proxy-addr` package with `TRUST_PROXY` env var (defaulting to `loopback,linklocal,uniquelocal`) instead of Express's built-in string-based trust. This matches the pattern used in Stellar's `laboratory-backend`.
 
@@ -172,11 +172,11 @@ Full reference in the root `README.md` and per-service `.env.example` files.
 
 ## Test Coverage
 
-90 tests across 6 files:
+101 tests across 6 files:
 
 - `examples/facilitator/tests/config/env.test.ts` — 25 tests (Env class validation)
 - `examples/facilitator/tests/routes/facilitator.test.ts` — 10 tests (route behavior)
-- `examples/simple-paywall/server/tests/config/env.test.ts` — 30 tests (Env + dual-network config + address validation)
+- `examples/simple-paywall/server/tests/config/env.test.ts` — 41 tests (Env + dual-network config + address validation + validateFacilitators)
 - `examples/simple-paywall/server/tests/middleware/txHashInjector.test.ts` — 10 tests
 - `examples/simple-paywall/server/tests/routes/protected.test.ts` — 12 tests (health + networks + protected routes per network)
 - `examples/simple-paywall/server/tests/routes/protected-single-network.test.ts` — 3 tests (single-network deployment behavior)
