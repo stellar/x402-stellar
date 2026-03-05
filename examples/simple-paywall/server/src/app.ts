@@ -45,7 +45,7 @@ export function createApp(): Express {
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'", "https://w.soundcloud.com"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
           frameSrc: ["https://w.soundcloud.com"],
           connectSrc,
           imgSrc: ["'self'", "data:", "https:"],

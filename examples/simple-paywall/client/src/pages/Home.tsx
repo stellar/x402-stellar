@@ -85,15 +85,15 @@ export function Home() {
   const heroTitle = "x402";
 
   return (
-    <div className="max-w-[1240px] mx-auto px-6 lg:px-8 py-20 space-y-20">
-      <section className="text-center flex flex-col items-center gap-6">
+    <div className="max-w-[960px] mx-auto px-6 py-[80px] flex flex-col items-center gap-[80px]">
+      <section className="text-center flex flex-col items-center gap-[24px]">
         <div className="flex items-end gap-2 justify-center">
           <h1 className="text-[64px] leading-[54px] font-semibold tracking-[-1.28px] font-[Inconsolata]">
             {heroTitle}
           </h1>
-          <span className="text-base text-[#171717]">on Stellar</span>
+          <span className="text-[16px] leading-[24px] font-medium text-[#171717]">on Stellar</span>
         </div>
-        <div className="text-[#171717] text-base max-w-[600px]">
+        <div className="text-[16px] leading-[24px] font-medium text-[#171717] max-w-[600px]">
           HTTP-native payments on the Stellar network. This demo shows a working paywall powered by
           the{" "}
           <a
@@ -109,57 +109,65 @@ export function Home() {
         </div>
         <Link
           to="/try"
-          className="bg-[#171717] text-white text-sm font-semibold rounded-lg px-4 py-2 inline-flex items-center gap-2"
+          className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
         >
           Try the demo
           <span aria-hidden>→</span>
         </Link>
       </section>
 
-      <section className="grid gap-8 md:grid-cols-3">
+      <section className="w-full grid gap-[32px] md:grid-cols-3">
         {features.map((f) => (
           <div
             key={f.title}
-            className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-lg p-6 text-left"
+            className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] text-left"
           >
-            <h3 className="text-lg font-semibold text-[#171717] mb-2">{f.title}</h3>
-            <p className="text-sm text-[#6f6f6f] leading-6">{f.description}</p>
+            <h3 className="text-[18px] leading-[26px] font-semibold text-[#171717] mb-[8px]">
+              {f.title}
+            </h3>
+            <p className="text-[16px] leading-[24px] font-medium text-[#6f6f6f]">{f.description}</p>
           </div>
         ))}
       </section>
 
-      <section className="flex flex-col items-center gap-6">
-        <h2 className="text-2xl font-semibold tracking-[-0.96px] text-center">How x402 Works</h2>
-        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-lg p-6 w-full max-w-[960px] space-y-4">
-          <div className="flex items-center gap-2 text-base">
-            <span className="w-6 h-6 rounded-full border border-[#e2e2e2] flex items-center justify-center text-sm font-semibold">
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          How x402 Works
+        </h2>
+        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] w-full max-w-[960px] flex flex-col gap-[24px]">
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
               1
             </span>
             <span>Client requests a protected resource from the server.</span>
           </div>
-          <div className="flex items-center gap-2 text-base">
-            <span className="w-6 h-6 rounded-full border border-[#e2e2e2] flex items-center justify-center text-sm font-semibold">
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
               2
             </span>
             <span>
               Server responds with{" "}
-              <span className="text-[#5746af] font-semibold font-[Inconsolata]">HTTP 402</span> and
-              payment requirements (asset, amount, recipient).
+              <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
+                HTTP 402
+              </span>{" "}
+              and payment requirements (asset, amount, recipient).
             </span>
           </div>
-          <div className="flex items-start gap-2 text-base">
-            <span className="w-6 h-6 rounded-full border border-[#e2e2e2] flex items-center justify-center text-sm font-semibold mt-1">
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
               3
             </span>
             <span>
               Client builds a Soroban{" "}
-              <span className="text-[#5746af] font-semibold font-[Inconsolata]">transfer()</span>
+              <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
+                transfer()
+              </span>
               call, signs the authorization entries, and sends the transaction in the request
               header.
             </span>
           </div>
-          <div className="flex items-start gap-2 text-base">
-            <span className="w-6 h-6 rounded-full border border-[#e2e2e2] flex items-center justify-center text-sm font-semibold mt-1">
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
               4
             </span>
             <span>
@@ -167,24 +175,26 @@ export function Home() {
               Stellar.
             </span>
           </div>
-          <div className="flex items-center gap-2 text-base">
-            <span className="w-6 h-6 rounded-full border border-[#e2e2e2] flex items-center justify-center text-sm font-semibold">
+          <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
               5
             </span>
             <span>
               Server returns{" "}
-              <span className="text-[#5746af] font-semibold font-[Inconsolata]">200 OK</span> with
-              the requested content.
+              <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
+                200 OK
+              </span>{" "}
+              with the requested content.
             </span>
           </div>
         </div>
       </section>
 
-      <section className="flex flex-col items-center gap-6">
-        <h2 className="text-2xl font-semibold tracking-[-0.96px] text-center">
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
           Compatible Wallets
         </h2>
-        <div className="text-base text-center">
+        <div className="text-[16px] leading-[24px] font-medium text-center">
           x402 on Stellar requires wallets that support{" "}
           <a
             href={walletLinks.authEntry}
@@ -197,14 +207,14 @@ export function Home() {
           </a>{" "}
           (Soroban authorization entry signing).
         </div>
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-[12px]">
           {compatibleWallets.map((wallet) => (
             <a
               key={wallet.label}
               href={wallet.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#fcfcfc] border border-[#e2e2e2] text-[#171717] text-sm px-3 py-2 rounded-lg inline-flex items-center gap-2"
+              className="bg-[#fcfcfc] border border-[#e2e2e2] text-[#171717] text-[14px] leading-[20px] px-[12px] py-[8px] rounded-[8px] inline-flex items-center gap-2"
             >
               {wallet.label}
               <span aria-hidden>↗</span>
@@ -213,9 +223,11 @@ export function Home() {
         </div>
       </section>
 
-      <section className="flex flex-col items-center gap-6">
-        <h2 className="text-2xl font-semibold tracking-[-0.96px] text-center">Facilitator</h2>
-        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-lg p-6 max-w-[960px] text-center text-base">
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          Facilitator
+        </h2>
+        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] w-full max-w-[960px] text-center text-[16px] leading-[24px] font-medium">
           The x402 Facilitator Service is now live. Under the hood, the plugin leverages{" "}
           <a
             href="https://www.openzeppelin.com/"
@@ -241,19 +253,25 @@ export function Home() {
         </div>
       </section>
 
-      <section className="flex flex-col items-center gap-6">
-        <h2 className="text-2xl font-semibold tracking-[-0.96px] text-center">Resources</h2>
-        <div className="grid gap-8 md:grid-cols-2 w-full max-w-[960px]">
+      <section className="w-full flex flex-col items-center gap-[24px]">
+        <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
+          Resources
+        </h2>
+        <div className="grid gap-[32px] md:grid-cols-2 w-full max-w-[960px]">
           {resources.map((r) => (
             <a
               key={r.label}
               href={r.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-lg p-6 block"
+              className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] block"
             >
-              <h3 className="text-lg font-semibold text-[#5746af] mb-2">{r.label}</h3>
-              <p className="text-sm text-[#6f6f6f] leading-6">{r.description}</p>
+              <h3 className="text-[18px] leading-[26px] font-semibold text-[#5746af] mb-[8px]">
+                {r.label}
+              </h3>
+              <p className="text-[16px] leading-[24px] font-medium text-[#6f6f6f]">
+                {r.description}
+              </p>
             </a>
           ))}
         </div>

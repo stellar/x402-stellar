@@ -13,17 +13,17 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-[#f8f8f8] text-[#171717] flex flex-col">
       <header className="border-b border-[#e2e2e2] bg-[#fcfcfc]">
-        <nav className="max-w-[1240px] mx-auto px-6 lg:px-8 py-2 flex items-center justify-between">
+        <nav className="w-full px-[32px] py-[8px] flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-tight">Stellar</span>
-            <span className="text-xs font-semibold uppercase rounded-full px-2 py-0.5 bg-[#fbfaff] border border-[#d7cff9] text-[#5746af]">
+            <span className="text-[16px] leading-[24px] font-semibold tracking-tight">Stellar</span>
+            <span className="font-[Inconsolata] font-bold text-[16px] leading-[24px] tracking-[-0.32px] rounded-full px-[8px] py-[2px] bg-[#fbfaff] border border-[#d7cff9] text-[#5746af]">
               x402
             </span>
           </Link>
           {!isTryPage && (
             <Link
               to="/try"
-              className="bg-[#171717] text-white text-sm font-semibold rounded-md px-3 py-1.5"
+              className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[12px] py-[6px]"
             >
               Try the demo
             </Link>
@@ -35,7 +35,7 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-[#e2e2e2] py-6 text-center text-sm text-[#6f6f6f]">
+      <footer className="w-full border-t border-[#e2e2e2] px-[32px] py-[24px] text-center text-[14px] leading-[20px] text-[#6f6f6f]">
         Powered by{" "}
         <a
           href="https://www.x402.org/"
