@@ -168,6 +168,8 @@ Minimum required for the system to function:
 
 Per-network server variables use `TESTNET_` or `MAINNET_` prefixes: `<NET>_SERVER_STELLAR_ADDRESS`, `<NET>_STELLAR_RPC_URL`, `<NET>_FACILITATOR_URL`, `<NET>_FACILITATOR_API_KEY`. Provide at least one set to enable that network.
 
+Client env variables (`VITE_SERVER_URL`, `VITE_APP_NAME`, `VITE_PAYMENT_PRICE`, `VITE_PORT`) are resolved via runtime `window.__CONFIG__` (Docker), Vite build-time env, or hardcoded defaults — in that priority order. `VITE_PORT` configures the Vite dev server port (default `5173`).
+
 Full reference in the root `README.md` and per-service `.env.example` files.
 
 ## Test Coverage

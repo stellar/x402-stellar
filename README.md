@@ -137,6 +137,7 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 | ----------------- | ----------------------- | ------------------------------------------ |
 | `VITE_SERVER_URL` | `http://localhost:3001` | Server URL for the client SPA (build time) |
 | `VITE_APP_NAME`   | `x402 on Stellar`       | App name for the client SPA (build time)   |
+| `VITE_PORT`       | `5173`                  | Dev server port                            |
 
 ## High-Throughput Facilitator Setup (Recommended)
 
