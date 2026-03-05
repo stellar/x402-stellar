@@ -14,7 +14,21 @@ window.addEventListener("load", () => {
   const validationError = validateX402Config();
   if (validationError) {
     console.error("x402 config validation failed:", validationError);
-    rootElement.innerHTML = `<div style="padding:2rem;font-family:system-ui,sans-serif;color:#b91c1c"><h2>Payment Configuration Error</h2><p>${validationError}</p></div>`;
+
+    const container = document.createElement("div");
+    container.style.cssText = "padding:2rem;font-family:system-ui,sans-serif;color:#b91c1c";
+
+    const heading = document.createElement("h2");
+    heading.textContent = "Payment Configuration Error";
+
+    const message = document.createElement("p");
+    message.textContent = validationError;
+
+    container.appendChild(heading);
+    container.appendChild(message);
+
+    rootElement.innerHTML = "";
+    rootElement.appendChild(container);
     return;
   }
 

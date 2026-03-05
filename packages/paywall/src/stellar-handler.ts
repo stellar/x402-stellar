@@ -96,7 +96,7 @@ export const stellarPaywall: PaywallNetworkHandler = {
     return getStellarPaywallHtml({
       amount,
       paymentRequired,
-      currentUrl: paymentRequired.resource?.url || config.currentUrl || "",
+      currentUrl: paymentRequired.resource?.url || config.currentUrl || undefined,
       testnet: config.testnet ?? true,
       appName: config.appName,
       appLogo: config.appLogo,
