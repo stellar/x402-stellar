@@ -205,8 +205,6 @@ export function protectedPageHtml(homeUrl?: string): string {
       entries and submitted the transaction on-chain. Enjoy this exclusive track below.
     </p>
     <p class="tx-link-container">{{TX_LINK}}</p>
-    <p class="tx-link-container"><a href="https://stellar.expert/" target="_blank" rel="noopener noreferrer">` +
-    `View transaction on Stellar Expert <span aria-hidden="true">&#8599;</span></a></p>
     <div class="embed-wrapper">
       <iframe
         width="100%"
