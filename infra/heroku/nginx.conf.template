@@ -26,12 +26,17 @@ http {
         listen ${PORT};
 
         # API / paywall routes — proxy to Express server
-        location /protected {
+        location /protected/ {
             proxy_pass http://paywall_server;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        }
+
+        location /networks {
+            proxy_pass http://paywall_server;
+            proxy_set_header Host $host;
         }
 
         location /health {

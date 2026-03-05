@@ -42,7 +42,7 @@ services:
       - PORT=3001
       - NODE_ENV=production
       - CORS_ORIGINS=*
-      - FACILITATOR_URL=http://facilitator:4022
+      - TESTNET_FACILITATOR_URL=http://facilitator:4022
     healthcheck:
       test:
         ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>{if(!r.ok)throw 1})"]
