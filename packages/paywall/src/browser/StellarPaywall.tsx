@@ -175,15 +175,15 @@ function StellarPaywallMain({
         <p>
           {paymentRequired.resource?.description && `${paymentRequired.resource.description}.`} To
           access this content, please pay ${amount} {chainName} USDC.
+          {network === "stellar:testnet" && (
+            <span>
+              {" "}
+              <a href="https://faucet.circle.com/" target="_blank" rel="noopener noreferrer">
+                Fund USDC ↗
+              </a>
+            </span>
+          )}
         </p>
-        {network === "stellar:testnet" && (
-          <p className="instructions">
-            Need Stellar Testnet USDC?{" "}
-            <a href="https://faucet.circle.com/" target="_blank" rel="noopener noreferrer">
-              Request some <u>here</u>.
-            </a>
-          </p>
-        )}
       </div>
 
       <div className="content w-full">
