@@ -3,6 +3,7 @@ declare global {
     __CONFIG__?: {
       SERVER_URL?: string;
       APP_NAME?: string;
+      PAYMENT_PRICE?: string;
     };
   }
 }
@@ -21,5 +22,9 @@ export class Env {
 
   static get appName(): string {
     return window.__CONFIG__?.APP_NAME || import.meta.env.VITE_APP_NAME || "x402 on Stellar";
+  }
+
+  static get paymentPrice(): string {
+    return window.__CONFIG__?.PAYMENT_PRICE || import.meta.env.VITE_PAYMENT_PRICE || "0.01";
   }
 }
