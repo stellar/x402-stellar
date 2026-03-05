@@ -149,8 +149,8 @@ function StellarPaywallMain({
 
     if (tokenBalanceFormatted === "") {
       setStatus(statusInfo(`Checking ${assetCode} balance...`));
-      await refreshBalance();
-      if (Number(tokenBalanceFormatted) < amount) {
+      const freshBalance = await refreshBalance();
+      if (Number(freshBalance) < amount) {
         setStatus(
           statusError(
             `Insufficient balance. Make sure you have enough ${assetCode} on ${chainName}.`,

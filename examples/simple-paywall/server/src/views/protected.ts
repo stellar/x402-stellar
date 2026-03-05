@@ -1,6 +1,25 @@
+/** Return the URL only if it is a safe href target (http(s) or relative path). */
+function safeHref(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+
+  if (trimmed.startsWith("/")) return trimmed;
+
+  try {
+    const { protocol } = new URL(trimmed);
+    if (protocol === "http:" || protocol === "https:") return trimmed;
+    console.warn(`safeHref: rejected homeUrl with disallowed scheme: ${protocol}`);
+  } catch {
+    console.warn(`safeHref: rejected malformed homeUrl: ${trimmed}`);
+  }
+  return undefined;
+}
+
 export function protectedPageHtml(homeUrl?: string): string {
-  const brand = homeUrl
-    ? `<a href="${homeUrl}" class="nav-link">
+  const href = safeHref(homeUrl);
+  const brand = href
+    ? `<a href="${href.replace(/&/g, "&amp;").replace(/"/g, "&quot;")}" class="nav-link">
         <span class="nav-brand">Stellar</span>
         <span class="nav-badge">x402</span>
       </a>`
@@ -9,8 +28,7 @@ export function protectedPageHtml(homeUrl?: string): string {
         <span class="nav-badge">x402</span>
       </span>`;
 
-  return (
-    `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -229,6 +247,5 @@ export function protectedPageHtml(homeUrl?: string): string {
     <a href="https://developers.stellar.org/docs/build/apps/x402" target="_blank" rel="noopener noreferrer">Stellar docs</a>.
   </footer>
 </body>
-</html>`
-  );
+</html>`;
 }

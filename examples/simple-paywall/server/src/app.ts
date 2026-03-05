@@ -46,6 +46,7 @@ export function createApp(): Express {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'", "https://w.soundcloud.com"],
           styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com"],
           frameSrc: ["https://w.soundcloud.com"],
           connectSrc,
           imgSrc: ["'self'", "data:", "https:"],

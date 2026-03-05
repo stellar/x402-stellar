@@ -18,7 +18,7 @@ const features = [
       "Payments settle in ~5 seconds on Stellar using Soroban token contracts. This demo uses USDC on testnet.",
   },
   {
-    title: "HTTPS 402 Protocol",
+    title: "HTTP 402 Protocol",
     description:
       "x402 activates the dormant HTTP 402 status code. Clients pay for resources via request headers -- no accounts, no OAuth, no subscriptions.",
   },
@@ -45,7 +45,7 @@ const resources = [
     label: "@x402/stellar Package",
     href: "https://github.com/coinbase/x402/tree/main/typescript/packages/mechanisms/stellar",
     description:
-      "The pull request adding Stellar blockchain support to the x402 protocol (client, facilitator, and server).",
+      "TypeScript package providing Stellar blockchain support for the x402 protocol (client, facilitator, and server).",
   },
   {
     label: "x402 Protocol",

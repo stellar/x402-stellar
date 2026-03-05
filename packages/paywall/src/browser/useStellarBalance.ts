@@ -24,7 +24,7 @@ export type UseBalanceReturn = {
   tokenBalanceFormatted: string;
   isMissingTrustline: boolean | null;
   assetMetadata: AssetMetadata | null;
-  refreshBalance: () => Promise<void>;
+  refreshBalance: () => Promise<string>;
   resetBalance: () => void;
 };
 
@@ -89,10 +89,10 @@ export function useStellarBalance({
     }
   }, [network, asset, runtimeRpcUrl]);
 
-  const refreshBalance = useCallback(async (): Promise<void> => {
+  const refreshBalance = useCallback(async (): Promise<string> => {
     if (!address) {
       resetBalance();
-      return;
+      return "";
     }
 
     setIsFetchingBalance(true);
@@ -141,6 +141,7 @@ export function useStellarBalance({
       setTokenBalanceRaw(balanceRaw);
       setTokenBalanceFormatted(balanceFormatted);
       setIsMissingTrustline(false);
+      return balanceFormatted;
     } catch (error) {
       console.error("Failed to fetch Stellar USDC balance", error);
       const msg = error instanceof Error ? error.message : "Unable to read balance. Please retry.";
@@ -152,6 +153,7 @@ export function useStellarBalance({
         onStatus(statusError(msg));
       }
       resetBalance();
+      return "";
     } finally {
       setIsFetchingBalance(false);
     }
