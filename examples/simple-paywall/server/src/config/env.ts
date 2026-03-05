@@ -1,6 +1,73 @@
 const VALID_LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"] as const;
 type LogLevel = (typeof VALID_LOG_LEVELS)[number];
 
+export const STELLAR_PUBNET_CAIP2 = "stellar:pubnet";
+export const STELLAR_TESTNET_CAIP2 = "stellar:testnet";
+export type StellarNetwork = typeof STELLAR_PUBNET_CAIP2 | typeof STELLAR_TESTNET_CAIP2;
+
+export const NETWORK_META: Record<
+  StellarNetwork,
+  { routeSuffix: string; displayName: string; envPrefix: string; defaultRpcUrl: string }
+> = {
+  [STELLAR_TESTNET_CAIP2]: {
+    routeSuffix: "testnet",
+    displayName: "Testnet",
+    envPrefix: "TESTNET_",
+    defaultRpcUrl: "https://soroban-testnet.stellar.org",
+  },
+  [STELLAR_PUBNET_CAIP2]: {
+    routeSuffix: "mainnet",
+    displayName: "Mainnet",
+    envPrefix: "MAINNET_",
+    defaultRpcUrl: "https://mainnet.sorobanrpc.com",
+  },
+};
+
+export const ALL_STELLAR_NETWORKS: readonly StellarNetwork[] = [
+  STELLAR_TESTNET_CAIP2,
+  STELLAR_PUBNET_CAIP2,
+] as const;
+
+export interface NetworkConfig {
+  network: StellarNetwork;
+  serverStellarAddress: string;
+  stellarRpcUrl: string;
+  facilitatorUrl: string;
+  facilitatorApiKey: string | undefined;
+}
+
+export const STELLAR_DESTINATION_ADDRESS_REGEX = /^(?:[GC][ABCD][A-Z2-7]{54}|M[ABCD][A-Z2-7]{67})$/;
+
+export function validateStellarDestinationAddress(address: string): boolean {
+  return STELLAR_DESTINATION_ADDRESS_REGEX.test(address);
+}
+
+function readPrefixed(prefix: string, name: string): string | undefined {
+  const val = process.env[`${prefix}${name}`]?.trim();
+  return val || undefined;
+}
+
+function readNetworkConfig(network: StellarNetwork): NetworkConfig | undefined {
+  const meta = NETWORK_META[network];
+  const addr = readPrefixed(meta.envPrefix, "SERVER_STELLAR_ADDRESS");
+  if (!addr) return undefined;
+
+  if (!validateStellarDestinationAddress(addr)) {
+    throw new Error(
+      `Invalid ${meta.envPrefix}SERVER_STELLAR_ADDRESS: "${addr}". ` +
+        "Must be a valid Stellar public key (G...), contract (C...), or muxed account (M...).",
+    );
+  }
+
+  return {
+    network,
+    serverStellarAddress: addr,
+    stellarRpcUrl: readPrefixed(meta.envPrefix, "STELLAR_RPC_URL") ?? meta.defaultRpcUrl,
+    facilitatorUrl: readPrefixed(meta.envPrefix, "FACILITATOR_URL") ?? "http://localhost:4022",
+    facilitatorApiKey: readPrefixed(meta.envPrefix, "FACILITATOR_API_KEY"),
+  };
+}
+
 export class Env {
   static get port(): number {
     const raw = process.env.PORT ?? "3001";
@@ -28,32 +95,6 @@ export class Env {
     return raw === "*" ? "*" : raw.split(",");
   }
 
-  static get facilitatorUrl(): string {
-    return process.env.FACILITATOR_URL ?? "http://localhost:4022";
-  }
-
-  static get facilitatorApiKey(): string | undefined {
-    const key = process.env.FACILITATOR_API_KEY?.trim();
-    return key || undefined;
-  }
-
-  static get serverStellarAddress(): string {
-    const addr = process.env.SERVER_STELLAR_ADDRESS;
-    if (!addr) {
-      throw new Error("SERVER_STELLAR_ADDRESS is required.");
-    }
-    return addr;
-  }
-
-  static get stellarNetwork(): `${string}:${string}` {
-    return (process.env.STELLAR_NETWORK ?? "stellar:testnet") as `${string}:${string}`;
-  }
-
-  /** Soroban RPC URL. Defaults to the public SDF testnet endpoint. */
-  static get stellarRpcUrl(): string {
-    return process.env.STELLAR_RPC_URL?.trim() || "https://soroban-testnet.stellar.org";
-  }
-
   static get paymentPrice(): string {
     return process.env.PAYMENT_PRICE ?? "0.01";
   }
@@ -79,5 +120,32 @@ export class Env {
   static get clientHomeUrl(): string | undefined {
     const url = process.env.CLIENT_HOME_URL?.trim();
     return url || undefined;
+  }
+
+  static get testnetConfig(): NetworkConfig | undefined {
+    return readNetworkConfig(STELLAR_TESTNET_CAIP2);
+  }
+
+  static get mainnetConfig(): NetworkConfig | undefined {
+    return readNetworkConfig(STELLAR_PUBNET_CAIP2);
+  }
+
+  static get networksConfig(): NetworkConfig[] {
+    const nets: NetworkConfig[] = [];
+    const t = Env.testnetConfig;
+    if (t) nets.push(t);
+    const m = Env.mainnetConfig;
+    if (m) nets.push(m);
+    if (nets.length === 0 && !Env.paywallDisabled) {
+      throw new Error(
+        "At least one network must be configured. " +
+          "Set TESTNET_SERVER_STELLAR_ADDRESS and/or MAINNET_SERVER_STELLAR_ADDRESS.",
+      );
+    }
+    return nets;
+  }
+
+  static get allStellarRpcUrls(): string[] {
+    return Env.networksConfig.map((n) => n.stellarRpcUrl);
   }
 }
