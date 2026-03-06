@@ -15,6 +15,7 @@ escape_js() {
 
 SERVER_URL_SAFE=$(escape_js "${VITE_SERVER_URL:-}")
 APP_NAME_SAFE=$(escape_js "${VITE_APP_NAME:-}")
+PAYMENT_PRICE_SAFE=$(escape_js "${VITE_PAYMENT_PRICE:-}")
 
 OUTPUT_DIR="${CONFIG_DIR:-/usr/share/nginx/html}"
 
@@ -22,5 +23,6 @@ cat > "${OUTPUT_DIR}/config.js" <<EOF
 window.__CONFIG__ = {
   SERVER_URL: "${SERVER_URL_SAFE}",
   APP_NAME: "${APP_NAME_SAFE}",
+  PAYMENT_PRICE: "${PAYMENT_PRICE_SAFE}",
 };
 EOF

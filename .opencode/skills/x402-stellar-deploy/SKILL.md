@@ -39,6 +39,7 @@ Note: `TESTNET_FACILITATOR_URL` and `MAINNET_FACILITATOR_URL` are auto-set to `h
 | --------------------- | -------------------------------- | ------------------------------------------- |
 | `VITE_SERVER_URL`     | same origin (nginx proxy)        | Override SPA API URL                        |
 | `VITE_APP_NAME`       | --                               | Display name in SPA                         |
+| `VITE_PAYMENT_PRICE`  | `0.01`                           | Payment price shown in the UI               |
 | `VITE_PORT`           | `5173`                           | Dev server port (local dev only)            |
 | `CORS_ORIGINS`        | `*`                              | Comma-separated allowed origins             |
 | `TRUST_PROXY`         | `loopback,linklocal,uniquelocal` | Proxy trust CIDRs                           |
