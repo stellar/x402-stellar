@@ -100,15 +100,16 @@ The Dockerfile is a multi-target build with targets for `facilitator`, `server`,
 
 ### Server
 
-| Variable           | Default                 | Description                                 |
-| ------------------ | ----------------------- | ------------------------------------------- |
-| `PORT`             | `3001`                  | Server port                                 |
-| `NODE_ENV`         | `development`           | Environment                                 |
-| `LOG_LEVEL`        | `info`                  | Pino log level                              |
-| `CORS_ORIGINS`     | `http://localhost:5173` | Allowed CORS origins (comma-separated)      |
-| `PAYWALL_DISABLED` | —                       | Set to `true` to disable the paywall        |
-| `PAYMENT_PRICE`    | `0.01`                  | Price for protected content                 |
-| `CLIENT_HOME_URL`  | —                       | Client home page URL for paywall brand link |
+| Variable           | Default                          | Description                                 |
+| ------------------ | -------------------------------- | ------------------------------------------- |
+| `PORT`             | `3001`                           | Server port                                 |
+| `NODE_ENV`         | `development`                    | Environment                                 |
+| `LOG_LEVEL`        | `info`                           | Pino log level                              |
+| `CORS_ORIGINS`     | `http://localhost:5173`          | Allowed CORS origins (comma-separated)      |
+| `PAYWALL_DISABLED` | —                                | Set to `true` to disable the paywall        |
+| `PAYMENT_PRICE`    | `0.01`                           | Price for protected content                 |
+| `CLIENT_HOME_URL`  | —                                | Client home page URL for paywall brand link |
+| `TRUST_PROXY`      | `loopback,linklocal,uniquelocal` | Express trust proxy setting                 |
 
 ### Per-Network (Testnet / Mainnet)
 
@@ -123,18 +124,23 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 
 ### Facilitator
 
-| Variable                              | Default | Description                              |
-| ------------------------------------- | ------- | ---------------------------------------- |
-| `FACILITATOR_STELLAR_PRIVATE_KEY`     | —       | Facilitator wallet private key           |
-| `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —       | Fee-bump signer secret (high-throughput) |
-| `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —       | Channel account secrets, comma-separated |
+| Variable                              | Default                          | Description                              |
+| ------------------------------------- | -------------------------------- | ---------------------------------------- |
+| `FACILITATOR_STELLAR_PRIVATE_KEY`     | —                                | Facilitator wallet private key           |
+| `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —                                | Fee-bump signer secret (high-throughput) |
+| `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —                                | Channel account secrets, comma-separated |
+| `TRUST_PROXY`                         | `loopback,linklocal,uniquelocal` | Express trust proxy setting              |
 
 ### Client
 
-| Variable          | Default                 | Description                                |
-| ----------------- | ----------------------- | ------------------------------------------ |
-| `VITE_SERVER_URL` | `http://localhost:3001` | Server URL for the client SPA (build time) |
-| `VITE_APP_NAME`   | `x402 on Stellar`       | App name for the client SPA (build time)   |
+| Variable             | Default                 | Description                                           |
+| -------------------- | ----------------------- | ----------------------------------------------------- |
+| `VITE_SERVER_URL`    | `http://localhost:3001` | Server URL for the client SPA (build-time or runtime) |
+| `VITE_APP_NAME`      | `x402 on Stellar`       | App name for the client SPA (build-time or runtime)   |
+| `VITE_PAYMENT_PRICE` | `0.01`                  | Payment price shown in the UI (build-time or runtime) |
+| `VITE_PORT`          | `5173`                  | Dev server port (build-time only)                     |
+
+> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are not in the root `.env.example`; set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
 
 ## High-Throughput Facilitator Setup (Recommended)
 

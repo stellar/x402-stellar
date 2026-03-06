@@ -25,7 +25,7 @@ pnpm 10.7.0 monorepo with Turborepo. Filter: `--filter='@x402-stellar/*'`.
 | ----------- | ---- | --------------------------------------------------------------------- |
 | Facilitator | 4022 | `POST /verify`, `POST /settle`, `GET /supported`, `GET /health`       |
 | Server      | 3001 | `GET /health`, `GET /networks`, `GET /protected/:network` (paywalled) |
-| Client      | 5173 | SPA (dev), 8080 (docker)                                              |
+| Client      | 5173 | SPA (dev, configurable via `VITE_PORT`), 8080 (docker)                |
 
 ## Full Check
 
