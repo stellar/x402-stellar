@@ -15,7 +15,7 @@ const features = [
   {
     title: "Stellar + USDC",
     description:
-      "Payments settle in ~5 seconds on Stellar using Soroban token contracts. This demo uses USDC on testnet.",
+      "Payments settle in ~5 seconds on Stellar using a Stellar asset contract. This demo uses USDC on testnet.",
   },
   {
     title: "HTTP 402 Protocol",
@@ -105,7 +105,7 @@ export function Home() {
             x402 protocol
             <span aria-hidden>↗</span>
           </a>{" "}
-          and Soroban smart contracts.
+          and Stellar smart contracts.
         </div>
         <Link
           to="/try"
@@ -158,7 +158,7 @@ export function Home() {
               3
             </span>
             <span>
-              Client builds a Soroban{" "}
+              Client builds a Stellar contract{" "}
               <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
                 transfer()
               </span>
