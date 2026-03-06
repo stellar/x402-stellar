@@ -30,7 +30,7 @@ x402-stellar/
 
 ```bash
 # Clone the repo
-git clone https://github.com/ArkaDevelopment/x402-stellar.git
+git clone https://github.com/stellar/x402-stellar.git
 cd x402-stellar
 
 # Install dependencies
@@ -47,11 +47,12 @@ cp examples/simple-paywall/server/.env.example examples/simple-paywall/server/.e
 
 You need three terminals:
 
-**Terminal 1 -- Facilitator** (from the x402 submodule):
+**Terminal 1 -- Facilitator:**
 
 ```bash
-cd vendors/x402/examples/typescript/facilitator/advanced
-FACILITATOR_STELLAR_PRIVATE_KEY=<your-key> pnpm dev:all-networks
+cd examples/facilitator
+cp .env.example .env  # fill in FACILITATOR_STELLAR_PRIVATE_KEY
+pnpm dev
 ```
 
 **Terminal 2 -- Server:**
@@ -140,7 +141,7 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 | `VITE_PAYMENT_PRICE` | `0.01`                  | Payment price shown in the UI (build-time or runtime) |
 | `VITE_PORT`          | `5173`                  | Dev server port (build-time only)                     |
 
-> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are not in the root `.env.example`; set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
+> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are included in the root `.env.example` (commented out); alternatively, set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
 
 ## High-Throughput Facilitator Setup (Recommended)
 
