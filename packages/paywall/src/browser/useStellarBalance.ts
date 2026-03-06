@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AssembledTransaction } from "@stellar/stellar-sdk/contract";
 import { nativeToScVal, scValToNative } from "@stellar/stellar-sdk";
 import type { Network } from "@x402/core/types";
@@ -45,6 +45,7 @@ export function useStellarBalance({
   onStatus,
 }: UseBalanceParams): UseBalanceReturn {
   const runtimeRpcUrl = window.x402?.config?.rpcUrl;
+  const cancelledRef = useRef(false);
   const [tokenBalanceRaw, setTokenBalanceRaw] = useState<bigint | null>(null);
   const [tokenBalanceFormatted, setTokenBalanceFormatted] = useState<string>("");
   const [isFetchingBalance, setIsFetchingBalance] = useState(false);
@@ -81,7 +82,7 @@ export function useStellarBalance({
       const name = scValToNative(nameTx.result) as string;
       const parts = name.split(":");
 
-      if (parts.length === 2) {
+      if (parts.length === 2 && !cancelledRef.current) {
         setAssetMetadata({ code: parts[0], issuer: parts[1] });
       }
     } catch (error) {
@@ -138,6 +139,7 @@ export function useStellarBalance({
       // Format the balance
       const balanceFormatted = formatUnits(balanceRaw, decimals);
 
+      if (cancelledRef.current) return "";
       setTokenBalanceRaw(balanceRaw);
       setTokenBalanceFormatted(balanceFormatted);
       setIsMissingTrustline(false);
@@ -145,6 +147,7 @@ export function useStellarBalance({
     } catch (error) {
       console.error("Failed to fetch Stellar USDC balance", error);
       const msg = error instanceof Error ? error.message : "Unable to read balance. Please retry.";
+      if (cancelledRef.current) return "";
       const isTrustlineError = msg.includes("trustline entry is missing for account");
       if (isTrustlineError) {
         setIsMissingTrustline(true);
@@ -160,9 +163,13 @@ export function useStellarBalance({
   }, [address, network, asset, onStatus, resetBalance, fetchAssetMetadata, runtimeRpcUrl]);
 
   useEffect(() => {
+    cancelledRef.current = false;
     if (address) {
       void refreshBalance();
     }
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [address, refreshBalance]);
 
   return {
