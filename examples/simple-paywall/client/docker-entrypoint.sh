@@ -24,7 +24,11 @@ OUTPUT_DIR="${CONFIG_DIR:-/usr/share/nginx/html}"
 
 # ── Base path rewriting ──────────────────────────────────────────────
 # Normalize: ensure leading and trailing slash (e.g. "x402" -> "/x402/")
-BASE_PATH="${VITE_BASE_PATH:-/}"
+RAW_BASE_PATH="${VITE_BASE_PATH:-/}"
+BASE_PATH=$(printf '%s' "$RAW_BASE_PATH" | tr -cd 'A-Za-z0-9/_-')
+if [ -z "$BASE_PATH" ]; then
+  BASE_PATH="/"
+fi
 case "$BASE_PATH" in
   /*) ;; *) BASE_PATH="/$BASE_PATH" ;;
 esac
@@ -32,14 +36,11 @@ case "$BASE_PATH" in
   */) ;; *) BASE_PATH="$BASE_PATH/" ;;
 esac
 
-BASE_PATH_SAFE=$(escape_js "$BASE_PATH")
-
 cat > "${OUTPUT_DIR}/config.js" <<EOF
 window.__CONFIG__ = {
   SERVER_URL: "${SERVER_URL_SAFE}",
   APP_NAME: "${APP_NAME_SAFE}",
   PAYMENT_PRICE: "${PAYMENT_PRICE_SAFE}",
-  BASE_PATH: "${BASE_PATH_SAFE}",
 };
 EOF
 
@@ -54,5 +55,7 @@ if [ "$BASE_PATH" != "/" ]; then
   # /x402/assets/foo.js → OUTPUT_DIR/x402/assets/foo.js → OUTPUT_DIR/assets/foo.js
   SUBPATH="${BASE_PATH#/}"   # "x402/"
   SUBPATH="${SUBPATH%/}"     # "x402"
-  ln -sfn "${OUTPUT_DIR}" "${OUTPUT_DIR}/${SUBPATH}"
+  TARGET="${OUTPUT_DIR}/${SUBPATH}"
+  mkdir -p "$(dirname "$TARGET")"
+  ln -sfn "${OUTPUT_DIR}" "$TARGET"
 fi
