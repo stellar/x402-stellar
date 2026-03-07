@@ -139,10 +139,10 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 | `VITE_SERVER_URL`    | `http://localhost:3001` | Server URL for the client SPA (build-time or runtime)                 |
 | `VITE_APP_NAME`      | `x402 on Stellar`       | App name for the client SPA (build-time or runtime)                   |
 | `VITE_PAYMENT_PRICE` | `0.01`                  | Payment price shown in the UI (build-time or runtime)                 |
-| `VITE_BASE_PATH`     | `/`                     | Rewrites asset paths in index.html for subpath serving (runtime only) |
+| `VITE_BASE_ROUTE`     | `/`                     | Rewrites asset paths in index.html for subpath serving (runtime only) |
 | `VITE_PORT`          | `5173`                  | Dev server port (build-time only)                                     |
 
-> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_BASE_PATH` is runtime-only: at container startup, the entrypoint rewrites asset paths in `index.html` so the SPA works when served under a subpath (e.g. `/x402/`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are included in the root `.env.example` (commented out); alternatively, set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
+> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_BASE_ROUTE` is runtime-only: at container startup, the entrypoint rewrites asset paths in `index.html` so the SPA works when served under a subpath (e.g. `/x402/`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are included in the root `.env.example` (commented out); alternatively, set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
 
 ## High-Throughput Facilitator Setup (Recommended)
 
