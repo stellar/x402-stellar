@@ -35,21 +35,24 @@ esac
 case "$BASE_ROUTE" in
   */) ;; *) BASE_ROUTE="$BASE_ROUTE/" ;;
 esac
+BASE_ROUTE_SAFE=$(escape_js "$BASE_ROUTE")
 
 cat > "${OUTPUT_DIR}/config.js" <<EOF
 window.__CONFIG__ = {
   SERVER_URL: "${SERVER_URL_SAFE}",
   APP_NAME: "${APP_NAME_SAFE}",
   PAYMENT_PRICE: "${PAYMENT_PRICE_SAFE}",
+  BASE_ROUTE: "${BASE_ROUTE_SAFE}",
 };
 EOF
 
 if [ "$BASE_ROUTE" != "/" ]; then
-  sed -i \
+  sed -i.bak \
     -e "s|src=\"/assets/|src=\"${BASE_ROUTE}assets/|g" \
     -e "s|href=\"/assets/|href=\"${BASE_ROUTE}assets/|g" \
     -e "s|src=\"/config.js\"|src=\"${BASE_ROUTE}config.js\"|g" \
     "${OUTPUT_DIR}/index.html"
+  rm -f "${OUTPUT_DIR}/index.html.bak"
 
   # Symlink so nginx's default "location / { root ... }" resolves
   # /x402/assets/foo.js → OUTPUT_DIR/x402/assets/foo.js → OUTPUT_DIR/assets/foo.js

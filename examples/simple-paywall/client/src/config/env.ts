@@ -1,9 +1,12 @@
+import { resolveBaseRoute } from "./baseRoute.ts";
+
 declare global {
   interface Window {
     __CONFIG__?: {
       SERVER_URL?: string;
       APP_NAME?: string;
       PAYMENT_PRICE?: string;
+      BASE_ROUTE?: string;
     };
   }
 }
@@ -26,5 +29,9 @@ export class Env {
 
   static get paymentPrice(): string {
     return window.__CONFIG__?.PAYMENT_PRICE || import.meta.env.VITE_PAYMENT_PRICE || "0.01";
+  }
+
+  static get baseRoute(): string {
+    return resolveBaseRoute(window.__CONFIG__?.BASE_ROUTE, import.meta.env.VITE_BASE_ROUTE);
   }
 }
