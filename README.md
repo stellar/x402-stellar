@@ -71,6 +71,35 @@ pnpm dev
 
 Open [http://localhost:5173](http://localhost:5173) and navigate through Home → Try It. The page dynamically shows buttons for each configured network (testnet, mainnet, or both) based on which `TESTNET_*` / `MAINNET_*` env vars are set.
 
+### Docker Compose (with ingress rewrite simulation)
+
+To run the 3-service compose stack plus a local ingress simulator (production-style rewrite behavior):
+
+```bash
+docker compose \
+  -f examples/simple-paywall/docker-compose.yml \
+  -f examples/simple-paywall/docker-compose.ingress-sim.yml \
+  up -d --build
+```
+
+Then open [http://localhost:8099/x402/try](http://localhost:8099/x402/try).
+
+This simulator rewrites:
+
+- `/x402(/|$)(.*)` → client `/$2`
+- `/x402/api(/|$)(.*)` → server `/$2`
+
+It is useful for reproducing ingress-prefix issues locally. Full verification steps (including decoding `PAYMENT-REQUIRED.resource.url`) are in `examples/simple-paywall/INGRESS_SIMULATION.md`.
+
+To stop:
+
+```bash
+docker compose \
+  -f examples/simple-paywall/docker-compose.yml \
+  -f examples/simple-paywall/docker-compose.ingress-sim.yml \
+  down
+```
+
 ## Examples
 
 | Example            | Path                       | Description                                              |

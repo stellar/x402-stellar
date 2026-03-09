@@ -66,7 +66,7 @@ services:
     environment:
       - VITE_SERVER_URL=http://localhost:3001
       - VITE_PAYMENT_PRICE=0.01
-      # - VITE_BASE_ROUTE=/x402
+      - VITE_BASE_ROUTE=/x402
     depends_on:
       server:
         condition: service_healthy

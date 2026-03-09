@@ -1,0 +1,22 @@
+services:
+  server:
+    environment:
+      - CORS_ORIGINS=http://localhost:8080,http://localhost:8099
+      - CLIENT_HOME_URL=http://localhost:8099/x402
+
+  client:
+    environment:
+      - VITE_SERVER_URL=http://localhost:8099/x402/api
+
+  ingress-sim:
+    image: nginx:alpine
+    ports:
+      - "8099:80"
+    volumes:
+      - ./ingress-sim/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      server:
+        condition: service_healthy
+      client:
+        condition: service_started
+    restart: unless-stopped
