@@ -3,6 +3,7 @@
     "target": "ES2023",
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "types": ["node"],
     "jsx": "react-jsx",
     "strict": true,
     "noImplicitReturns": true,
@@ -12,5 +13,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "test"]
 }
