@@ -76,7 +76,7 @@ if [ "$BASE_ROUTE" != "/" ]; then
   rm -f "${OUTPUT_DIR}/index.html.bak"
 
   if [ -f "${OUTPUT_DIR}/index.html" ]; then
-    log "post_rewrite_index_lines=$(grep -E 'assets/index|/config.js|/x402/config.js' "${OUTPUT_DIR}/index.html" | tr '\n' ' ')"
+    log "post_rewrite_index_lines=$(grep -E 'assets/index|config\.js' "${OUTPUT_DIR}/index.html" | tr '\n' ' ')"
   else
     log "ERROR: ${OUTPUT_DIR}/index.html missing after rewrite"
   fi
