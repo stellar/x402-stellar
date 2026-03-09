@@ -6,6 +6,7 @@
   "scripts": {
     "codegen": "tsx src/browser/build.ts",
     "build": "tsup",
+    "test": "node --test --experimental-strip-types src/browser/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ignore-pattern src/browser/",
     "lint:fix": "eslint src/ --ignore-pattern src/browser/ --fix"
