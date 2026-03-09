@@ -8,6 +8,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react(), tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          // Use hex hashes (lowercase-only) so filenames survive Cloudflare's
+          // lowercase redirect without a second 404.
+          hashCharacters: "hex",
+        },
+      },
+    },
     server: {
       port,
       proxy: {

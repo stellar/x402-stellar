@@ -4,6 +4,7 @@ set -e
 # Generate runtime config.js for the SPA
 export VITE_SERVER_URL="${VITE_SERVER_URL:-}"
 export VITE_APP_NAME="${VITE_APP_NAME:-}"
+export VITE_BASE_ROUTE="${VITE_BASE_ROUTE:-}"
 export CONFIG_DIR=/app/client
 /app/scripts/runtime-config.sh
 
