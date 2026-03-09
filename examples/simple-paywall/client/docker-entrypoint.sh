@@ -16,11 +16,22 @@ escape_js() {
   printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e "s/'/\\\\'/g"
 }
 
+log() {
+  printf '[runtime-config] %s\n' "$1"
+}
+
 SERVER_URL_SAFE=$(escape_js "${VITE_SERVER_URL:-}")
 APP_NAME_SAFE=$(escape_js "${VITE_APP_NAME:-}")
 PAYMENT_PRICE_SAFE=$(escape_js "${VITE_PAYMENT_PRICE:-}")
 
 OUTPUT_DIR="${CONFIG_DIR:-/usr/share/nginx/html}"
+
+log "starting config generation"
+log "output_dir=${OUTPUT_DIR}"
+log "env(VITE_SERVER_URL)=${VITE_SERVER_URL:-<unset>}"
+log "env(VITE_APP_NAME)=${VITE_APP_NAME:-<unset>}"
+log "env(VITE_PAYMENT_PRICE)=${VITE_PAYMENT_PRICE:-<unset>}"
+log "env(VITE_BASE_ROUTE)=${VITE_BASE_ROUTE:-<unset>}"
 
 # ── Base path rewriting ──────────────────────────────────────────────
 # Normalize: ensure leading and trailing slash (e.g. "x402" -> "/x402/")
@@ -37,6 +48,8 @@ case "$BASE_ROUTE" in
 esac
 BASE_ROUTE_SAFE=$(escape_js "$BASE_ROUTE")
 
+log "normalized_base_route=${BASE_ROUTE}"
+
 cat > "${OUTPUT_DIR}/config.js" <<EOF
 window.__CONFIG__ = {
   SERVER_URL: "${SERVER_URL_SAFE}",
@@ -46,13 +59,27 @@ window.__CONFIG__ = {
 };
 EOF
 
+if [ -f "${OUTPUT_DIR}/config.js" ]; then
+  log "wrote ${OUTPUT_DIR}/config.js"
+  log "generated_config=$(tr '\n' ' ' < "${OUTPUT_DIR}/config.js")"
+else
+  log "ERROR: failed to write ${OUTPUT_DIR}/config.js"
+fi
+
 if [ "$BASE_ROUTE" != "/" ]; then
+  log "rewriting index.html for subpath assets"
   sed -i.bak \
     -e "s|src=\"/assets/|src=\"${BASE_ROUTE}assets/|g" \
     -e "s|href=\"/assets/|href=\"${BASE_ROUTE}assets/|g" \
     -e "s|src=\"/config.js\"|src=\"${BASE_ROUTE}config.js\"|g" \
     "${OUTPUT_DIR}/index.html"
   rm -f "${OUTPUT_DIR}/index.html.bak"
+
+  if [ -f "${OUTPUT_DIR}/index.html" ]; then
+    log "post_rewrite_index_lines=$(grep -E 'assets/index|config\.js' "${OUTPUT_DIR}/index.html" | tr '\n' ' ')"
+  else
+    log "ERROR: ${OUTPUT_DIR}/index.html missing after rewrite"
+  fi
 
   # Symlink so nginx's default "location / { root ... }" resolves
   # /x402/assets/foo.js → OUTPUT_DIR/x402/assets/foo.js → OUTPUT_DIR/assets/foo.js
@@ -61,4 +88,9 @@ if [ "$BASE_ROUTE" != "/" ]; then
   TARGET="${OUTPUT_DIR}/${SUBPATH}"
   mkdir -p "$(dirname "$TARGET")"
   ln -sfn "${OUTPUT_DIR}" "$TARGET"
+  log "symlink_created=${TARGET} -> ${OUTPUT_DIR}"
+else
+  log "base_route_is_root, skipping index rewrite and symlink"
 fi
+
+log "runtime config completed"

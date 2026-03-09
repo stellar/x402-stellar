@@ -230,6 +230,13 @@ RUN chmod +x /docker-entrypoint.d/40-runtime-config.sh
 
 RUN mkdir -p /etc/nginx/templates && printf 'server {\n\
   listen ${PORT};\n\
+  location ~* /config\\.js$ {\n\
+    root /usr/share/nginx/html;\n\
+    add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;\n\
+    add_header Pragma "no-cache" always;\n\
+    add_header Expires "0" always;\n\
+    try_files $uri =404;\n\
+  }\n\
   location / {\n\
     root /usr/share/nginx/html;\n\
     index index.html;\n\
