@@ -5,6 +5,7 @@ import { encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
 import { statusError, statusInfo, statusSuccess, type Status } from "./status";
+import { resolvePaymentTargetUrl } from "./paymentTargetUrl";
 
 export type UseStellarPaymentParams = {
   paymentRequired: PaymentRequired;
@@ -53,7 +54,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
 
       setStatus(statusInfo("Settling payment..."));
-      const targetUrl = x402.currentUrl || window.location.href;
+      const targetUrl = resolvePaymentTargetUrl(window.location.href, x402.currentUrl);
       const response = await fetch(targetUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
