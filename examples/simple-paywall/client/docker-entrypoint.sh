@@ -9,7 +9,7 @@
 #
 # CONFIG_DIR can be set to override the output directory (default: /usr/share/nginx/html).
 #
-# VITE_BASE_ROUTE (e.g. "/x402/") rewrites asset paths in index.html so the
+# VITE_BASE_ROUTE (e.g. "/x402-demo/") rewrites asset paths in index.html so the
 # SPA works when served under a subpath via ingress rewrite.
 
 escape_js() {
@@ -34,7 +34,7 @@ log "env(VITE_PAYMENT_PRICE)=${VITE_PAYMENT_PRICE:-<unset>}"
 log "env(VITE_BASE_ROUTE)=${VITE_BASE_ROUTE:-<unset>}"
 
 # ── Base path rewriting ──────────────────────────────────────────────
-# Normalize: ensure leading and trailing slash (e.g. "x402" -> "/x402/")
+# Normalize: ensure leading and trailing slash (e.g. "x402-demo" -> "/x402-demo/")
 RAW_BASE_ROUTE="${VITE_BASE_ROUTE:-/}"
 BASE_ROUTE=$(printf '%s' "$RAW_BASE_ROUTE" | tr -cd 'A-Za-z0-9/_-')
 if [ -z "$BASE_ROUTE" ]; then
@@ -82,7 +82,7 @@ if [ "$BASE_ROUTE" != "/" ]; then
   fi
 
   # Symlink so nginx's default "location / { root ... }" resolves
-  # /x402/assets/foo.js → OUTPUT_DIR/x402/assets/foo.js → OUTPUT_DIR/assets/foo.js
+  # /x402-demo/assets/foo.js → OUTPUT_DIR/x402-demo/assets/foo.js → OUTPUT_DIR/assets/foo.js
   SUBPATH="${BASE_ROUTE#/}"   # "x402/"
   SUBPATH="${SUBPATH%/}"     # "x402"
   TARGET="${OUTPUT_DIR}/${SUBPATH}"
