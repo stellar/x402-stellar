@@ -4,10 +4,11 @@ import helmet from "helmet";
 import proxyAddr from "proxy-addr";
 import { Env } from "./config/env.js";
 import { logger, httpLogger } from "./utils/logger.js";
-import { createPaymentMiddlewares } from "./middleware/payment.js";
+import { createPaymentMiddlewares, createApiPaymentMiddlewares } from "./middleware/payment.js";
 import { txHashInjector } from "./middleware/txHashInjector.js";
 import { healthRouter } from "./routes/health.js";
 import { protectedRouter } from "./routes/protected.js";
+import { apiProtectedRouter } from "./routes/api-protected.js";
 
 export function createApp(): Express {
   const app = express();
@@ -80,9 +81,20 @@ export function createApp(): Express {
         "Registered payment route",
       );
     }
+
+    // API routes for programmatic (agent/M2M) clients — JSON 402, no HTML paywall.
+    const apiMiddlewares = createApiPaymentMiddlewares();
+    for (const mw of apiMiddlewares) {
+      app.use(mw.handler);
+      logger.info(
+        { route: `GET ${mw.routePath}`, network: mw.network },
+        "Registered API payment route",
+      );
+    }
   }
 
   app.use(protectedRouter);
+  app.use(apiProtectedRouter);
 
   // Global error handler (Express requires all 4 parameters for error middleware)
   app.use(

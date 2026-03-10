@@ -12,8 +12,8 @@ export interface NetworkMiddleware {
   handler: RequestHandler;
 }
 
-function buildMiddleware(netConfig: NetworkConfig): NetworkMiddleware {
-  const facilitatorClient = new HTTPFacilitatorClient({
+function buildFacilitatorClient(netConfig: NetworkConfig) {
+  return new HTTPFacilitatorClient({
     url: netConfig.facilitatorUrl,
     createAuthHeaders: netConfig.facilitatorApiKey
       ? async () => {
@@ -22,6 +22,11 @@ function buildMiddleware(netConfig: NetworkConfig): NetworkMiddleware {
         }
       : undefined,
   });
+}
+
+/** HTML paywall route: /protected/:network — serves the browser wallet UI on 402. */
+function buildMiddleware(netConfig: NetworkConfig): NetworkMiddleware {
+  const facilitatorClient = buildFacilitatorClient(netConfig);
 
   const paywall = createPaywall()
     .withNetwork(stellarPaywall)
@@ -62,6 +67,45 @@ function buildMiddleware(netConfig: NetworkConfig): NetworkMiddleware {
   return { network: netConfig.network, routePath, handler };
 }
 
+/** API route: /api/protected/:network — returns JSON 402 (no HTML paywall). */
+function buildApiMiddleware(netConfig: NetworkConfig): NetworkMiddleware {
+  const facilitatorClient = buildFacilitatorClient(netConfig);
+
+  const server = new x402ResourceServer(facilitatorClient).register(
+    netConfig.network,
+    new ExactStellarScheme(),
+  );
+
+  const { routeSuffix } = NETWORK_META[netConfig.network];
+  const routePath = `/api/protected/${routeSuffix}`;
+
+  const handler = paymentMiddleware(
+    {
+      [`GET ${routePath}`]: {
+        accepts: [
+          {
+            scheme: "exact",
+            price: Env.paymentPrice,
+            network: netConfig.network,
+            payTo: netConfig.serverStellarAddress,
+          },
+        ],
+        description: Env.paymentDescription,
+      },
+    },
+    server,
+    undefined,
+    undefined, // no HTML paywall — JSON 402 responses
+    true,
+  );
+
+  return { network: netConfig.network, routePath, handler };
+}
+
 export function createPaymentMiddlewares(): NetworkMiddleware[] {
   return Env.networksConfig.map(buildMiddleware);
+}
+
+export function createApiPaymentMiddlewares(): NetworkMiddleware[] {
+  return Env.networksConfig.map(buildApiMiddleware);
 }

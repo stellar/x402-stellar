@@ -7,17 +7,17 @@ This demonstrates x402's value in AI-agent and machine-to-machine (M2M) payment 
 ## How it works
 
 ```
-Agent                                 Server
-  │                                     │
-  │──── GET /protected/testnet ─────────▶│
-  │◀─── 402 Payment Required ───────────│
-  │     (PAYMENT-REQUIRED header)        │
-  │                                     │
-  │  [construct & sign Stellar tx]       │
-  │                                     │
-  │──── GET /protected/testnet ─────────▶│
-  │     (PAYMENT-SIGNATURE header)       │
-  │◀─── 200 OK ─────────────────────────│
+Agent                                        Server
+  │                                            │
+  │──── GET /api/protected/testnet ────────────▶│
+  │◀─── 402 Payment Required ──────────────────│
+  │     (PAYMENT-REQUIRED header, JSON body)    │
+  │                                            │
+  │  [construct & sign Stellar tx]              │
+  │                                            │
+  │──── GET /api/protected/testnet ────────────▶│
+  │     (PAYMENT-SIGNATURE header)              │
+  │◀─── 200 OK  { message, network, timestamp } │
 ```
 
 1. The agent makes a plain `GET` request.
@@ -69,6 +69,15 @@ cp .env.example .env
 pnpm dev
 ```
 
+The server exposes two sets of protected endpoints:
+
+| Path | Description |
+| ---- | ----------- |
+| `GET /api/protected/testnet` | **JSON API** — 402 returns JSON, 200 returns JSON (use with agent-client) |
+| `GET /api/protected/mainnet` | **JSON API** — same as above on mainnet |
+| `GET /protected/testnet` | **HTML paywall** — 402 renders browser wallet UI |
+| `GET /protected/mainnet` | **HTML paywall** — same as above on mainnet |
+
 ### 4. Run the agent
 
 ```bash
@@ -80,7 +89,7 @@ Example output:
 ```
 Agent Stellar address: GABCDE...
 
-Requesting: http://localhost:3001/protected/testnet
+Requesting: http://localhost:3001/api/protected/testnet
 Received 402 Payment Required.
 Payment required: scheme=exact, network=stellar:testnet, asset=USDC, amount=10000
 
@@ -89,10 +98,10 @@ Sending request with PAYMENT-SIGNATURE header...
 Payment accepted on attempt 1.
 
 Status: 200 OK
-Content-Type: text/html; charset=utf-8
+Content-Type: application/json; charset=utf-8
 
 --- Response body (first 1000 chars) ---
-<!DOCTYPE html>...
+{"message":"Access granted","network":"testnet","timestamp":"2026-..."}
 ```
 
 ## Configuration reference
