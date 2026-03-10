@@ -83,8 +83,8 @@ if [ "$BASE_ROUTE" != "/" ]; then
 
   # Symlink so nginx's default "location / { root ... }" resolves
   # /x402-demo/assets/foo.js → OUTPUT_DIR/x402-demo/assets/foo.js → OUTPUT_DIR/assets/foo.js
-  SUBPATH="${BASE_ROUTE#/}"   # "x402/"
-  SUBPATH="${SUBPATH%/}"     # "x402"
+  SUBPATH="${BASE_ROUTE#/}"   # "x402-demo/"
+  SUBPATH="${SUBPATH%/}"     # "x402-demo"
   TARGET="${OUTPUT_DIR}/${SUBPATH}"
   mkdir -p "$(dirname "$TARGET")"
   ln -sfn "${OUTPUT_DIR}" "$TARGET"
