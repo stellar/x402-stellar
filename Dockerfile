@@ -37,9 +37,6 @@ COPY patches/ patches/
 # Activate pnpm version from package.json
 RUN corepack install
 
-# Vendor packages (pre-built: dist + package.json)
-COPY vendors/x402/typescript/packages/ vendors/x402/typescript/packages/
-
 # Own packages (built from source)
 COPY packages/paywall/package.json                               packages/paywall/package.json
 
@@ -195,7 +192,6 @@ FROM node:22-alpine AS facilitator
 WORKDIR /app
 
 COPY --from=base /app/node_modules                               /app/node_modules
-COPY --from=base /app/vendors/x402/typescript/packages           /app/vendors/x402/typescript/packages
 COPY --from=base /app/examples/facilitator                       /app/examples/facilitator
 
 EXPOSE 4022
@@ -210,7 +206,6 @@ FROM node:22-alpine AS server
 WORKDIR /app
 
 COPY --from=base /app/node_modules                               /app/node_modules
-COPY --from=base /app/vendors/x402/typescript/packages           /app/vendors/x402/typescript/packages
 COPY --from=base /app/packages/paywall/dist                      /app/packages/paywall/dist
 COPY --from=base /app/packages/paywall/package.json              /app/packages/paywall/package.json
 COPY --from=base /app/examples/simple-paywall/server             /app/examples/simple-paywall/server
@@ -258,7 +253,6 @@ WORKDIR /app
 
 # Copy pruned workspace tree
 COPY --from=base /app/node_modules                               /app/node_modules
-COPY --from=base /app/vendors/x402/typescript/packages           /app/vendors/x402/typescript/packages
 COPY --from=base /app/packages/paywall/dist                      /app/packages/paywall/dist
 COPY --from=base /app/packages/paywall/package.json              /app/packages/paywall/package.json
 COPY --from=base /app/examples/facilitator/dist                  /app/examples/facilitator/dist

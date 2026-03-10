@@ -10,7 +10,7 @@
 #
 # Reads secrets from ../../.env (repo root).
 # Build context is the repo root (../../) because the pnpm workspace
-# and vendors/x402 must be in scope.
+# must be in scope.
 
 services:
   facilitator:

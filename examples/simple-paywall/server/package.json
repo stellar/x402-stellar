@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@x402-stellar/paywall": "workspace:*",
-    "@x402/core": "workspace:*",
-    "@x402/express": "workspace:*",
-    "@x402/stellar": "workspace:*",
+    "@x402/core": "2.6.0",
+    "@x402/express": "2.6.0",
+    "@x402/stellar": "2.6.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
