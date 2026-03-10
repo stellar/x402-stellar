@@ -6,9 +6,10 @@
  *
  * At least one of the following must be set:
  *   FACILITATOR_STELLAR_PRIVATE_KEY
- *   FACILITATOR_STELLAR_FEE_BUMP_SECRET + FACILITATOR_STELLAR_CHANNEL_SECRETS
+ *   FACILITATOR_STELLAR_FEE_BUMP_SECRET
+ *   FACILITATOR_STELLAR_CHANNEL_SECRETS
  *
- * All present env vars are processed — they are not mutually exclusive.
+ * All present env vars are processed independently — they are not mutually exclusive.
  *
  * Usage:
  *   npx tsx scripts/refund-accounts-from-env.ts
@@ -60,9 +61,11 @@ async function main() {
     console.log(`Channel accounts: ${channelSecrets.length}`);
   }
 
-  console.log(`\nTotal accounts to check: ${addresses.length}\n`);
+  const uniqueAddresses = [...new Set(addresses)];
 
-  await fundAddressesWithFriendbot(addresses, { label: "account" });
+  console.log(`\nTotal accounts to check: ${uniqueAddresses.length}\n`);
+
+  await fundAddressesWithFriendbot(uniqueAddresses, { label: "account" });
 
   console.log("\nDone.");
 }

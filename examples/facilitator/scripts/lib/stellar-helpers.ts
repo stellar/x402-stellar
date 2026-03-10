@@ -7,6 +7,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
 import { rpc as StellarRpc } from "@stellar/stellar-sdk";
 
 export const TESTNET_RPC =
@@ -22,9 +23,9 @@ export async function isAccountFunded(
     await server.getAccount(address);
     return true;
   } catch (error: unknown) {
-    // The SDK's getAccountEntry throws `Error("Account not found: <addr>")`
-    // when the ledger entry doesn't exist.  Any other failure (network
-    // timeout, RPC error, etc.) should bubble up so callers can handle it.
+    // server.getAccount() throws `Error("Account not found: <addr>")` when
+    // the ledger entry doesn't exist.  Any other failure (network timeout,
+    // RPC error, etc.) should bubble up so callers can handle it.
     if (error instanceof Error && error.message.startsWith("Account not found:")) {
       return false;
     }
@@ -60,7 +61,7 @@ export async function fundAddressesWithFriendbot(
   }
 }
 
-const OUTPUT_DIR = path.join(import.meta.dirname, "..", "output");
+const OUTPUT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "output");
 
 /** Write env-var lines to `scripts/output/<timestamp>.env`. Returns the file path. */
 export function saveEnvFile(entries: Record<string, string>): string {
