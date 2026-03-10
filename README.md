@@ -10,7 +10,6 @@ x402-stellar/
 │   ├── facilitator/              # Stellar facilitator service
 │   └── simple-paywall/           # Paywall demo (server + client)
 │       └── docker-compose.yml
-├── vendors/x402/                 # Vendored @x402/* packages (pre-built)
 ├── infra/
 │   └── heroku/                   # Heroku support files (start.sh, nginx.conf.template)
 ├── Dockerfile                    # Multi-target Dockerfile (must be at root for Heroku)

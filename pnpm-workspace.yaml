@@ -3,7 +3,3 @@ packages:
   - examples/*/client
   - examples/facilitator
   - packages/paywall
-  - vendors/x402/typescript/packages/core
-  - vendors/x402/typescript/packages/extensions
-  - vendors/x402/typescript/packages/http/express
-  - vendors/x402/typescript/packages/mechanisms/stellar
