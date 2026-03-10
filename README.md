@@ -189,7 +189,7 @@ On Stellar, a single account can only submit one transaction at a time because e
 
 ```bash
 cd examples/facilitator
-pnpm generate-channels
+pnpm generate-channel-accounts
 ```
 
 This will:
@@ -197,7 +197,7 @@ This will:
 - Create a fee-payer keypair and fund it via Friendbot
 - Generate 19 channel account keypairs
 - Create all channel accounts on-chain with zero balance (using sponsored reserves)
-- Save all keys to a timestamped JSON file under `scripts/output/`
+- Save all keys to a timestamped `.env` file under `scripts/output/`
 - Print the environment variables to add to your `.env`
 
 2. Copy the output into your `.env`:
@@ -218,6 +218,22 @@ pnpm dev
 You should see a log line: `High-throughput mode: fee-bump signer + channel accounts`.
 
 When the channel account variables are not set, the facilitator falls back to single-signer mode using `FACILITATOR_STELLAR_PRIVATE_KEY`.
+
+### Testnet Reset Recovery
+
+Stellar's public testnet resets periodically, wiping all accounts. Two utility scripts re-fund your accounts without regenerating keys:
+
+```bash
+cd examples/facilitator
+
+# Re-fund accounts from your .env file
+pnpm refund-accounts-from-env
+
+# Re-fund all signers registered with x402.org
+pnpm refund-accounts-from-remote
+```
+
+Both scripts skip accounts that are already funded. See `examples/facilitator/README.md` for details.
 
 ## Adding a New Example
 
