@@ -2,6 +2,7 @@ packages:
   - examples/*/server
   - examples/*/client
   - examples/facilitator
+  - examples/agent-client
   - packages/paywall
   - vendors/x402/typescript/packages/core
   - vendors/x402/typescript/packages/extensions
