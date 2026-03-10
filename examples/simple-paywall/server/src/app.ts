@@ -5,6 +5,7 @@ import proxyAddr from "proxy-addr";
 import { Env, NETWORK_META } from "./config/env.js";
 import { logger, httpLogger } from "./utils/logger.js";
 import { createPaymentMiddlewares, createApiPaymentMiddlewares } from "./middleware/payment.js";
+import { paymentLogger } from "./middleware/paymentLogger.js";
 import { txHashInjector } from "./middleware/txHashInjector.js";
 import { healthRouter } from "./routes/health.js";
 import { protectedRouter } from "./routes/protected.js";
@@ -113,6 +114,7 @@ export function createApp(): Express {
     // txHashInjector must be registered before x402 middleware to wrap res.end/res.write at the outermost layer.
     // After payment settlement, it intercepts the response body and replaces {{TX_LINK}} with a Stellar Expert link.
     app.use(txHashInjector());
+    app.use(paymentLogger());
 
     // FE middlewares
     const middlewares = createPaymentMiddlewares();
