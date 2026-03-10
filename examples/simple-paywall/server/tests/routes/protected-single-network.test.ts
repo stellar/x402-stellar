@@ -35,6 +35,7 @@ vi.mock("../../src/middleware/payment.js", () => ({
     });
     return [makeMock("stellar:testnet", "testnet")];
   },
+  createApiPaymentMiddlewares: () => [],
 }));
 
 vi.mock("../../src/utils/logger.js", () => {
@@ -63,7 +64,7 @@ beforeAll(async () => {
 
   vi.stubEnv(
     "TESTNET_SERVER_STELLAR_ADDRESS",
-    "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "GAJUGVETJ4NQIG64OQNLNL6KHXYQ46MFWBCXFIUMACK4MTOOTRYJN2KV",
   );
   vi.stubEnv("TESTNET_FACILITATOR_URL", "http://localhost:4022");
   delete process.env.MAINNET_SERVER_STELLAR_ADDRESS;

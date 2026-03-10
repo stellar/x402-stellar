@@ -35,6 +35,7 @@ vi.mock("../../src/middleware/payment.js", () => ({
     });
     return [makeMock("stellar:testnet", "testnet"), makeMock("stellar:pubnet", "mainnet")];
   },
+  createApiPaymentMiddlewares: () => [],
 }));
 
 vi.mock("../../src/utils/logger.js", () => {
@@ -60,12 +61,12 @@ let app: Express;
 beforeAll(async () => {
   vi.stubEnv(
     "TESTNET_SERVER_STELLAR_ADDRESS",
-    "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "GAJUGVETJ4NQIG64OQNLNL6KHXYQ46MFWBCXFIUMACK4MTOOTRYJN2KV",
   );
   vi.stubEnv("TESTNET_FACILITATOR_URL", "http://localhost:4022");
   vi.stubEnv(
     "MAINNET_SERVER_STELLAR_ADDRESS",
-    "GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "GBZOAILBLWURMYNMVFITJJBKXSKHV4MLLZ4I57K5RY3VP3JAF7FTCGF6",
   );
   vi.stubEnv("MAINNET_FACILITATOR_URL", "http://localhost:4022");
   vi.stubEnv("MAINNET_STELLAR_RPC_URL", "https://mainnet.sorobanrpc.com");
