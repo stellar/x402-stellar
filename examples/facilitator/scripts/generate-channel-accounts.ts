@@ -6,7 +6,7 @@
  * CreateAccount + EndSponsoringFutureReserves).
  *
  * Outputs:
- *  - A timestamped JSON file under scripts/output/ with all generated keys
+ *  - A timestamped .env file under scripts/output/ with the generated secrets
  *  - The env variables to paste into .env
  *
  * Usage:
@@ -22,27 +22,11 @@ import {
   BASE_FEE,
 } from "@stellar/stellar-sdk";
 import { rpc as StellarRpc } from "@stellar/stellar-sdk";
-import * as fs from "node:fs";
-import * as path from "node:path";
+
+import { TESTNET_RPC, fundWithFriendbot, saveEnvFile } from "./lib/stellar-helpers.js";
 
 const CHANNEL_COUNT = 19;
-const TESTNET_RPC = process.env.STELLAR_RPC_URL?.trim() || "https://soroban-testnet.stellar.org";
-const TESTNET_FRIENDBOT = "https://friendbot.stellar.org";
 const TESTNET_PASSPHRASE = process.env.STELLAR_NETWORK_PASSPHRASE?.trim() || Networks.TESTNET;
-
-interface GeneratedAccount {
-  publicKey: string;
-  secretKey: string;
-}
-
-async function fundWithFriendbot(address: string): Promise<void> {
-  const url = `${TESTNET_FRIENDBOT}?addr=${address}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Friendbot funding failed for ${address}: ${response.status} ${body}`);
-  }
-}
 
 async function main() {
   console.log("=== Stellar Channel Account Generator ===\n");
@@ -58,13 +42,9 @@ async function main() {
   console.log("Fee payer funded.\n");
 
   // 3. Generate channel account keypairs
-  const channels: { keypair: Keypair; account: GeneratedAccount }[] = [];
+  const channels: Keypair[] = [];
   for (let i = 0; i < CHANNEL_COUNT; i++) {
-    const kp = Keypair.random();
-    channels.push({
-      keypair: kp,
-      account: { publicKey: kp.publicKey(), secretKey: kp.secret() },
-    });
+    channels.push(Keypair.random());
   }
   console.log(`Generated ${CHANNEL_COUNT} channel account keypairs.\n`);
 
@@ -79,27 +59,24 @@ async function main() {
   });
 
   for (const ch of channels) {
-    // BeginSponsoringFutureReserves: fee payer sponsors the channel account
     builder.addOperation(
       Operation.beginSponsoringFutureReserves({
-        sponsoredId: ch.keypair.publicKey(),
+        sponsoredId: ch.publicKey(),
         source: feePayer.publicKey(),
       }),
     );
 
-    // CreateAccount with zero balance (sponsored)
     builder.addOperation(
       Operation.createAccount({
-        destination: ch.keypair.publicKey(),
+        destination: ch.publicKey(),
         startingBalance: "0",
         source: feePayer.publicKey(),
       }),
     );
 
-    // EndSponsoringFutureReserves: the channel account confirms sponsorship
     builder.addOperation(
       Operation.endSponsoringFutureReserves({
-        source: ch.keypair.publicKey(),
+        source: ch.publicKey(),
       }),
     );
   }
@@ -112,7 +89,7 @@ async function main() {
 
   // Sign with each channel account (source of EndSponsoring)
   for (const ch of channels) {
-    transaction.sign(ch.keypair);
+    transaction.sign(ch);
   }
 
   // 5. Submit the transaction
@@ -139,31 +116,21 @@ async function main() {
     process.exit(1);
   }
 
-  // 6. Save to timestamped file
-  const outputDir = path.join(import.meta.dirname, "output");
-  fs.mkdirSync(outputDir, { recursive: true });
-
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const outputFile = path.join(outputDir, `${timestamp}.json`);
-
-  const output = {
-    generatedAt: new Date().toISOString(),
-    transactionHash: result.hash,
-    feePayer: {
-      publicKey: feePayer.publicKey(),
-      secretKey: feePayer.secret(),
-    },
-    channelAccounts: channels.map((ch) => ch.account),
+  // 6. Save to timestamped .env file
+  const channelSecrets = channels.map((ch) => ch.secret()).join(",");
+  const envEntries = {
+    FACILITATOR_STELLAR_FEE_BUMP_SECRET: feePayer.secret(),
+    FACILITATOR_STELLAR_CHANNEL_SECRETS: channelSecrets,
   };
 
-  fs.writeFileSync(outputFile, JSON.stringify(output, null, 2));
+  const outputFile = saveEnvFile(envEntries);
   console.log(`Accounts saved to: ${outputFile}\n`);
 
   // 7. Print env variables
-  const channelSecrets = channels.map((ch) => ch.account.secretKey).join(",");
   console.log("=== Environment Variables ===\n");
-  console.log(`FACILITATOR_STELLAR_FEE_BUMP_SECRET=${feePayer.secret()}`);
-  console.log(`FACILITATOR_STELLAR_CHANNEL_SECRETS=${channelSecrets}`);
+  for (const [key, value] of Object.entries(envEntries)) {
+    console.log(`${key}=${value}`);
+  }
   console.log("\nCopy these into your .env file.");
 }
 

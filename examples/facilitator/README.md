@@ -52,7 +52,7 @@ When both `FACILITATOR_STELLAR_FEE_BUMP_SECRET` and `FACILITATOR_STELLAR_CHANNEL
 A bundled script creates 1 fee-payer account + 19 channel accounts on testnet in a single transaction:
 
 ```bash
-pnpm generate-channels
+pnpm generate-channel-accounts
 ```
 
 This will:
@@ -61,7 +61,7 @@ This will:
 2. Generate 19 channel account keypairs
 3. Create all 19 accounts on-chain with **zero balance** using sponsored reserves (`BeginSponsoringFutureReserves` + `CreateAccount` + `EndSponsoringFutureReserves`)
 4. Submit the transaction and wait for confirmation
-5. Save all keys to a timestamped JSON file in `scripts/output/`
+5. Save all keys to a timestamped `.env` file in `scripts/output/`
 6. Print the two environment variables to add to `.env`
 
 Example output:
@@ -90,6 +90,16 @@ INFO: High-throughput mode: fee-bump signer + channel accounts
 ```
 
 When the channel account variables are absent or empty, the facilitator falls back to single-signer mode -- no changes needed.
+
+## Utility Scripts
+
+| Script                             | Description                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------- |
+| `pnpm generate-channel-accounts`   | Create 1 fee-payer + 19 channel accounts on testnet (saves keys to `scripts/output/`) |
+| `pnpm refund-accounts-from-env`    | Re-fund facilitator accounts from `.env` secrets after a testnet reset                |
+| `pnpm refund-accounts-from-remote` | Fund signer addresses fetched from a remote facilitator's `/supported` endpoint       |
+
+After a testnet reset all accounts are wiped. The refund scripts call Friendbot to re-activate existing accounts — they do **not** re-create sponsored-reserve relationships. Each account receives 10,000 XLM independently.
 
 ## Development
 
