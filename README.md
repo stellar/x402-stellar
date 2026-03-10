@@ -81,12 +81,12 @@ docker compose \
   up -d --build
 ```
 
-Then open [http://localhost:8099/x402/try](http://localhost:8099/x402/try).
+Then open [http://localhost:8099/x402-demo/try](http://localhost:8099/x402-demo/try).
 
 This simulator rewrites:
 
-- `/x402(/|$)(.*)` → client `/$2`
-- `/x402/api(/|$)(.*)` → server `/$2`
+- `/x402-demo(/|$)(.*)` → client `/$2`
+- `/x402-demo/api(/|$)(.*)` → server `/$2`
 
 It is useful for reproducing ingress-prefix issues locally. Full verification steps (including decoding `PAYMENT-REQUIRED.resource.url`) are in `examples/simple-paywall/INGRESS_SIMULATION.md`.
 
@@ -170,7 +170,7 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 | `VITE_BASE_ROUTE`    | `/`                     | Rewrites asset paths and sets the SPA router basename for subpath serving (runtime only) |
 | `VITE_PORT`          | `5173`                  | Dev server port (build-time only)                                                        |
 
-> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_BASE_ROUTE` is runtime-only: at container startup, the entrypoint rewrites asset paths in `index.html` and injects the SPA router basename so the app works when served under a subpath (e.g. `/x402/`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are included in the root `.env.example` (commented out); alternatively, set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
+> **Note:** `VITE_SERVER_URL`, `VITE_APP_NAME`, and `VITE_PAYMENT_PRICE` can be overridden at container launch time (via `docker-entrypoint.sh` → `window.__CONFIG__`). `VITE_BASE_ROUTE` is runtime-only: at container startup, the entrypoint rewrites asset paths in `index.html` and injects the SPA router basename so the app works when served under a subpath (e.g. `/x402-demo/`). `VITE_PORT` only affects the Vite dev server and is not used in Docker. These variables are included in the root `.env.example` (commented out); alternatively, set them in the client's own `.env` file or pass them via the environment (e.g. `VITE_PORT=3000 pnpm dev`).
 
 ## High-Throughput Facilitator Setup (Recommended)
 
