@@ -94,3 +94,20 @@ describe("single-network deployment (testnet only)", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("GET /.well-known/x402 (single-network)", () => {
+  it("lists only testnet weather route", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.status).toBe(200);
+    expect(res.body.version).toBe(1);
+    expect(res.body.resources).toHaveLength(1);
+    expect(res.body.resources[0]).toMatch(/\/weather\/testnet$/);
+  });
+
+  it("does not include mainnet weather route", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.body.resources.some((r: string) => r.includes("mainnet"))).toBe(false);
+  });
+});

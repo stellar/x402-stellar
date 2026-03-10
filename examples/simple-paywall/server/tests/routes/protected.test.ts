@@ -173,3 +173,46 @@ describe("unknown routes", () => {
     expect(res.status).not.toBe(500);
   });
 });
+
+describe("GET /.well-known/x402", () => {
+  it("returns version 1 with resources array", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.status).toBe(200);
+    expect(res.body.version).toBe(1);
+    expect(res.body.resources).toBeInstanceOf(Array);
+  });
+
+  it("lists only weather API routes (not /protected)", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    const resources: string[] = res.body.resources;
+    expect(resources).toHaveLength(2);
+    expect(resources.every((r: string) => r.includes("/weather/"))).toBe(true);
+    expect(resources.some((r: string) => r.includes("/protected/"))).toBe(false);
+  });
+
+  it("includes both testnet and mainnet weather routes", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    const resources: string[] = res.body.resources;
+    expect(resources.some((r: string) => r.endsWith("/weather/testnet"))).toBe(true);
+    expect(resources.some((r: string) => r.endsWith("/weather/mainnet"))).toBe(true);
+  });
+
+  it("returns full URLs with protocol and host", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    const resources: string[] = res.body.resources;
+    for (const url of resources) {
+      expect(url).toMatch(/^https?:\/\/.+\/weather\//);
+    }
+  });
+
+  it("includes a description", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(typeof res.body.description).toBe("string");
+    expect(res.body.description.length).toBeGreaterThan(0);
+  });
+});

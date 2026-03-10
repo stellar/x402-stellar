@@ -64,3 +64,20 @@ describe("paywall-disabled mode", () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe("GET /.well-known/x402 (paywall disabled)", () => {
+  it("returns empty resources array", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.status).toBe(200);
+    expect(res.body.version).toBe(1);
+    expect(res.body.resources).toEqual([]);
+  });
+
+  it("still includes a description", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(typeof res.body.description).toBe("string");
+    expect(res.body.description.length).toBeGreaterThan(0);
+  });
+});

@@ -1,18 +1,10 @@
-import express, {
-  type Express,
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
+import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import proxyAddr from "proxy-addr";
-import { Env } from "./config/env.js";
+import { Env, NETWORK_META } from "./config/env.js";
 import { logger, httpLogger } from "./utils/logger.js";
-import {
-  createPaymentMiddlewares,
-  createApiPaymentMiddlewares,
-} from "./middleware/payment.js";
+import { createPaymentMiddlewares, createApiPaymentMiddlewares } from "./middleware/payment.js";
 import { txHashInjector } from "./middleware/txHashInjector.js";
 import { healthRouter } from "./routes/health.js";
 import { protectedRouter } from "./routes/protected.js";
@@ -39,18 +31,35 @@ export function createApp(): Express {
   // Discovery endpoint: returns which networks are configured so the
   // client can dynamically render one or two "Access Protected Content" buttons.
   app.get("/networks", (_req, res) => {
-    const networks = Env.paywallDisabled
-      ? []
-      : Env.networksConfig.map((n) => n.network);
+    const networks = Env.paywallDisabled ? [] : Env.networksConfig.map((n) => n.network);
     res.json({ networks });
   });
 
+  // x402 discovery — https://www.x402scan.com/discovery
+  app.get("/.well-known/x402", (req, res) => {
+    const description =
+      "Weather forecast API — pay-per-request with x402 on Stellar. " +
+      "Each /weather/<network> endpoint accepts payment on the corresponding Stellar network " +
+      "(e.g. /weather/testnet for Stellar testnet, /weather/mainnet for Stellar mainnet).";
+
+    if (Env.paywallDisabled) {
+      res.json({ version: 1, resources: [], description });
+      return;
+    }
+
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const resources: string[] = [];
+
+    for (const netConfig of Env.networksConfig) {
+      const { routeSuffix } = NETWORK_META[netConfig.network];
+      resources.push(`${baseUrl}/weather/${routeSuffix}`);
+    }
+
+    res.json({ version: 1, resources, description });
+  });
+
   // Relax CSP for /protected:
-  const connectSrc = [
-    "'self'",
-    "https://*.stellar.org",
-    "https://*.stellar.expert",
-  ];
+  const connectSrc = ["'self'", "https://*.stellar.org", "https://*.stellar.expert"];
   if (!Env.paywallDisabled) {
     for (const rpcUrl of Env.allStellarRpcUrls) {
       try {
@@ -59,10 +68,7 @@ export function createApp(): Express {
           connectSrc.push(rpcOrigin);
         }
       } catch {
-        logger.warn(
-          { stellarRpcUrl: rpcUrl },
-          "Invalid STELLAR_RPC_URL for CSP",
-        );
+        logger.warn({ stellarRpcUrl: rpcUrl }, "Invalid STELLAR_RPC_URL for CSP");
       }
     }
   }
@@ -73,11 +79,7 @@ export function createApp(): Express {
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'", "https://w.soundcloud.com"],
-          styleSrc: [
-            "'self'",
-            "'unsafe-inline'",
-            "https://fonts.googleapis.com",
-          ],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
           fontSrc: ["'self'", "https://fonts.gstatic.com"],
           frameSrc: ["https://w.soundcloud.com"],
           connectSrc,
