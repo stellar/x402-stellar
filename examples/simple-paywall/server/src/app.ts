@@ -9,6 +9,7 @@ import { txHashInjector } from "./middleware/txHashInjector.js";
 import { healthRouter } from "./routes/health.js";
 import { protectedRouter } from "./routes/protected.js";
 import { apiRouter } from "./routes/api.js";
+import { openapiRouter } from "./routes/openapi.js";
 
 export function createApp(): Express {
   const app = express();
@@ -27,6 +28,7 @@ export function createApp(): Express {
   app.use(httpLogger);
 
   app.use(healthRouter);
+  app.use(openapiRouter);
 
   // Discovery endpoint: returns which networks are configured so the
   // client can dynamically render one or two "Access Protected Content" buttons.
@@ -36,23 +38,23 @@ export function createApp(): Express {
   });
 
   // x402 discovery — https://www.x402scan.com/discovery
-  app.get("/.well-known/x402", (req, res) => {
+  app.get("/.well-known/x402", (_req, res) => {
     const description =
       "Weather forecast API — pay-per-request with x402 on Stellar. " +
       "Each /weather/<network> endpoint accepts payment on the corresponding Stellar network " +
-      "(e.g. /weather/testnet for Stellar testnet, /weather/mainnet for Stellar mainnet).";
+      "(e.g. /weather/testnet for Stellar testnet, /weather/mainnet for Stellar mainnet). " +
+      "Pass the city name as a required query parameter: GET /weather/<network>?city=<name>.";
 
     if (Env.paywallDisabled) {
       res.json({ version: 1, resources: [], description });
       return;
     }
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
     const resources: string[] = [];
 
     for (const netConfig of Env.networksConfig) {
       const { routeSuffix } = NETWORK_META[netConfig.network];
-      resources.push(`${baseUrl}/weather/${routeSuffix}`);
+      resources.push(`GET /weather/${routeSuffix}`);
     }
 
     res.json({ version: 1, resources, description });

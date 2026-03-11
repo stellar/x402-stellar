@@ -196,16 +196,16 @@ describe("GET /.well-known/x402", () => {
     const res = await request(app).get("/.well-known/x402");
 
     const resources: string[] = res.body.resources;
-    expect(resources.some((r: string) => r.endsWith("/weather/testnet"))).toBe(true);
-    expect(resources.some((r: string) => r.endsWith("/weather/mainnet"))).toBe(true);
+    expect(resources).toContain("GET /weather/testnet");
+    expect(resources).toContain("GET /weather/mainnet");
   });
 
-  it("returns full URLs with protocol and host", async () => {
+  it("uses METHOD /path format per x402scan spec", async () => {
     const res = await request(app).get("/.well-known/x402");
 
     const resources: string[] = res.body.resources;
-    for (const url of resources) {
-      expect(url).toMatch(/^https?:\/\/.+\/weather\//);
+    for (const entry of resources) {
+      expect(entry).toMatch(/^GET \/weather\//);
     }
   });
 
@@ -214,5 +214,63 @@ describe("GET /.well-known/x402", () => {
 
     expect(typeof res.body.description).toBe("string");
     expect(res.body.description.length).toBeGreaterThan(0);
+  });
+});
+
+describe("GET /openapi.json", () => {
+  it("returns valid OpenAPI 3.1.0 structure", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    expect(res.status).toBe(200);
+    expect(res.body.openapi).toBe("3.1.0");
+    expect(res.body.info.title).toBeDefined();
+    expect(res.body.info.version).toBeDefined();
+    expect(res.body.paths).toBeDefined();
+  });
+
+  it("includes both testnet and mainnet weather paths", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    expect(res.body.paths["/weather/testnet"]).toBeDefined();
+    expect(res.body.paths["/weather/mainnet"]).toBeDefined();
+  });
+
+  it("declares x-payment-info with x402 protocol on each path", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    for (const path of ["/weather/testnet", "/weather/mainnet"]) {
+      const op = res.body.paths[path].get;
+      expect(op["x-payment-info"]).toBeDefined();
+      expect(op["x-payment-info"].protocols).toContain("x402");
+      expect(op["x-payment-info"].pricingMode).toBe("fixed");
+      expect(op["x-payment-info"].price).toBeDefined();
+    }
+  });
+
+  it("includes 402 response on each weather path", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    for (const path of ["/weather/testnet", "/weather/mainnet"]) {
+      expect(res.body.paths[path].get.responses["402"]).toBeDefined();
+    }
+  });
+
+  it("declares required city query parameter", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    const params = res.body.paths["/weather/testnet"].get.parameters;
+    const cityParam = params.find((p: { name: string }) => p.name === "city");
+    expect(cityParam).toBeDefined();
+    expect(cityParam.in).toBe("query");
+    expect(cityParam.required).toBe(true);
+  });
+
+  it("includes correct Stellar network identifiers", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    expect(res.body.paths["/weather/testnet"].get["x-payment-info"].network).toBe(
+      "stellar:testnet",
+    );
+    expect(res.body.paths["/weather/mainnet"].get["x-payment-info"].network).toBe("stellar:pubnet");
   });
 });
