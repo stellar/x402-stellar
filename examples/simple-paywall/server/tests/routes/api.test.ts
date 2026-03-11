@@ -93,12 +93,17 @@ beforeEach(() => {
   vi.stubGlobal("fetch", fetchSpy);
 });
 
+function isHostMatch(raw: string, expectedHost: string): boolean {
+  const { protocol, hostname } = new URL(raw);
+  return protocol === "https:" && hostname === expectedHost;
+}
+
 function mockFetchResponses(geocodeBody: unknown, forecastBody: unknown) {
   fetchSpy.mockImplementation((url: string) => {
-    if (url.includes("geocoding-api.open-meteo.com")) {
+    if (isHostMatch(url, "geocoding-api.open-meteo.com")) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve(geocodeBody) });
     }
-    if (url.includes("api.open-meteo.com")) {
+    if (isHostMatch(url, "api.open-meteo.com")) {
       return Promise.resolve({ ok: true, json: () => Promise.resolve(forecastBody) });
     }
     return Promise.resolve({ ok: false });
@@ -186,7 +191,7 @@ describe("GET /weather/:network (paywall disabled)", () => {
 
   it("returns 502 when forecast API fails", async () => {
     fetchSpy.mockImplementation((url: string) => {
-      if (url.includes("geocoding-api.open-meteo.com")) {
+      if (isHostMatch(url, "geocoding-api.open-meteo.com")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve(GEOCODE_SF) });
       }
       return Promise.resolve({ ok: false });
