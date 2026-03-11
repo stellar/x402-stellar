@@ -225,4 +225,22 @@ export class Env {
   static get allStellarRpcUrls(): string[] {
     return Env.networksConfig.map((n) => n.stellarRpcUrl);
   }
+
+  /**
+   * External path prefix under which the server is exposed behind a
+   * path-rewriting ingress (e.g. `/x402-demo/api`).
+   *
+   * Normalised: leading `/`, no trailing `/`, collapsed slashes, unsafe
+   * characters stripped.  Defaults to `""` (root — no prefix).
+   */
+  static get serverBaseRoute(): string {
+    const raw = process.env.SERVER_BASE_ROUTE?.trim();
+    if (!raw || raw === "/") return "";
+    const cleaned = raw
+      .replace(/[^a-zA-Z0-9/_-]/g, "")
+      .replace(/\/+/g, "/")
+      .replace(/\/+$/, "");
+    if (!cleaned || cleaned === "/") return "";
+    return cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
+  }
 }

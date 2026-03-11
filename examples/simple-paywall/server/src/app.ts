@@ -2,12 +2,14 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import helmet from "helmet";
 import proxyAddr from "proxy-addr";
-import { Env } from "./config/env.js";
+import { Env, NETWORK_META } from "./config/env.js";
 import { logger, httpLogger } from "./utils/logger.js";
-import { createPaymentMiddlewares } from "./middleware/payment.js";
+import { createPaymentMiddlewares, createApiPaymentMiddlewares } from "./middleware/payment.js";
 import { txHashInjector } from "./middleware/txHashInjector.js";
 import { healthRouter } from "./routes/health.js";
 import { protectedRouter } from "./routes/protected.js";
+import { apiRouter } from "./routes/api.js";
+import { openapiRouter } from "./routes/openapi.js";
 
 export function createApp(): Express {
   const app = express();
@@ -25,13 +27,53 @@ export function createApp(): Express {
   app.use(helmet());
   app.use(httpLogger);
 
+  // When served behind a path-rewriting ingress (e.g. /x402-demo/api/* → /*)
+  // prepend SERVER_BASE_ROUTE to req.originalUrl so that @x402/express
+  // ExpressAdapter.getUrl() returns the full external URL.
+  // req.path is untouched — Express route matching is unaffected.
+  const baseRoute = Env.serverBaseRoute;
+  if (baseRoute) {
+    app.use((req, _res, next) => {
+      if (!req.originalUrl.startsWith(baseRoute)) {
+        req.originalUrl = baseRoute + req.originalUrl;
+      }
+      next();
+    });
+  }
+
   app.use(healthRouter);
+  app.use(openapiRouter);
 
   // Discovery endpoint: returns which networks are configured so the
   // client can dynamically render one or two "Access Protected Content" buttons.
   app.get("/networks", (_req, res) => {
     const networks = Env.paywallDisabled ? [] : Env.networksConfig.map((n) => n.network);
     res.json({ networks });
+  });
+
+  // x402 discovery — https://www.x402scan.com/discovery
+  app.get("/.well-known/x402", (_req, res) => {
+    const prefix = Env.serverBaseRoute;
+
+    const description =
+      "Weather forecast API — pay-per-request with x402 on Stellar. " +
+      `Each ${prefix}/weather/<network> endpoint accepts payment on the corresponding Stellar network ` +
+      `(e.g. ${prefix}/weather/testnet for Stellar testnet, ${prefix}/weather/mainnet for Stellar mainnet). ` +
+      `Pass the city name as a required query parameter: GET ${prefix}/weather/<network>?city=<name>.`;
+
+    if (Env.paywallDisabled) {
+      res.json({ version: 1, resources: [], description });
+      return;
+    }
+
+    const resources: string[] = [];
+
+    for (const netConfig of Env.networksConfig) {
+      const { routeSuffix } = NETWORK_META[netConfig.network];
+      resources.push(`GET ${prefix}/weather/${routeSuffix}`);
+    }
+
+    res.json({ version: 1, resources, description });
   });
 
   // Relax CSP for /protected:
@@ -72,6 +114,7 @@ export function createApp(): Express {
     // After payment settlement, it intercepts the response body and replaces {{TX_LINK}} with a Stellar Expert link.
     app.use(txHashInjector());
 
+    // FE middlewares
     const middlewares = createPaymentMiddlewares();
     for (const mw of middlewares) {
       app.use(mw.handler);
@@ -80,9 +123,20 @@ export function createApp(): Express {
         "Registered payment route",
       );
     }
+
+    // API middlewares
+    const apiMiddlewares = createApiPaymentMiddlewares();
+    for (const mw of apiMiddlewares) {
+      app.use(mw.handler);
+      logger.info(
+        { route: `GET ${mw.routePath}`, network: mw.network },
+        "Registered API payment route",
+      );
+    }
   }
 
   app.use(protectedRouter);
+  app.use(apiRouter);
 
   // Global error handler (Express requires all 4 parameters for error middleware)
   app.use(

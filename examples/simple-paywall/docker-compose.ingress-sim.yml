@@ -3,6 +3,7 @@ services:
     environment:
       - CORS_ORIGINS=http://localhost:8080,http://localhost:8099
       - CLIENT_HOME_URL=http://localhost:8099/x402-demo
+      - SERVER_BASE_ROUTE=/x402-demo/api
 
   client:
     environment:

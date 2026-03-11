@@ -35,6 +35,7 @@ vi.mock("../../src/middleware/payment.js", () => ({
     });
     return [makeMock("stellar:testnet", "testnet")];
   },
+  createApiPaymentMiddlewares: () => [],
 }));
 
 vi.mock("../../src/utils/logger.js", () => {
@@ -63,7 +64,7 @@ beforeAll(async () => {
 
   vi.stubEnv(
     "TESTNET_SERVER_STELLAR_ADDRESS",
-    "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "GAJUGVETJ4NQIG64OQNLNL6KHXYQ46MFWBCXFIUMACK4MTOOTRYJN2KV",
   );
   vi.stubEnv("TESTNET_FACILITATOR_URL", "http://localhost:4022");
   delete process.env.MAINNET_SERVER_STELLAR_ADDRESS;
@@ -91,5 +92,40 @@ describe("single-network deployment (testnet only)", () => {
     const res = await request(app).get("/protected/mainnet");
 
     expect(res.status).toBe(404);
+  });
+});
+
+describe("GET /.well-known/x402 (single-network)", () => {
+  it("lists only testnet weather route", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.status).toBe(200);
+    expect(res.body.version).toBe(1);
+    expect(res.body.resources).toHaveLength(1);
+    expect(res.body.resources[0]).toBe("GET /weather/testnet");
+  });
+
+  it("does not include mainnet weather route", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.body.resources.some((r: string) => r.includes("mainnet"))).toBe(false);
+  });
+});
+
+describe("GET /openapi.json (single-network)", () => {
+  it("includes only testnet weather path", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    expect(res.status).toBe(200);
+    expect(res.body.paths["/weather/testnet"]).toBeDefined();
+    expect(res.body.paths["/weather/mainnet"]).toBeUndefined();
+  });
+
+  it("declares x-payment-info for testnet path", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    const op = res.body.paths["/weather/testnet"].get;
+    expect(op["x-payment-info"].protocols).toContain("x402");
+    expect(op["x-payment-info"].network).toBe("stellar:testnet");
   });
 });

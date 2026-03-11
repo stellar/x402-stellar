@@ -70,6 +70,22 @@ export class Env {
     return process.env.STELLAR_RPC_URL?.trim() || "https://soroban-testnet.stellar.org";
   }
 
+  /**
+   * Maximum transaction fee (in stroops) the facilitator will accept from clients.
+   * Defaults to 100_000 stroops. The @x402/stellar client computes fees as
+   * baseFee (10,000) + minResourceFee (from simulation), which can exceed
+   * the library default of 50,000 on resource-heavy Soroban transactions.
+   */
+  static get maxTransactionFeeStroops(): number | undefined {
+    const raw = process.env.MAX_TRANSACTION_FEE_STROOPS;
+    if (!raw) return undefined;
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error(`Invalid MAX_TRANSACTION_FEE_STROOPS: ${raw}. Must be a positive integer.`);
+    }
+    return value;
+  }
+
   static get trustProxy(): string[] {
     const raw = process.env.TRUST_PROXY;
     const defaultValue = "loopback,linklocal,uniquelocal";

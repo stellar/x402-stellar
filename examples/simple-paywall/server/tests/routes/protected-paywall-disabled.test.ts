@@ -4,6 +4,7 @@ import type { Express } from "express";
 
 vi.mock("../../src/middleware/payment.js", () => ({
   createPaymentMiddlewares: () => [],
+  createApiPaymentMiddlewares: () => [],
 }));
 
 vi.mock("../../src/utils/logger.js", () => {
@@ -61,5 +62,32 @@ describe("paywall-disabled mode", () => {
     const res = await request(app).get("/protected/fakenet");
 
     expect(res.status).toBe(200);
+  });
+});
+
+describe("GET /.well-known/x402 (paywall disabled)", () => {
+  it("returns empty resources array", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(res.status).toBe(200);
+    expect(res.body.version).toBe(1);
+    expect(res.body.resources).toEqual([]);
+  });
+
+  it("still includes a description", async () => {
+    const res = await request(app).get("/.well-known/x402");
+
+    expect(typeof res.body.description).toBe("string");
+    expect(res.body.description.length).toBeGreaterThan(0);
+  });
+});
+
+describe("GET /openapi.json (paywall disabled)", () => {
+  it("returns empty paths when paywall is disabled", async () => {
+    const res = await request(app).get("/openapi.json");
+
+    expect(res.status).toBe(200);
+    expect(res.body.openapi).toBe("3.1.0");
+    expect(Object.keys(res.body.paths)).toHaveLength(0);
   });
 });

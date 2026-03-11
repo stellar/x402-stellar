@@ -20,6 +20,7 @@ export function createApp(): Express {
   const channelSecrets = Env.channelSecrets;
   const useChannelAccounts = feeBumpSecret && channelSecrets && channelSecrets.length > 0;
   const rpcConfig = { url: Env.stellarRpcUrl };
+  const maxTransactionFeeStroops = Env.maxTransactionFeeStroops;
 
   let scheme: ExactStellarScheme;
 
@@ -37,12 +38,19 @@ export function createApp(): Express {
       "High-throughput mode: fee-bump signer + channel accounts",
     );
 
-    scheme = new ExactStellarScheme(channelSigners, { feeBumpSigner, rpcConfig });
+    scheme = new ExactStellarScheme(channelSigners, {
+      feeBumpSigner,
+      rpcConfig,
+      maxTransactionFeeStroops,
+    });
   } else {
     // Single-signer mode (default)
     const stellarSigner = createEd25519Signer(Env.stellarPrivateKey);
     logger.info(`Stellar Facilitator account: ${stellarSigner.address}`);
-    scheme = new ExactStellarScheme([stellarSigner], { rpcConfig });
+    scheme = new ExactStellarScheme([stellarSigner], {
+      rpcConfig,
+      maxTransactionFeeStroops,
+    });
   }
 
   const facilitator = new x402Facilitator()

@@ -21,6 +21,7 @@ services:
     env_file: ../../.env
     environment:
       - PORT=4022
+      - MAX_TRANSACTION_FEE_STROOPS=100000
     healthcheck:
       test:
         ["CMD", "node", "-e", "fetch('http://localhost:4022/health').then(r=>{if(!r.ok)throw 1})"]

@@ -159,6 +159,7 @@ The server supports multiple Stellar networks simultaneously. Each network is co
 | `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | —                                | Fee-bump signer secret (high-throughput) |
 | `FACILITATOR_STELLAR_CHANNEL_SECRETS` | —                                | Channel account secrets, comma-separated |
 | `TRUST_PROXY`                         | `loopback,linklocal,uniquelocal` | Express trust proxy setting              |
+| `MAX_TRANSACTION_FEE_STROOPS`         | `50000` (library default)        | Max fee in stroops accepted from clients |
 
 ### Client
 
