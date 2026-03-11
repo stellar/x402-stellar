@@ -32,6 +32,7 @@ The facilitator listens on port 4022 by default.
 | `LOG_LEVEL`                           | `info`                           | Pino log level                               |
 | `CORS_ORIGINS`                        | `*`                              | Comma-separated allowed origins              |
 | `TRUST_PROXY`                         | `loopback,linklocal,uniquelocal` | Trusted proxy ranges                         |
+| `MAX_TRANSACTION_FEE_STROOPS`         | `50000` (library default)        | Max fee in stroops accepted from clients     |
 | `FACILITATOR_STELLAR_FEE_BUMP_SECRET` | --                               | Fee-bump signer secret (high-throughput)     |
 | `FACILITATOR_STELLAR_CHANNEL_SECRETS` | --                               | Channel account secrets, comma-separated     |
 

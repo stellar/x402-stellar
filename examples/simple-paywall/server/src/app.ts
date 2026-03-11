@@ -27,6 +27,20 @@ export function createApp(): Express {
   app.use(helmet());
   app.use(httpLogger);
 
+  // When served behind a path-rewriting ingress (e.g. /x402-demo/api/* → /*)
+  // prepend SERVER_BASE_ROUTE to req.originalUrl so that @x402/express
+  // ExpressAdapter.getUrl() returns the full external URL.
+  // req.path is untouched — Express route matching is unaffected.
+  const baseRoute = Env.serverBaseRoute;
+  if (baseRoute) {
+    app.use((req, _res, next) => {
+      if (!req.originalUrl.startsWith(baseRoute)) {
+        req.originalUrl = baseRoute + req.originalUrl;
+      }
+      next();
+    });
+  }
+
   app.use(healthRouter);
   app.use(openapiRouter);
 
@@ -39,11 +53,13 @@ export function createApp(): Express {
 
   // x402 discovery — https://www.x402scan.com/discovery
   app.get("/.well-known/x402", (_req, res) => {
+    const prefix = Env.serverBaseRoute;
+
     const description =
       "Weather forecast API — pay-per-request with x402 on Stellar. " +
-      "Each /weather/<network> endpoint accepts payment on the corresponding Stellar network " +
-      "(e.g. /weather/testnet for Stellar testnet, /weather/mainnet for Stellar mainnet). " +
-      "Pass the city name as a required query parameter: GET /weather/<network>?city=<name>.";
+      `Each ${prefix}/weather/<network> endpoint accepts payment on the corresponding Stellar network ` +
+      `(e.g. ${prefix}/weather/testnet for Stellar testnet, ${prefix}/weather/mainnet for Stellar mainnet). ` +
+      `Pass the city name as a required query parameter: GET ${prefix}/weather/<network>?city=<name>.`;
 
     if (Env.paywallDisabled) {
       res.json({ version: 1, resources: [], description });
@@ -54,7 +70,7 @@ export function createApp(): Express {
 
     for (const netConfig of Env.networksConfig) {
       const { routeSuffix } = NETWORK_META[netConfig.network];
-      resources.push(`GET /weather/${routeSuffix}`);
+      resources.push(`GET ${prefix}/weather/${routeSuffix}`);
     }
 
     res.json({ version: 1, resources, description });

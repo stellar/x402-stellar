@@ -18,11 +18,12 @@ const ASSET_ID: Record<StellarNetwork, string> = {
  */
 function buildSpec(): Record<string, unknown> {
   const paths: Record<string, unknown> = {};
+  const prefix = Env.serverBaseRoute;
 
   if (!Env.paywallDisabled) {
     for (const netConfig of Env.networksConfig) {
       const { routeSuffix, displayName } = NETWORK_META[netConfig.network];
-      const path = `/weather/${routeSuffix}`;
+      const path = `${prefix}/weather/${routeSuffix}`;
 
       paths[path] = {
         get: {

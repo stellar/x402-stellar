@@ -20,6 +20,7 @@ describe("Env", () => {
     delete process.env.MAINNET_STELLAR_RPC_URL;
     delete process.env.MAINNET_FACILITATOR_URL;
     delete process.env.MAINNET_FACILITATOR_API_KEY;
+    delete process.env.SERVER_BASE_ROUTE;
     vi.stubEnv("NODE_ENV", "test");
   });
 
@@ -105,6 +106,52 @@ describe("Env", () => {
     it("filters empty entries from TRUST_PROXY", () => {
       vi.stubEnv("TRUST_PROXY", "loopback,,linklocal");
       expect(Env.trustProxy).toEqual(["loopback", "linklocal"]);
+    });
+  });
+
+  describe("serverBaseRoute", () => {
+    it("defaults to empty string when SERVER_BASE_ROUTE is unset", () => {
+      expect(Env.serverBaseRoute).toBe("");
+    });
+
+    it("returns empty string for '/'", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "/");
+      expect(Env.serverBaseRoute).toBe("");
+    });
+
+    it("returns normalised path with leading slash", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "x402-demo/api");
+      expect(Env.serverBaseRoute).toBe("/x402-demo/api");
+    });
+
+    it("strips trailing slash", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "/x402-demo/api/");
+      expect(Env.serverBaseRoute).toBe("/x402-demo/api");
+    });
+
+    it("collapses multiple slashes", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "//x402-demo///api//");
+      expect(Env.serverBaseRoute).toBe("/x402-demo/api");
+    });
+
+    it("strips unsafe characters", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "/x402-demo/<script>/api");
+      expect(Env.serverBaseRoute).toBe("/x402-demo/script/api");
+    });
+
+    it("trims whitespace", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "  /x402-demo/api  ");
+      expect(Env.serverBaseRoute).toBe("/x402-demo/api");
+    });
+
+    it("returns empty string for empty value", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "");
+      expect(Env.serverBaseRoute).toBe("");
+    });
+
+    it("returns empty string for whitespace-only value", () => {
+      vi.stubEnv("SERVER_BASE_ROUTE", "   ");
+      expect(Env.serverBaseRoute).toBe("");
     });
   });
 
