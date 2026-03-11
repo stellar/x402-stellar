@@ -4,8 +4,8 @@ import { Env, NETWORK_META, type StellarNetwork } from "../config/env.js";
 const router: RouterType = Router();
 
 const ASSET_ID: Record<StellarNetwork, string> = {
-  "stellar:testnet": "stellar:testnet/native",
-  "stellar:pubnet": "stellar:pubnet/native",
+  "stellar:testnet": "stellar:testnet/CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+  "stellar:pubnet": "stellar:pubnet/CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
 };
 
 /**
@@ -100,7 +100,7 @@ function buildSpec(): Record<string, unknown> {
       version: "1.0.0",
       description:
         "Pay-per-request weather API demonstrating the x402 protocol on Stellar. " +
-        "Each endpoint requires a micro-payment in XLM on the corresponding Stellar network.",
+        "Each endpoint requires a micro-payment in USDC on the corresponding Stellar network.",
     },
     paths,
   };

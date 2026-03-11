@@ -65,6 +65,10 @@ async function main(): Promise<void> {
   );
 
   const accepted = paymentRequired.accepts[0];
+  if (!accepted) {
+    logger.fatal("Server returned 402 with no acceptable payment options");
+    process.exit(1);
+  }
   logger.debug(
     {
       scheme: accepted.scheme,

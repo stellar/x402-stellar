@@ -60,7 +60,13 @@ interface ForecastCurrent {
 async function geocodeCity(city: string): Promise<GeocodingResult | null> {
   const url = `${OPEN_METEO_GEOCODE_URL}?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
   const res = await fetch(url);
-  if (!res.ok) return null;
+  if (!res.ok) {
+    logger.error(
+      { status: res.status, statusText: res.statusText, city },
+      "Upstream geocoding request to Open-Meteo failed",
+    );
+    throw new Error(`Geocoding API request failed with status ${res.status}`);
+  }
   const data = (await res.json()) as { results?: GeocodingResult[] };
   return data.results?.[0] ?? null;
 }

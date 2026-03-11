@@ -199,11 +199,14 @@ describe("GET /weather/:network (paywall disabled)", () => {
   });
 
   it("returns 502 when geocoding API fails", async () => {
-    fetchSpy.mockImplementation(() => Promise.resolve({ ok: false }));
+    fetchSpy.mockImplementation(() =>
+      Promise.resolve({ ok: false, status: 503, statusText: "Service Unavailable" }),
+    );
 
     const res = await request(disabledApp).get("/weather/testnet?city=San+Francisco");
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(502);
+    expect(res.body.error).toMatch(/upstream/i);
   });
 
   it("handles unknown WMO weather codes gracefully", async () => {
