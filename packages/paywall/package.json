@@ -27,7 +27,7 @@
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.9.0",
     "@creit.tech/stellar-wallets-kit": "^2.0.0",
-    "@stellar/stellar-sdk": "^14.5.0",
+    "@stellar/stellar-sdk": "^14.6.1",
     "@types/node": "^22.19.13",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
