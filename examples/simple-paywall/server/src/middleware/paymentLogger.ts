@@ -4,9 +4,17 @@ import { logger } from "../utils/logger.js";
 const MAX_FIELD_LENGTH = 500;
 const ERROR_FIELDS = ["error", "message", "detail", "details"] as const;
 
+function tryDecodeBase64Json(value: string | number | string[]): unknown {
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(Buffer.from(value, "base64").toString("utf8"));
+  } catch {
+    return value;
+  }
+}
+
 export function paymentLogger() {
   return (req: Request, res: Response, next: NextFunction) => {
-    // Only used as a boolean gate — header value is NEVER logged.
     const hasPayment = !!(req.header("payment-signature") || req.header("x-payment"));
     if (!hasPayment) return next();
 
@@ -24,8 +32,18 @@ export function paymentLogger() {
             }
           }
         }
+
+        const paymentResponse = res.getHeader("PAYMENT-RESPONSE");
+        const decoded = paymentResponse ? tryDecodeBase64Json(paymentResponse) : undefined;
+
         logger.error(
-          { status: res.statusCode, method: req.method, url: req.originalUrl, ...extracted },
+          {
+            status: res.statusCode,
+            method: req.method,
+            url: req.originalUrl,
+            ...extracted,
+            ...(decoded !== undefined && { paymentResponse: decoded }),
+          },
           "Payment request failed",
         );
       }
