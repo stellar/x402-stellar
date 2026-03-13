@@ -4,7 +4,8 @@ import { ExactStellarScheme } from "@x402/stellar/exact/server";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { createPaywall } from "@x402-stellar/paywall";
 import { stellarPaywall } from "@x402-stellar/paywall/stellar";
-import { type NetworkConfig, NETWORK_META, Env } from "../config/env.js";
+import { type NetworkConfig, NETWORK_META, Env, parseFacilitatorApiKeys } from "../config/env.js";
+import { logger } from "../utils/logger.js";
 
 export interface NetworkMiddleware {
   network: string;
@@ -17,12 +18,31 @@ interface ServerComponents {
   x402Server: x402ResourceServer;
 }
 
+function createRoundRobinKeySelector(commaSeparatedKeys: string): () => string {
+  const keys = parseFacilitatorApiKeys(commaSeparatedKeys);
+  if (keys.length === 0) {
+    throw new Error("FACILITATOR_API_KEY must contain at least one non-empty key");
+  }
+
+  let index = 0;
+  return () => {
+    const pos = index;
+    index = (index + 1) % keys.length;
+    logger.debug({ keyIndex: pos }, "Selecting API key");
+    return keys[pos];
+  };
+}
+
 function buildServerComponents(netConfig: NetworkConfig): ServerComponents {
+  const getNextKey = netConfig.facilitatorApiKey
+    ? createRoundRobinKeySelector(netConfig.facilitatorApiKey)
+    : undefined;
+
   const facilitatorClient = new HTTPFacilitatorClient({
     url: netConfig.facilitatorUrl,
-    createAuthHeaders: netConfig.facilitatorApiKey
+    createAuthHeaders: getNextKey
       ? async () => {
-          const headers = { Authorization: `Bearer ${netConfig.facilitatorApiKey}` };
+          const headers = { Authorization: `Bearer ${getNextKey()}` };
           return { verify: headers, settle: headers, supported: headers };
         }
       : undefined,

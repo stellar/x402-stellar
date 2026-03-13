@@ -47,6 +47,25 @@ function readPrefixed(prefix: string, name: string): string | undefined {
   return val || undefined;
 }
 
+export function parseFacilitatorApiKeys(value: string | undefined): string[] {
+  if (!value) {
+    return [];
+  }
+
+  return value
+    .split(",")
+    .map((key) => key.trim())
+    .filter(Boolean);
+}
+
+export function maskFacilitatorApiKey(key: string): string {
+  if (key.length <= 4) {
+    return `${key.slice(0, 2)}...${key.slice(-2)}`;
+  }
+
+  return `${key.slice(0, 2)}...${key.slice(-2)}`;
+}
+
 function readNetworkConfig(network: StellarNetwork): NetworkConfig | undefined {
   const meta = NETWORK_META[network];
   const addr = readPrefixed(meta.envPrefix, "SERVER_STELLAR_ADDRESS");
@@ -66,6 +85,11 @@ function readNetworkConfig(network: StellarNetwork): NetworkConfig | undefined {
     errors.push(`${meta.envPrefix}FACILITATOR_URL is required`);
   }
 
+  const facilitatorApiKey = readPrefixed(meta.envPrefix, "FACILITATOR_API_KEY");
+  if (facilitatorApiKey && parseFacilitatorApiKeys(facilitatorApiKey).length === 0) {
+    errors.push(`${meta.envPrefix}FACILITATOR_API_KEY must contain at least one non-empty key`);
+  }
+
   const isMainnet = network === STELLAR_PUBNET_CAIP2;
   const rpcUrl = readPrefixed(meta.envPrefix, "STELLAR_RPC_URL");
   if (isMainnet && !rpcUrl) {
@@ -83,7 +107,7 @@ function readNetworkConfig(network: StellarNetwork): NetworkConfig | undefined {
     serverStellarAddress: addr,
     stellarRpcUrl: rpcUrl ?? meta.defaultRpcUrl,
     facilitatorUrl: facilitatorUrl!,
-    facilitatorApiKey: readPrefixed(meta.envPrefix, "FACILITATOR_API_KEY"),
+    facilitatorApiKey,
   };
 }
 
@@ -194,23 +218,39 @@ export class Env {
     await Promise.all(
       configs.map(async (cfg) => {
         const { displayName } = NETWORK_META[cfg.network];
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (cfg.facilitatorApiKey) {
-          headers["Authorization"] = `Bearer ${cfg.facilitatorApiKey}`;
+        const configuredKeys = parseFacilitatorApiKeys(cfg.facilitatorApiKey);
+        const keys = configuredKeys.length > 0 ? configuredKeys : [undefined];
+
+        const keyErrors: string[] = [];
+
+        for (const key of keys) {
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (key) {
+            headers["Authorization"] = `Bearer ${key}`;
+          }
+
+          try {
+            const res = await fetch(`${cfg.facilitatorUrl}/supported`, {
+              method: "GET",
+              headers,
+            });
+            if (!res.ok) {
+              keyErrors.push(
+                key
+                  ? `${maskFacilitatorApiKey(key)} returned HTTP ${res.status}`
+                  : `HTTP ${res.status}`,
+              );
+            }
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            keyErrors.push(key ? `${maskFacilitatorApiKey(key)} failed: ${message}` : message);
+          }
         }
 
-        try {
-          const res = await fetch(`${cfg.facilitatorUrl}/supported`, { method: "GET", headers });
-          if (!res.ok) {
-            errors.push(
-              `${displayName} facilitator at ${cfg.facilitatorUrl} returned HTTP ${res.status}`,
-            );
-          }
-        } catch (err) {
-          const message = err instanceof Error ? err.message : String(err);
-          errors.push(
-            `${displayName} facilitator at ${cfg.facilitatorUrl} is unreachable: ${message}`,
-          );
+        if (keyErrors.length > 0) {
+          const detail =
+            keys.length > 1 ? `one or more API keys failed: ${keyErrors.join("; ")}` : keyErrors[0];
+          errors.push(`${displayName} facilitator at ${cfg.facilitatorUrl}: ${detail}`);
         }
       }),
     );
