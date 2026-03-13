@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
+  "types": "./dist/index.d.ts",
   "scripts": {
     "codegen": "tsx src/browser/build.ts",
     "build": "tsup",
-    "test": "node --test --experimental-strip-types src/browser/*.test.ts",
+    "test": "tsx --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ignore-pattern src/browser/",
     "lint:fix": "eslint src/ --ignore-pattern src/browser/ --fix"
@@ -22,6 +23,7 @@
     }
   },
   "dependencies": {
+    "@x402-stellar/shared": "workspace:*",
     "@x402/core": "2.6.0"
   },
   "devDependencies": {

@@ -5,8 +5,7 @@ import { encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
 import { statusError, statusInfo, statusSuccess, type Status } from "./status";
-import { resolvePaymentTargetUrl } from "./paymentTargetUrl";
-import { formatPaymentError } from "./formatPaymentError";
+import { resolvePaymentTargetUrl, formatPaymentError } from "./utils";
 
 export type UseStellarPaymentParams = {
   paymentRequired: PaymentRequired;
@@ -18,6 +17,13 @@ export type UseStellarPaymentParams = {
 export type UseStellarPaymentResult = {
   isPaying: boolean;
   submitPayment: () => Promise<void>;
+};
+
+type X402Runtime = {
+  currentUrl?: string;
+  config?: {
+    rpcUrl?: string;
+  };
 };
 
 /**
@@ -34,7 +40,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
   const { walletSigner, paymentRequired, onSuccessfulResponse, setStatus } = params;
   const [isPaying, setIsPaying] = useState(false);
 
-  const x402 = window.x402;
+  const x402 = (window as Window & { x402?: X402Runtime }).x402;
   const runtimeRpcUrl = x402?.config?.rpcUrl;
 
   const submitPayment = useCallback(async () => {
@@ -72,7 +78,9 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       let parsedBody: Record<string, unknown> | null = null;
       try {
         parsedBody = JSON.parse(responseBody) as Record<string, unknown>;
-      } catch (_notJson) {}
+      } catch {
+        /* body is not JSON; parsedBody stays null */
+      }
 
       if (response.status === 402) {
         if (parsedBody && typeof parsedBody.x402Version === "number") {
@@ -95,7 +103,12 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
 
           const retryBody = await retryResponse.text().catch(() => "");
           throw new Error(
-            formatPaymentError("Payment retry failed", retryResponse.status, retryBody),
+            formatPaymentError(
+              "Payment retry failed",
+              retryResponse.status,
+              retryBody,
+              retryResponse.headers.get("payment-required"),
+            ),
           );
         }
 
@@ -104,12 +117,18 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
             "Payment required but settlement failed",
             response.status,
             responseBody,
+            response.headers.get("payment-required"),
           ),
         );
       }
 
       throw new Error(
-        formatPaymentError("Payment request rejected", response.status, responseBody),
+        formatPaymentError(
+          "Payment request rejected",
+          response.status,
+          responseBody,
+          response.headers.get("payment-required"),
+        ),
       );
     } catch (error) {
       setStatus(statusError(error instanceof Error ? error.message : "Payment failed."));

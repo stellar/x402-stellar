@@ -3,6 +3,8 @@
  * Replaces the multi-chain paywallUtils.ts (which depends on viem/chains).
  */
 
+import { parseX402PaymentRequiredHeaderError } from "@x402-stellar/shared";
+
 /**
  * Provides a human-readable display name for a Stellar network.
  *
@@ -44,4 +46,44 @@ export function formatUnits(value: bigint, decimals: number): string {
 
   const result = trimmed.length > 0 ? `${intPart}.${trimmed}` : intPart;
   return isNegative ? `-${result}` : result;
+}
+
+export function resolvePaymentTargetUrl(windowLocationHref: string, _currentUrl?: string): string {
+  return windowLocationHref;
+}
+
+export function formatPaymentError(
+  prefix: string,
+  status: number,
+  body: string,
+  paymentRequiredHeader?: string | null,
+): string {
+  const paymentRequiredError = parseX402PaymentRequiredHeaderError(paymentRequiredHeader);
+  if (paymentRequiredError) {
+    return `${prefix}: ${paymentRequiredError}`;
+  }
+
+  const trimmed = body.trim();
+  if (!trimmed) {
+    return `${prefix}: ${status}`;
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object") {
+      const message = parsed.error || parsed.message || parsed.detail;
+      if (typeof message === "string") {
+        return `${prefix}: ${message}`;
+      }
+    }
+  } catch {
+    /* body is not JSON */
+  }
+  if (trimmed.startsWith("<") || trimmed.length > 200) {
+    console.error(
+      `${prefix} (${status}) — response body (first 2000 chars):`,
+      trimmed.slice(0, 2000),
+    );
+    return `${prefix}: ${status} (see browser console for details)`;
+  }
+  return `${prefix}: ${trimmed}`;
 }
