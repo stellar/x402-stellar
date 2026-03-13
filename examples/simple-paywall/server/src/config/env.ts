@@ -221,10 +221,14 @@ export class Env {
           }
 
           try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10_000);
             const res = await fetch(`${cfg.facilitatorUrl}/supported`, {
               method: "GET",
               headers,
+              signal: controller.signal,
             });
+            clearTimeout(timeout);
             if (!res.ok) {
               keyErrors.push(
                 key
