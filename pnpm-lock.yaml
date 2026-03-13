@@ -34,6 +34,9 @@ importers:
 
   examples/client-cli:
     dependencies:
+      '@x402-stellar/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@x402/core':
         specifier: 2.6.0
         version: 2.6.0
@@ -114,6 +117,9 @@ importers:
       supertest:
         specifier: ^7.2.2
         version: 7.2.2
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -163,6 +169,9 @@ importers:
       '@x402-stellar/paywall':
         specifier: workspace:*
         version: link:../../../packages/paywall
+      '@x402-stellar/shared':
+        specifier: workspace:*
+        version: link:../../../packages/shared
       '@x402/core':
         specifier: 2.6.0
         version: 2.6.0
@@ -224,6 +233,9 @@ importers:
 
   packages/paywall:
     dependencies:
+      '@x402-stellar/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@x402/core':
         specifier: 2.6.0
         version: 2.6.0
@@ -261,6 +273,21 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.4(react@19.2.4)
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/shared:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.13
+        version: 22.19.13
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.21.0)(typescript@5.9.3)
@@ -1605,11 +1632,6 @@ packages:
   '@stellar/stellar-sdk@13.3.0':
     resolution: {integrity: sha512-8+GHcZLp+mdin8gSjcgfb/Lb6sSMYRX6Nf/0LcSJxvjLQR0XHpjGzOiRbYb2jSXo51EnA6kAV5j+4Pzh5OUKUg==}
     engines: {node: '>=18.0.0'}
-
-  '@stellar/stellar-sdk@14.5.0':
-    resolution: {integrity: sha512-Uzjq+An/hUA+Q5ERAYPtT0+MMiwWnYYWMwozmZMjxjdL2MmSjucBDF8Q04db6K/ekU4B5cHuOfsdlrfaxQYblw==}
-    engines: {node: '>=20.0.0'}
-    hasBin: true
 
   '@stellar/stellar-sdk@14.6.1':
     resolution: {integrity: sha512-A1rQWDLdUasXkMXnYSuhgep+3ZZzyuXJKdt5/KAIc0gkmSp906HTvUpbT4pu+bVr41tu0+J4Ugz9J4BQAGGytg==}
@@ -6446,20 +6468,6 @@ snapshots:
       - bare-url
       - debug
 
-  '@stellar/stellar-sdk@14.5.0':
-    dependencies:
-      '@stellar/stellar-base': 14.1.0
-      axios: 1.13.6
-      bignumber.js: 9.3.1
-      commander: 14.0.3
-      eventsource: 2.0.2
-      feaxios: 0.0.23
-      randombytes: 2.1.0
-      toml: 3.0.0
-      urijs: 1.19.11
-    transitivePeerDependencies:
-      - debug
-
   '@stellar/stellar-sdk@14.6.1':
     dependencies:
       '@stellar/stellar-base': 14.1.0
@@ -7620,7 +7628,7 @@ snapshots:
 
   '@x402/stellar@2.6.0':
     dependencies:
-      '@stellar/stellar-sdk': 14.5.0
+      '@stellar/stellar-sdk': 14.6.1
       '@x402/core': 2.6.0
     transitivePeerDependencies:
       - debug

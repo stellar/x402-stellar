@@ -3,4 +3,4 @@ packages:
   - examples/*/client
   - examples/facilitator
   - examples/client-cli
-  - packages/paywall
+  - packages/*
