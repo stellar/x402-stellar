@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  getX402ErrorMessage,
   parseX402JsonHeaderValue,
   parseX402PaymentRequiredHeaderError,
   parseX402PaymentResponseHeader,
@@ -28,11 +27,59 @@ test("parseX402JsonHeaderValue returns undefined for invalid base64 json", () =>
   assert.equal(parseX402JsonHeaderValue(Buffer.from("not-json").toString("base64")), undefined);
 });
 
-test("getX402ErrorMessage prefers x402 error fields in priority order", () => {
-  assert.equal(getX402ErrorMessage({ error: "primary", message: "secondary" }), "primary");
-  assert.equal(getX402ErrorMessage({ message: "secondary" }), "secondary");
-  assert.equal(getX402ErrorMessage({ detail: "detail" }), "detail");
-  assert.equal(getX402ErrorMessage({ details: "details" }), "details");
+test("parseX402PaymentRequiredHeaderError prefers x402 error fields in priority order", () => {
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(
+      encodeBase64Json({ error: "primary", message: "secondary" }),
+    ),
+    "primary",
+  );
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(encodeBase64Json({ message: "secondary" })),
+    "secondary",
+  );
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(encodeBase64Json({ detail: "detail" })),
+    "detail",
+  );
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(encodeBase64Json({ details: "details" })),
+    "details",
+  );
+});
+
+test("parseX402PaymentRequiredHeaderError returns undefined for non-object payloads", () => {
+  assert.equal(parseX402PaymentRequiredHeaderError(undefined), undefined);
+  assert.equal(parseX402PaymentRequiredHeaderError(null), undefined);
+  assert.equal(parseX402PaymentRequiredHeaderError(encodeBase64Json({})), undefined);
+});
+
+test("parseX402PaymentRequiredHeaderError ignores empty and whitespace-only strings", () => {
+  assert.equal(parseX402PaymentRequiredHeaderError(encodeBase64Json({ error: "" })), undefined);
+  assert.equal(parseX402PaymentRequiredHeaderError(encodeBase64Json({ error: "   " })), undefined);
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(encodeBase64Json({ error: "", message: "fallback" })),
+    "fallback",
+  );
+});
+
+test("parseX402PaymentRequiredHeaderError ignores non-string field values", () => {
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(encodeBase64Json({ error: 123 as unknown as string })),
+    undefined,
+  );
+  assert.equal(
+    parseX402PaymentRequiredHeaderError(
+      encodeBase64Json({ error: true as unknown as string, message: "fallback" }),
+    ),
+    "fallback",
+  );
+});
+
+test("parseX402PaymentRequiredHeaderError returns undefined for array payloads", () => {
+  // Arrays pass typeof === "object" but have no meaningful error fields
+  const header = Buffer.from(JSON.stringify(["not", "an", "object"])).toString("base64");
+  assert.equal(parseX402PaymentRequiredHeaderError(header), undefined);
 });
 
 test("parseX402PaymentRequiredHeaderError decodes payment-required header", () => {

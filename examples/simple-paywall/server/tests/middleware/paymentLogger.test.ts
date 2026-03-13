@@ -170,4 +170,23 @@ describe("paymentLogger", () => {
     res.json({ error: "fail" });
     expect(originalJson).toHaveBeenCalledWith({ error: "fail" });
   });
+
+  it("logs without error fields when response uses res.end() instead of res.json()", () => {
+    const { req, res, next, finish } = createMocks(true, 500);
+    paymentLogger()(req, res, next);
+
+    finish();
+
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 500,
+        method: "GET",
+        url: "/protected/testnet",
+      }),
+      "Payment request failed without payment headers",
+    );
+    const logPayload = (logger.error as ReturnType<typeof vi.fn>).mock.calls[0][0];
+    expect(logPayload).not.toHaveProperty("error");
+    expect(logPayload).not.toHaveProperty("details");
+  });
 });

@@ -1,5 +1,4 @@
 export {
-  getX402ErrorMessage,
   parseX402JsonHeaderValue,
   parseX402PaymentRequiredHeaderError,
   parseX402PaymentResponseHeader,

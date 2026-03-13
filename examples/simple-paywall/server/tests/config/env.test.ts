@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Env } from "../../src/config/env.js";
+import { Env, maskFacilitatorApiKey, parseFacilitatorApiKeys } from "../../src/config/env.js";
 
 describe("Env", () => {
   beforeEach(() => {
@@ -459,5 +459,47 @@ describe("Env", () => {
       await expect(Env.validateFacilitators()).resolves.toBeUndefined();
       expect(mockFetch).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("maskFacilitatorApiKey", () => {
+  it("masks short keys (≤4 chars) completely", () => {
+    expect(maskFacilitatorApiKey("a")).toBe("****");
+    expect(maskFacilitatorApiKey("ab")).toBe("****");
+    expect(maskFacilitatorApiKey("abc")).toBe("****");
+    expect(maskFacilitatorApiKey("abcd")).toBe("****");
+  });
+
+  it("shows first 2 and last 2 chars for longer keys", () => {
+    expect(maskFacilitatorApiKey("abcde")).toBe("ab...de");
+    expect(maskFacilitatorApiKey("123456ab")).toBe("12...ab");
+    expect(maskFacilitatorApiKey("my-very-long-api-key")).toBe("my...ey");
+  });
+});
+
+describe("parseFacilitatorApiKeys", () => {
+  it("returns empty array for undefined", () => {
+    expect(parseFacilitatorApiKeys(undefined)).toEqual([]);
+  });
+
+  it("returns empty array for empty string", () => {
+    expect(parseFacilitatorApiKeys("")).toEqual([]);
+  });
+
+  it("parses single key", () => {
+    expect(parseFacilitatorApiKeys("my-key")).toEqual(["my-key"]);
+  });
+
+  it("parses comma-separated keys", () => {
+    expect(parseFacilitatorApiKeys("key-1,key-2,key-3")).toEqual(["key-1", "key-2", "key-3"]);
+  });
+
+  it("trims whitespace from keys", () => {
+    expect(parseFacilitatorApiKeys(" key-1 , key-2 ")).toEqual(["key-1", "key-2"]);
+  });
+
+  it("filters empty entries from comma-separated values", () => {
+    expect(parseFacilitatorApiKeys("key-1,,key-2")).toEqual(["key-1", "key-2"]);
+    expect(parseFacilitatorApiKeys(" , , ")).toEqual([]);
   });
 });

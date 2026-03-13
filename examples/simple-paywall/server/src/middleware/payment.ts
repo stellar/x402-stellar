@@ -18,7 +18,7 @@ interface ServerComponents {
   x402Server: x402ResourceServer;
 }
 
-function createRoundRobinKeySelector(commaSeparatedKeys: string): () => string {
+export function createRoundRobinKeySelector(commaSeparatedKeys: string): () => string {
   const keys = parseFacilitatorApiKeys(commaSeparatedKeys);
   if (keys.length === 0) {
     throw new Error("FACILITATOR_API_KEY must contain at least one non-empty key");

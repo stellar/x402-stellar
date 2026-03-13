@@ -60,7 +60,7 @@ export function parseFacilitatorApiKeys(value: string | undefined): string[] {
 
 export function maskFacilitatorApiKey(key: string): string {
   if (key.length <= 4) {
-    return `${key.slice(0, 2)}...${key.slice(-2)}`;
+    return "****";
   }
 
   return `${key.slice(0, 2)}...${key.slice(-2)}`;

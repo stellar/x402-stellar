@@ -47,7 +47,7 @@ export function parseX402JsonHeaderValue<T = unknown>(
   }
 }
 
-export function getX402ErrorMessage(x402Payload: unknown): string | undefined {
+function getX402ErrorMessage(x402Payload: unknown): string | undefined {
   if (!x402Payload || typeof x402Payload !== "object") {
     return undefined;
   }
