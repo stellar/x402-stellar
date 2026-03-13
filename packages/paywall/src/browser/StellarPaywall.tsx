@@ -156,6 +156,7 @@ function StellarPaywallMain({
             `Insufficient balance. Make sure you have enough ${assetCode} on ${chainName}.`,
           ),
         );
+        return;
       }
     }
 
