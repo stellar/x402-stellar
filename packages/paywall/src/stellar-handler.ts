@@ -87,11 +87,12 @@ export const stellarPaywall: PaywallNetworkHandler = {
     config: PaywallConfig,
   ): string {
     // Stellar USDC uses 7 decimal places (stroops)
-    const amount = requirement.amount
+    const rawAmount = requirement.amount
       ? parseFloat(requirement.amount) / 1e7
       : requirement.maxAmountRequired
         ? parseFloat(requirement.maxAmountRequired) / 1e7
         : 0;
+    const amount = Number.isFinite(rawAmount) ? rawAmount : 0;
 
     return getStellarPaywallHtml({
       amount,
