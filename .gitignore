@@ -6,9 +6,3 @@ dist
 
 # Generated channel account keys (contain secrets)
 examples/facilitator/scripts/output/
-
-# Pre-built vendor packages — committed as dist-only (no source)
-!vendors/x402/typescript/packages/*/dist
-!vendors/x402/typescript/packages/*/dist/**
-!vendors/x402/typescript/packages/*/*/dist
-!vendors/x402/typescript/packages/*/*/dist/**

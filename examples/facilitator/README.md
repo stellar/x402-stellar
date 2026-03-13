@@ -105,7 +105,9 @@ After a testnet reset all accounts are wiped. The refund scripts call Friendbot 
 ## Development
 
 ```bash
-pnpm dev          # Run with tsx (auto-reload not included, restart manually)
+pnpm dev          # Run with tsx watch (auto-reloads on file changes)
+pnpm build        # Compile to dist/ with tsup
+pnpm start        # Run compiled output (dist/index.js)
 pnpm test         # Run tests
 pnpm typecheck    # Type-check without emitting
 pnpm lint         # Lint src/

@@ -39,6 +39,7 @@ RUN corepack install
 
 # Own packages (built from source)
 COPY packages/paywall/package.json                               packages/paywall/package.json
+COPY packages/shared/package.json                                packages/shared/package.json
 
 # Example package.json files (for dep resolution)
 COPY examples/facilitator/package.json                           examples/facilitator/package.json
@@ -54,6 +55,9 @@ RUN pnpm install --frozen-lockfile
 COPY packages/paywall/src/       packages/paywall/src/
 COPY packages/paywall/tsconfig.json packages/paywall/tsconfig.json
 COPY packages/paywall/tsup.config.ts packages/paywall/tsup.config.ts
+COPY packages/shared/src/        packages/shared/src/
+COPY packages/shared/tsconfig.json packages/shared/tsconfig.json
+COPY packages/shared/tsup.config.ts packages/shared/tsup.config.ts
 
 # Copy example source and build
 COPY examples/ examples/
@@ -169,7 +173,7 @@ RUN set -ex \
     && rm -rf node_modules/.pnpm/es-toolkit@* \
     && rm -rf node_modules/.pnpm/zod@* \
     #
-    # ── Duplicate Stellar versions (only 14.5.0 / 14.0.4 needed) ─
+    # ── Duplicate Stellar versions (only 14.6.1 / 14.0.4 needed) ─
     && rm -rf node_modules/.pnpm/@stellar+stellar-sdk@13.3.0 \
     && rm -rf node_modules/.pnpm/@stellar+stellar-base@13.1.0 \
     && rm -rf node_modules/.pnpm/@stellar+stellar-base@14.0.1 \
@@ -208,6 +212,8 @@ WORKDIR /app
 COPY --from=base /app/node_modules                               /app/node_modules
 COPY --from=base /app/packages/paywall/dist                      /app/packages/paywall/dist
 COPY --from=base /app/packages/paywall/package.json              /app/packages/paywall/package.json
+COPY --from=base /app/packages/shared/dist                       /app/packages/shared/dist
+COPY --from=base /app/packages/shared/package.json               /app/packages/shared/package.json
 COPY --from=base /app/examples/simple-paywall/server             /app/examples/simple-paywall/server
 
 EXPOSE 3001
@@ -255,6 +261,8 @@ WORKDIR /app
 COPY --from=base /app/node_modules                               /app/node_modules
 COPY --from=base /app/packages/paywall/dist                      /app/packages/paywall/dist
 COPY --from=base /app/packages/paywall/package.json              /app/packages/paywall/package.json
+COPY --from=base /app/packages/shared/dist                       /app/packages/shared/dist
+COPY --from=base /app/packages/shared/package.json               /app/packages/shared/package.json
 COPY --from=base /app/examples/facilitator/dist                  /app/examples/facilitator/dist
 COPY --from=base /app/examples/facilitator/package.json          /app/examples/facilitator/package.json
 COPY --from=base /app/examples/facilitator/node_modules          /app/examples/facilitator/node_modules
