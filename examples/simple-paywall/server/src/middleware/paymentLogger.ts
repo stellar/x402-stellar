@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { parseX402JsonHeaderValue, X402_ERROR_MESSAGE_FIELDS } from "@x402-stellar/shared";
+import { parseX402Header, X402_ERROR_MESSAGE_FIELDS } from "@x402-stellar/shared";
 import { logger } from "../utils/logger.js";
 
 const MAX_FIELD_LENGTH = 500;
@@ -69,8 +69,8 @@ export function paymentLogger() {
     };
 
     res.once("finish", () => {
-      const decodedPaymentRequired = parseX402JsonHeaderValue(paymentRequiredHeader);
-      const decodedPaymentResponse = parseX402JsonHeaderValue(paymentResponseHeader);
+      const decodedPaymentRequired = parseX402Header(paymentRequiredHeader);
+      const decodedPaymentResponse = parseX402Header(paymentResponseHeader);
 
       if (res.statusCode >= 400) {
         const paymentContext =
@@ -88,7 +88,7 @@ export function paymentLogger() {
             ...extractedErrorFields,
             ...paymentContext,
           },
-          decodedPaymentResponse === undefined && decodedPaymentRequired === undefined
+          paymentResponseHeader === undefined && paymentRequiredHeader === undefined
             ? "Payment request failed without payment headers"
             : "Payment request failed",
         );

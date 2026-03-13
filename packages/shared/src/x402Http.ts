@@ -47,11 +47,11 @@ function decodeX402HeaderBase64Value(base64HeaderValue: string): string {
 }
 
 /**
- * Parses a base64-encoded JSON x402 header value into a typed object.
+ * Parses a base64-encoded JSON x402 header value into a typed payload.
  *
  * Returns `undefined` when the value is absent, empty, or not valid JSON.
  */
-export function parseX402JsonHeaderValue<T = unknown>(
+export function parseX402Header<T = unknown>(
   x402HeaderValue: string | null | undefined,
 ): T | undefined {
   if (!x402HeaderValue) {
@@ -68,11 +68,10 @@ export function parseX402JsonHeaderValue<T = unknown>(
 /**
  * Extracts a human-readable error message from an x402 JSON payload object.
  *
- * Checks the fields listed in `X402_ERROR_MESSAGE_FIELDS` in order and
- * returns the first non-empty string value found, or `undefined` when none
- * is present.
+ * Checks the fields listed in `X402_ERROR_MESSAGE_FIELDS` in order and returns
+ * the first non-empty string value found, or `undefined` when none is present.
  */
-function getX402ErrorMessage(x402Payload: unknown): string | undefined {
+export function getX402ErrorMessage(x402Payload: unknown): string | undefined {
   if (!x402Payload || typeof x402Payload !== "object") {
     return undefined;
   }
@@ -86,30 +85,4 @@ function getX402ErrorMessage(x402Payload: unknown): string | undefined {
   }
 
   return undefined;
-}
-
-/**
- * Parses the `payment-required` response header and returns its error message.
- *
- * The header value is expected to be a base64-encoded JSON object.  Returns
- * `undefined` when the header is absent, malformed, or contains no error text.
- */
-export function parseX402PaymentRequiredHeaderError(
-  paymentRequiredHeaderValue: string | null | undefined,
-): string | undefined {
-  return getX402ErrorMessage(
-    parseX402JsonHeaderValue<Record<string, unknown>>(paymentRequiredHeaderValue),
-  );
-}
-
-/**
- * Parses the `payment-response` header into a typed payload object.
- *
- * The header value is expected to be a base64-encoded JSON object.  Returns
- * `undefined` when the header is absent or malformed.
- */
-export function parseX402PaymentResponseHeader(
-  paymentResponseHeaderValue: string | null | undefined,
-): X402PaymentResponsePayload | undefined {
-  return parseX402JsonHeaderValue<X402PaymentResponsePayload>(paymentResponseHeaderValue);
 }

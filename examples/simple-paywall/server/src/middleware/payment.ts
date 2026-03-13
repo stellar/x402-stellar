@@ -18,6 +18,13 @@ interface ServerComponents {
   x402Server: x402ResourceServer;
 }
 
+/**
+ * Returns a selector that cycles through the configured facilitator API keys.
+ *
+ * @param commaSeparatedKeys - Raw FACILITATOR_API_KEY env value, allowing multiple comma-separated keys.
+ * @returns A function that returns the next key on each call.
+ * @throws Error when the input does not contain at least one non-empty key.
+ */
 export function createRoundRobinKeySelector(commaSeparatedKeys: string): () => string {
   const keys = parseFacilitatorApiKeys(commaSeparatedKeys);
   if (keys.length === 0) {

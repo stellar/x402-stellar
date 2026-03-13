@@ -54,9 +54,7 @@ export function useSWKConnection({
     } catch (error) {
       console.error("Failed to initialize Stellar Wallet Kit", error);
       onStatusRef.current(
-        statusError(
-          parseError(error, "Failed to initialize Stellar Wallet Kit."),
-        ),
+        statusError(parseError(error, "Failed to initialize Stellar Wallet Kit.")),
       );
     }
   }, [network]);
@@ -91,9 +89,7 @@ export function useSWKConnection({
       onStatusRef.current(statusClear());
     } catch (error) {
       console.error("Failed to connect wallet", error);
-      onStatusRef.current(
-        statusError(parseError(error, "Failed to connect to wallet.")),
-      );
+      onStatusRef.current(statusError(parseError(error, "Failed to connect to wallet.")));
       setAddress(null);
     }
   }, [kitReady, network]);

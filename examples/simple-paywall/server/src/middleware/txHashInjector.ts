@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { parseX402PaymentResponseHeader } from "@x402-stellar/shared";
+import { parseX402Header, type X402PaymentResponsePayload } from "@x402-stellar/shared";
 
 /**
  * Middleware that intercepts HTML responses carrying a PAYMENT-RESPONSE header,
@@ -92,7 +92,7 @@ export function injectTxLink(body: string, paymentResponseHeader: string | undef
     return body.replace("{{TX_LINK}}", "");
   }
 
-  const decoded = parseX402PaymentResponseHeader(paymentResponseHeader);
+  const decoded = parseX402Header<X402PaymentResponsePayload>(paymentResponseHeader);
   if (!decoded) {
     return body.replace("{{TX_LINK}}", "");
   }

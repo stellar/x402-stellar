@@ -1,7 +1,6 @@
 export {
-  parseX402JsonHeaderValue,
-  parseX402PaymentRequiredHeaderError,
-  parseX402PaymentResponseHeader,
+  getX402ErrorMessage,
+  parseX402Header,
   X402_ERROR_MESSAGE_FIELDS,
   type X402PaymentResponsePayload,
 } from "./x402Http.js";

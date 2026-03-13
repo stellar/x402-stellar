@@ -3,7 +3,7 @@
  * Replaces the multi-chain paywallUtils.ts (which depends on viem/chains).
  */
 
-import { parseX402PaymentRequiredHeaderError } from "@x402-stellar/shared";
+import { getX402ErrorMessage, parseX402Header } from "@x402-stellar/shared";
 
 /**
  * Provides a human-readable display name for a Stellar network.
@@ -48,17 +48,15 @@ export function formatUnits(value: bigint, decimals: number): string {
   return isNegative ? `-${result}` : result;
 }
 
-export function resolvePaymentTargetUrl(windowLocationHref: string, _currentUrl?: string): string {
-  return windowLocationHref;
-}
-
 export function formatPaymentError(
   prefix: string,
   status: number,
   body: string,
   paymentRequiredHeader?: string | null,
 ): string {
-  const paymentRequiredError = parseX402PaymentRequiredHeaderError(paymentRequiredHeader);
+  const paymentRequiredError = getX402ErrorMessage(
+    parseX402Header<Record<string, unknown>>(paymentRequiredHeader),
+  );
   if (paymentRequiredError) {
     return `${prefix}: ${paymentRequiredError}`;
   }

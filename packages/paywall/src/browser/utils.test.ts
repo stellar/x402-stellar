@@ -1,6 +1,6 @@
-import { describe, it } from "node:test";
+import { describe, it, mock } from "node:test";
 import assert from "node:assert/strict";
-import { formatPaymentError, resolvePaymentTargetUrl } from "./utils.ts";
+import { formatPaymentError } from "./utils.ts";
 
 describe("formatPaymentError", () => {
   it("returns status code when body is empty", () => {
@@ -65,11 +65,17 @@ describe("formatPaymentError", () => {
   });
 
   it("uses console fallback for body longer than 200 chars", () => {
-    const longBody = "x".repeat(201);
-    assert.equal(
-      formatPaymentError("Err", 500, longBody),
-      "Err: 500 (see browser console for details)",
-    );
+    const consoleError = mock.method(console, "error", () => {});
+    try {
+      const longBody = "x".repeat(201);
+      assert.equal(
+        formatPaymentError("Err", 500, longBody),
+        "Err: 500 (see browser console for details)",
+      );
+      assert.equal(consoleError.mock.calls.length, 1);
+    } finally {
+      consoleError.mock.restore();
+    }
   });
 
   it("shows body directly when exactly 200 chars", () => {
@@ -78,17 +84,29 @@ describe("formatPaymentError", () => {
   });
 
   it("uses console fallback for HTML body starting with <", () => {
-    assert.equal(
-      formatPaymentError("Err", 502, "<html><body>Bad Gateway</body></html>"),
-      "Err: 502 (see browser console for details)",
-    );
+    const consoleError = mock.method(console, "error", () => {});
+    try {
+      assert.equal(
+        formatPaymentError("Err", 502, "<html><body>Bad Gateway</body></html>"),
+        "Err: 502 (see browser console for details)",
+      );
+      assert.equal(consoleError.mock.calls.length, 1);
+    } finally {
+      consoleError.mock.restore();
+    }
   });
 
   it("uses console fallback for short HTML", () => {
-    assert.equal(
-      formatPaymentError("Err", 500, "<!DOCTYPE html>"),
-      "Err: 500 (see browser console for details)",
-    );
+    const consoleError = mock.method(console, "error", () => {});
+    try {
+      assert.equal(
+        formatPaymentError("Err", 500, "<!DOCTYPE html>"),
+        "Err: 500 (see browser console for details)",
+      );
+      assert.equal(consoleError.mock.calls.length, 1);
+    } finally {
+      consoleError.mock.restore();
+    }
   });
 
   it("falls through gracefully on invalid JSON", () => {
@@ -118,25 +136,6 @@ describe("formatPaymentError", () => {
     assert.equal(
       formatPaymentError("Payment request rejected", 403, body),
       "Payment request rejected: timeout",
-    );
-  });
-});
-
-describe("resolvePaymentTargetUrl", () => {
-  it("uses browser location for ingress-prefixed protected routes", () => {
-    assert.equal(
-      resolvePaymentTargetUrl(
-        "https://example.com/x402-demo/api/protected/testnet",
-        "https://example.com/protected/testnet",
-      ),
-      "https://example.com/x402-demo/api/protected/testnet",
-    );
-  });
-
-  it("uses browser location when currentUrl is undefined", () => {
-    assert.equal(
-      resolvePaymentTargetUrl("https://example.com/x402-demo/api/protected/testnet", undefined),
-      "https://example.com/x402-demo/api/protected/testnet",
     );
   });
 });

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { parseError, parseX402PaymentRequiredHeaderError } from "@x402-stellar/shared";
+import { getX402ErrorMessage, parseError, parseX402Header } from "@x402-stellar/shared";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
@@ -126,7 +126,9 @@ async function main(): Promise<void> {
     const errorBody = await paidResponse.text();
     const facilitatorError =
       paidResponse.status === 402
-        ? parseX402PaymentRequiredHeaderError(paidResponse.headers.get("payment-required"))
+        ? getX402ErrorMessage(
+            parseX402Header<Record<string, unknown>>(paidResponse.headers.get("payment-required")),
+          )
         : undefined;
     logger.error(
       {
