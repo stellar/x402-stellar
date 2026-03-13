@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import { parseX402Header, type X402PaymentResponsePayload } from "@x402-stellar/shared";
 
 /**
  * Middleware that intercepts HTML responses carrying a PAYMENT-RESPONSE header,
@@ -91,29 +92,25 @@ export function injectTxLink(body: string, paymentResponseHeader: string | undef
     return body.replace("{{TX_LINK}}", "");
   }
 
-  try {
-    const decoded = JSON.parse(Buffer.from(paymentResponseHeader, "base64").toString()) as {
-      transaction?: string;
-      network?: string;
-    };
-
-    const txHash = decoded.transaction;
-    if (!txHash || !/^[0-9a-fA-F]+$/.test(txHash)) {
-      return body.replace("{{TX_LINK}}", "");
-    }
-
-    // Derive the Stellar Expert network segment from the x402 network string
-    // (e.g. "stellar:testnet" → "testnet", "stellar:pubnet" → "pubnet")
-    const networkSegment = decoded.network?.split(":")?.[1] ?? "testnet";
-    const base = STELLAR_EXPERT_BASE[networkSegment] ?? STELLAR_EXPERT_BASE.testnet;
-    const url = `${base}/${txHash}`;
-
-    const link =
-      `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
-      `View transaction on Stellar Expert <span aria-hidden="true">&#8599;</span></a>`;
-
-    return body.replace("{{TX_LINK}}", link);
-  } catch {
+  const decoded = parseX402Header<X402PaymentResponsePayload>(paymentResponseHeader);
+  if (!decoded) {
     return body.replace("{{TX_LINK}}", "");
   }
+
+  const txHash = decoded.transaction;
+  if (!txHash || !/^[0-9a-fA-F]+$/.test(txHash)) {
+    return body.replace("{{TX_LINK}}", "");
+  }
+
+  // Derive the Stellar Expert network segment from the x402 network string
+  // (e.g. "stellar:testnet" → "testnet", "stellar:pubnet" → "pubnet")
+  const networkSegment = decoded.network?.split(":")?.[1] ?? "testnet";
+  const base = STELLAR_EXPERT_BASE[networkSegment] ?? STELLAR_EXPERT_BASE.testnet;
+  const url = `${base}/${txHash}`;
+
+  const link =
+    `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
+    `View transaction on Stellar Expert <span aria-hidden="true">&#8599;</span></a>`;
+
+  return body.replace("{{TX_LINK}}", link);
 }

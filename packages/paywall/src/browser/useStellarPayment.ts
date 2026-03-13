@@ -4,8 +4,9 @@ import { x402Client } from "@x402/core/client";
 import { encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
+import { parseError } from "@x402-stellar/shared";
 import { statusError, statusInfo, statusSuccess, type Status } from "./status";
-import { resolvePaymentTargetUrl } from "./paymentTargetUrl";
+import { formatPaymentError } from "./utils";
 
 export type UseStellarPaymentParams = {
   paymentRequired: PaymentRequired;
@@ -17,6 +18,12 @@ export type UseStellarPaymentParams = {
 export type UseStellarPaymentResult = {
   isPaying: boolean;
   submitPayment: () => Promise<void>;
+};
+
+type X402Runtime = {
+  config?: {
+    rpcUrl?: string;
+  };
 };
 
 /**
@@ -33,7 +40,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
   const { walletSigner, paymentRequired, onSuccessfulResponse, setStatus } = params;
   const [isPaying, setIsPaying] = useState(false);
 
-  const x402 = window.x402;
+  const x402 = (window as Window & { x402?: X402Runtime }).x402;
   const runtimeRpcUrl = x402?.config?.rpcUrl;
 
   const submitPayment = useCallback(async () => {
@@ -54,7 +61,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       const paymentHeader = encodePaymentSignatureHeader(paymentPayload);
 
       setStatus(statusInfo("Settling payment..."));
-      const targetUrl = resolvePaymentTargetUrl(window.location.href, x402.currentUrl);
+      const targetUrl = window.location.href;
       const response = await fetch(targetUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
@@ -67,9 +74,16 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
         return;
       }
 
+      const responseBody = await response.text().catch(() => "");
+      let parsedBody: Record<string, unknown> | null = null;
+      try {
+        parsedBody = JSON.parse(responseBody) as Record<string, unknown>;
+      } catch {
+        /* body is not JSON; parsedBody stays null */
+      }
+
       if (response.status === 402) {
-        const errorData = await response.json().catch(() => ({}));
-        if (errorData && typeof errorData.x402Version === "number") {
+        if (parsedBody && typeof parsedBody.x402Version === "number") {
           setStatus(statusInfo("Retrying payment..."));
 
           const retryPayload = await client.createPaymentPayload(paymentRequired);
@@ -87,17 +101,37 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
             return;
           }
 
+          const retryBody = await retryResponse.text().catch(() => "");
           throw new Error(
-            `Payment retry failed: ${retryResponse.status} ${retryResponse.statusText}`,
+            formatPaymentError(
+              "Payment retry failed",
+              retryResponse.status,
+              retryBody,
+              retryResponse.headers.get("payment-required"),
+            ),
           );
         }
 
-        throw new Error(`Payment failed: ${response.statusText}`);
+        throw new Error(
+          formatPaymentError(
+            "Payment required but settlement failed",
+            response.status,
+            responseBody,
+            response.headers.get("payment-required"),
+          ),
+        );
       }
 
-      throw new Error(`Payment failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        formatPaymentError(
+          "Payment request rejected",
+          response.status,
+          responseBody,
+          response.headers.get("payment-required"),
+        ),
+      );
     } catch (error) {
-      setStatus(statusError(error instanceof Error ? error.message : "Payment failed."));
+      setStatus(statusError(parseError(error, "Payment failed.")));
     } finally {
       setIsPaying(false);
     }

@@ -3,6 +3,7 @@ import { AssembledTransaction } from "@stellar/stellar-sdk/contract";
 import { nativeToScVal, scValToNative } from "@stellar/stellar-sdk";
 import type { Network } from "@x402/core/types";
 import { getNetworkPassphrase, getRpcUrl } from "@x402/stellar";
+import { parseError } from "@x402-stellar/shared";
 import { formatUnits } from "./utils";
 import { statusError, type Status } from "./status";
 
@@ -144,7 +145,7 @@ export function useStellarBalance({
       return balanceFormatted;
     } catch (error) {
       console.error("Failed to fetch Stellar USDC balance", error);
-      const msg = error instanceof Error ? error.message : "Unable to read balance. Please retry.";
+      const msg = parseError(error, "Unable to read balance. Please retry.");
       const isTrustlineError = msg.includes("trustline entry is missing for account");
       if (isTrustlineError) {
         setIsMissingTrustline(true);

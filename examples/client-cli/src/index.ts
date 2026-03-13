@@ -1,8 +1,13 @@
 import "dotenv/config";
+import { getX402ErrorMessage, parseError, parseX402Header } from "@x402-stellar/shared";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import { logger } from "./utils/logger.js";
+
+function isInsufficientBalanceSimulationError(error: unknown): boolean {
+  return parseError(error).includes("resulting balance is not within the allowed range");
+}
 
 const STELLAR_PRIVATE_KEY = process.env.STELLAR_PRIVATE_KEY;
 if (!STELLAR_PRIVATE_KEY) {
@@ -81,7 +86,34 @@ async function main(): Promise<void> {
   );
 
   logger.debug("Creating and signing payment...");
-  const paymentPayload = await client.createPaymentPayload(paymentRequired);
+  let paymentPayload;
+  try {
+    paymentPayload = await client.createPaymentPayload(paymentRequired);
+  } catch (error) {
+    if (isInsufficientBalanceSimulationError(error)) {
+      logger.fatal(
+        {
+          network: accepted.network,
+          amount: accepted.amount,
+          asset: accepted.asset,
+          payTo: accepted.payTo,
+          accountHint:
+            "Check that your payer account has enough balance for this asset and network.",
+        },
+        "Payment simulation failed due to insufficient balance",
+      );
+
+      if (networkKey === "testnet") {
+        logger.fatal(
+          "For testnet USDC, fund your account and retry (e.g. https://faucet.circle.com/).",
+        );
+      }
+
+      process.exit(1);
+    }
+
+    throw error;
+  }
   logger.debug("Payment payload created");
 
   const paymentHeaders = client.encodePaymentSignatureHeader(paymentPayload);
@@ -92,7 +124,20 @@ async function main(): Promise<void> {
 
   if (!paidResponse.ok) {
     const errorBody = await paidResponse.text();
-    logger.error({ status: paidResponse.status, body: errorBody }, "Payment failed");
+    const facilitatorError =
+      paidResponse.status === 402
+        ? getX402ErrorMessage(
+            parseX402Header<Record<string, unknown>>(paidResponse.headers.get("payment-required")),
+          )
+        : undefined;
+    logger.error(
+      {
+        status: paidResponse.status,
+        body: errorBody,
+        ...(facilitatorError ? { facilitatorError } : {}),
+      },
+      "Payment failed",
+    );
     process.exit(1);
   }
 

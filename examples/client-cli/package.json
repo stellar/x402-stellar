@@ -9,6 +9,7 @@
     "lint:fix": "eslint src/ --fix"
   },
   "dependencies": {
+    "@x402-stellar/shared": "workspace:*",
     "@x402/core": "2.6.0",
     "@x402/stellar": "2.6.0",
     "dotenv": "^16.6.1",

@@ -144,12 +144,12 @@ The Dockerfile is a multi-target build with targets for `facilitator`, `server`,
 
 The server supports multiple Stellar networks simultaneously. Each network is configured with a `TESTNET_` or `MAINNET_` prefix. Provide at least one set to enable that network's `/protected/<network>` endpoint.
 
-| Variable (replace `<NETWORK>_` with `TESTNET_` or `MAINNET_`) | Default                    | Description                                   |
-| ------------------------------------------------------------- | -------------------------- | --------------------------------------------- |
-| `<NETWORK>_SERVER_STELLAR_ADDRESS`                            | _required per network_     | Stellar address to receive payments           |
-| `<NETWORK>_STELLAR_RPC_URL`                                   | testnet RPC (testnet only) | Custom Soroban RPC URL (required for mainnet) |
-| `<NETWORK>_FACILITATOR_URL`                                   | —                          | x402 facilitator URL                          |
-| `<NETWORK>_FACILITATOR_API_KEY`                               | —                          | Facilitator API key (optional)                |
+| Variable (replace `<NETWORK>_` with `TESTNET_` or `MAINNET_`) | Default                    | Description                                                                                    |
+| ------------------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------- |
+| `<NETWORK>_SERVER_STELLAR_ADDRESS`                            | _required per network_     | Stellar address to receive payments                                                            |
+| `<NETWORK>_STELLAR_RPC_URL`                                   | testnet RPC (testnet only) | Custom Soroban RPC URL (required for mainnet)                                                  |
+| `<NETWORK>_FACILITATOR_URL`                                   | —                          | x402 facilitator URL                                                                           |
+| `<NETWORK>_FACILITATOR_API_KEY`                               | —                          | Facilitator API key(s); comma-separate multiple keys for round-robin load balancing (optional) |
 
 ### Facilitator
 

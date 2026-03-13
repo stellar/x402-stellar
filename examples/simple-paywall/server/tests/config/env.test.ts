@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { Env } from "../../src/config/env.js";
+import { Env, maskFacilitatorApiKey, parseFacilitatorApiKeys } from "../../src/config/env.js";
 
 describe("Env", () => {
   beforeEach(() => {
@@ -259,6 +259,15 @@ describe("Env", () => {
       expect(Env.testnetConfig!.facilitatorApiKey).toBeUndefined();
     });
 
+    it("throws when TESTNET_FACILITATOR_API_KEY contains only empty entries", () => {
+      vi.stubEnv("TESTNET_SERVER_STELLAR_ADDRESS", VALID_G_ADDR);
+      vi.stubEnv("TESTNET_FACILITATOR_URL", FACILITATOR_URL);
+      vi.stubEnv("TESTNET_FACILITATOR_API_KEY", " , , ");
+      expect(() => Env.testnetConfig).toThrow(
+        "TESTNET_FACILITATOR_API_KEY must contain at least one non-empty key",
+      );
+    });
+
     it("throws on invalid TESTNET_SERVER_STELLAR_ADDRESS", () => {
       vi.stubEnv("TESTNET_SERVER_STELLAR_ADDRESS", "INVALID");
       vi.stubEnv("TESTNET_FACILITATOR_URL", FACILITATOR_URL);
@@ -351,6 +360,32 @@ describe("Env", () => {
       );
     });
 
+    it("validates every configured facilitator API key", async () => {
+      vi.stubEnv("TESTNET_SERVER_STELLAR_ADDRESS", VALID_G_ADDR);
+      vi.stubEnv("TESTNET_FACILITATOR_URL", FACILITATOR_URL);
+      vi.stubEnv("TESTNET_FACILITATOR_API_KEY", "key-1,key-2");
+
+      const mockFetch = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      vi.stubGlobal("fetch", mockFetch);
+
+      await expect(Env.validateFacilitators()).resolves.toBeUndefined();
+      expect(mockFetch).toHaveBeenCalledTimes(2);
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        1,
+        `${FACILITATOR_URL}/supported`,
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer key-1" }),
+        }),
+      );
+      expect(mockFetch).toHaveBeenNthCalledWith(
+        2,
+        `${FACILITATOR_URL}/supported`,
+        expect.objectContaining({
+          headers: expect.objectContaining({ Authorization: "Bearer key-2" }),
+        }),
+      );
+    });
+
     it("does not send Authorization header when no API key is set", async () => {
       vi.stubEnv("TESTNET_SERVER_STELLAR_ADDRESS", VALID_G_ADDR);
       vi.stubEnv("TESTNET_FACILITATOR_URL", FACILITATOR_URL);
@@ -369,9 +404,7 @@ describe("Env", () => {
 
       vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 503 }));
 
-      await expect(Env.validateFacilitators()).rejects.toThrow(
-        /Testnet facilitator.*returned HTTP 503/,
-      );
+      await expect(Env.validateFacilitators()).rejects.toThrow(/Testnet facilitator.*HTTP 503/);
     });
 
     it("throws when facilitator is unreachable", async () => {
@@ -380,8 +413,22 @@ describe("Env", () => {
 
       vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("ECONNREFUSED")));
 
+      await expect(Env.validateFacilitators()).rejects.toThrow(/Testnet facilitator.*ECONNREFUSED/);
+    });
+
+    it("throws when any configured facilitator API key fails and masks the key", async () => {
+      vi.stubEnv("TESTNET_SERVER_STELLAR_ADDRESS", VALID_G_ADDR);
+      vi.stubEnv("TESTNET_FACILITATOR_URL", FACILITATOR_URL);
+      vi.stubEnv("TESTNET_FACILITATOR_API_KEY", "123456ab,abcdef12");
+
+      const mockFetch = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: true, status: 200 })
+        .mockResolvedValueOnce({ ok: false, status: 401 });
+      vi.stubGlobal("fetch", mockFetch);
+
       await expect(Env.validateFacilitators()).rejects.toThrow(
-        /Testnet facilitator.*unreachable.*ECONNREFUSED/,
+        /Testnet facilitator.*one or more API keys failed: ab\.\.\.12 returned HTTP 401/s,
       );
     });
 
@@ -412,5 +459,47 @@ describe("Env", () => {
       await expect(Env.validateFacilitators()).resolves.toBeUndefined();
       expect(mockFetch).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe("maskFacilitatorApiKey", () => {
+  it("masks short keys (≤4 chars) completely", () => {
+    expect(maskFacilitatorApiKey("a")).toBe("****");
+    expect(maskFacilitatorApiKey("ab")).toBe("****");
+    expect(maskFacilitatorApiKey("abc")).toBe("****");
+    expect(maskFacilitatorApiKey("abcd")).toBe("****");
+  });
+
+  it("shows first 2 and last 2 chars for longer keys", () => {
+    expect(maskFacilitatorApiKey("abcde")).toBe("ab...de");
+    expect(maskFacilitatorApiKey("123456ab")).toBe("12...ab");
+    expect(maskFacilitatorApiKey("my-very-long-api-key")).toBe("my...ey");
+  });
+});
+
+describe("parseFacilitatorApiKeys", () => {
+  it("returns empty array for undefined", () => {
+    expect(parseFacilitatorApiKeys(undefined)).toEqual([]);
+  });
+
+  it("returns empty array for empty string", () => {
+    expect(parseFacilitatorApiKeys("")).toEqual([]);
+  });
+
+  it("parses single key", () => {
+    expect(parseFacilitatorApiKeys("my-key")).toEqual(["my-key"]);
+  });
+
+  it("parses comma-separated keys", () => {
+    expect(parseFacilitatorApiKeys("key-1,key-2,key-3")).toEqual(["key-1", "key-2", "key-3"]);
+  });
+
+  it("trims whitespace from keys", () => {
+    expect(parseFacilitatorApiKeys(" key-1 , key-2 ")).toEqual(["key-1", "key-2"]);
+  });
+
+  it("filters empty entries from comma-separated values", () => {
+    expect(parseFacilitatorApiKeys("key-1,,key-2")).toEqual(["key-1", "key-2"]);
+    expect(parseFacilitatorApiKeys(" , , ")).toEqual([]);
   });
 });
