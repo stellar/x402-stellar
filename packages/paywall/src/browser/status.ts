@@ -5,8 +5,7 @@
 export type Status =
   | { type: "success"; message: string }
   | { type: "error"; message: string }
-  | { type: "info"; message: string }
-  | { type: "warning"; message: string };
+  | { type: "info"; message: string };
 
 /**
  * Helper to create a success status.
@@ -36,16 +35,6 @@ export function statusError(message: string): Status {
  */
 export function statusInfo(message: string): Status {
   return { type: "info", message };
-}
-
-/**
- * Helper to create a warning status.
- *
- * @param message - Warning message to display.
- * @returns Status object with type "warning".
- */
-export function statusWarning(message: string): Status {
-  return { type: "warning", message };
 }
 
 /**

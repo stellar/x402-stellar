@@ -261,10 +261,6 @@ body {
   color: #cd2b31;
 }
 
-.status-warning {
-  color: #ad5700;
-}
-
 .cta-container {
   display: flex;
   flex-basis: 50%;
