@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit/sdk";
 import type { SignAuthEntry } from "@stellar/stellar-sdk/contract";
 import type { Network } from "@x402/core/types";
+import { parseError } from "@x402-stellar/shared";
 import { getNetworkPassphrase, type ClientStellarSigner } from "@x402/stellar";
 
 export type UseSWKSignerParams = {
@@ -62,7 +63,7 @@ export function useSWKSigner({
         return {
           signedAuthEntry: "",
           error: {
-            message: error instanceof Error ? error.message : "Failed to sign auth entry.",
+            message: parseError(error, "Failed to sign auth entry."),
             code: 0,
           },
         };

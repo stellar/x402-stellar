@@ -68,6 +68,9 @@ importers:
       '@stellar/stellar-sdk':
         specifier: ^14.6.1
         version: 14.6.1
+      '@x402-stellar/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@x402/core':
         specifier: 2.6.0
         version: 2.6.0

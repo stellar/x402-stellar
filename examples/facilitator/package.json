@@ -19,6 +19,7 @@
   "dependencies": {
     "@stellar/stellar-sdk": "^14.6.1",
     "@x402/core": "2.6.0",
+    "@x402-stellar/shared": "workspace:*",
     "@x402/stellar": "2.6.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",

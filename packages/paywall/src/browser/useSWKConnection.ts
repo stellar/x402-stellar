@@ -7,6 +7,7 @@ import { OneKeyModule } from "@creit.tech/stellar-wallets-kit/modules/onekey";
 import { Networks } from "@creit.tech/stellar-wallets-kit/types";
 import type { Network } from "@x402/core/types";
 import { getNetworkPassphrase } from "@x402/stellar";
+import { parseError } from "@x402-stellar/shared";
 import { statusClear, statusError, statusInfo, type Status } from "./status";
 
 export type UseSWKConnectionParams = {
@@ -54,7 +55,7 @@ export function useSWKConnection({
       console.error("Failed to initialize Stellar Wallet Kit", error);
       onStatusRef.current(
         statusError(
-          error instanceof Error ? error.message : "Failed to initialize Stellar Wallet Kit.",
+          parseError(error, "Failed to initialize Stellar Wallet Kit."),
         ),
       );
     }
@@ -91,7 +92,7 @@ export function useSWKConnection({
     } catch (error) {
       console.error("Failed to connect wallet", error);
       onStatusRef.current(
-        statusError(error instanceof Error ? error.message : "Failed to connect to wallet."),
+        statusError(parseError(error, "Failed to connect to wallet.")),
       );
       setAddress(null);
     }

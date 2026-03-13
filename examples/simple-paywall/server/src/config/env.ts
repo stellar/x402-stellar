@@ -1,3 +1,5 @@
+import { parseCommaSeparatedList, parseError } from "@x402-stellar/shared";
+
 const VALID_LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"] as const;
 type LogLevel = (typeof VALID_LOG_LEVELS)[number];
 
@@ -52,10 +54,7 @@ export function parseFacilitatorApiKeys(value: string | undefined): string[] {
     return [];
   }
 
-  return value
-    .split(",")
-    .map((key) => key.trim())
-    .filter(Boolean);
+  return parseCommaSeparatedList(value);
 }
 
 export function maskFacilitatorApiKey(key: string): string {
@@ -135,12 +134,7 @@ export class Env {
 
   static get corsOrigins(): string | string[] {
     const raw = process.env.CORS_ORIGINS ?? "http://localhost:5173";
-    return raw === "*"
-      ? "*"
-      : raw
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean);
+    return raw === "*" ? "*" : parseCommaSeparatedList(raw);
   }
 
   static get paymentPrice(): string {
@@ -154,10 +148,7 @@ export class Env {
   static get trustProxy(): string[] {
     const raw = process.env.TRUST_PROXY;
     const defaultValue = "loopback,linklocal,uniquelocal";
-    return (raw ?? defaultValue)
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    return parseCommaSeparatedList(raw ?? defaultValue);
   }
 
   static get paywallDisabled(): boolean {
@@ -242,7 +233,7 @@ export class Env {
               );
             }
           } catch (err) {
-            const message = err instanceof Error ? err.message : String(err);
+            const message = parseError(err);
             keyErrors.push(key ? `${maskFacilitatorApiKey(key)} failed: ${message}` : message);
           }
         }

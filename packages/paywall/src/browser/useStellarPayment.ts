@@ -4,6 +4,7 @@ import { x402Client } from "@x402/core/client";
 import { encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
+import { parseError } from "@x402-stellar/shared";
 import { statusError, statusInfo, statusSuccess, type Status } from "./status";
 import { resolvePaymentTargetUrl, formatPaymentError } from "./utils";
 
@@ -131,7 +132,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
         ),
       );
     } catch (error) {
-      setStatus(statusError(error instanceof Error ? error.message : "Payment failed."));
+      setStatus(statusError(parseError(error, "Payment failed.")));
     } finally {
       setIsPaying(false);
     }

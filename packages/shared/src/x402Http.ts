@@ -1,5 +1,11 @@
 /// <reference lib="dom" />
-const X402_ERROR_MESSAGE_FIELDS = ["error", "message", "detail", "details"] as const;
+
+/**
+ * Header field names checked when extracting an error message from an x402
+ * JSON payload. Shared so callers (e.g. logging middleware) can inspect the
+ * same fields without re-declaring the list.
+ */
+export const X402_ERROR_MESSAGE_FIELDS = ["error", "message", "detail", "details"] as const;
 
 type BufferLike = {
   from(
@@ -15,13 +21,20 @@ export type X402PaymentResponsePayload = {
   network?: string;
 } & Record<string, unknown>;
 
-// Detect Node.js Buffer for base64 decoding. Falls back to atob + TextDecoder
-// in browsers and edge runtimes (Cloudflare Workers, Deno) where Buffer may
-// be absent or only partially polyfilled by bundlers.
+/**
+ * Returns the Node.js `Buffer` constructor when available, or `undefined` in
+ * browser / edge runtimes where `Buffer` may be absent or partially polyfilled.
+ */
 function getNodeBuffer(): BufferLike | undefined {
   return (globalThis as typeof globalThis & { Buffer?: BufferLike }).Buffer;
 }
 
+/**
+ * Decodes a base64-encoded x402 header value to a UTF-8 string.
+ *
+ * Uses `Buffer` in Node.js and falls back to `atob` + `TextDecoder` in
+ * browser and edge runtimes (Cloudflare Workers, Deno).
+ */
 function decodeX402HeaderBase64Value(base64HeaderValue: string): string {
   const nodeBuffer = getNodeBuffer();
   if (nodeBuffer) {
@@ -33,6 +46,11 @@ function decodeX402HeaderBase64Value(base64HeaderValue: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+/**
+ * Parses a base64-encoded JSON x402 header value into a typed object.
+ *
+ * Returns `undefined` when the value is absent, empty, or not valid JSON.
+ */
 export function parseX402JsonHeaderValue<T = unknown>(
   x402HeaderValue: string | null | undefined,
 ): T | undefined {
@@ -47,6 +65,13 @@ export function parseX402JsonHeaderValue<T = unknown>(
   }
 }
 
+/**
+ * Extracts a human-readable error message from an x402 JSON payload object.
+ *
+ * Checks the fields listed in `X402_ERROR_MESSAGE_FIELDS` in order and
+ * returns the first non-empty string value found, or `undefined` when none
+ * is present.
+ */
 function getX402ErrorMessage(x402Payload: unknown): string | undefined {
   if (!x402Payload || typeof x402Payload !== "object") {
     return undefined;
@@ -63,6 +88,12 @@ function getX402ErrorMessage(x402Payload: unknown): string | undefined {
   return undefined;
 }
 
+/**
+ * Parses the `payment-required` response header and returns its error message.
+ *
+ * The header value is expected to be a base64-encoded JSON object.  Returns
+ * `undefined` when the header is absent, malformed, or contains no error text.
+ */
 export function parseX402PaymentRequiredHeaderError(
   paymentRequiredHeaderValue: string | null | undefined,
 ): string | undefined {
@@ -71,6 +102,12 @@ export function parseX402PaymentRequiredHeaderError(
   );
 }
 
+/**
+ * Parses the `payment-response` header into a typed payload object.
+ *
+ * The header value is expected to be a base64-encoded JSON object.  Returns
+ * `undefined` when the header is absent or malformed.
+ */
 export function parseX402PaymentResponseHeader(
   paymentResponseHeaderValue: string | null | undefined,
 ): X402PaymentResponsePayload | undefined {

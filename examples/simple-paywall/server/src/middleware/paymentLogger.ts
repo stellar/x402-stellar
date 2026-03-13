@@ -1,9 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { parseX402JsonHeaderValue } from "@x402-stellar/shared";
+import { parseX402JsonHeaderValue, X402_ERROR_MESSAGE_FIELDS } from "@x402-stellar/shared";
 import { logger } from "../utils/logger.js";
 
 const MAX_FIELD_LENGTH = 500;
-const ERROR_FIELDS = ["error", "message", "detail", "details"] as const;
 const PAYMENT_REQUIRED_HEADER = "payment-required";
 const PAYMENT_RESPONSE_HEADER = "payment-response";
 
@@ -22,7 +21,7 @@ function extractErrorFields(body: unknown): Record<string, string> {
     return extracted;
   }
 
-  for (const key of ERROR_FIELDS) {
+  for (const key of X402_ERROR_MESSAGE_FIELDS) {
     if (key in body) {
       extracted[key] = String((body as Record<string, unknown>)[key]).slice(0, MAX_FIELD_LENGTH);
     }

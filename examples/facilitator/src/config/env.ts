@@ -1,3 +1,5 @@
+import { parseCommaSeparatedList } from "@x402-stellar/shared";
+
 const VALID_LOG_LEVELS = ["fatal", "error", "warn", "info", "debug", "trace"] as const;
 type LogLevel = (typeof VALID_LOG_LEVELS)[number];
 
@@ -54,10 +56,7 @@ export class Env {
   static get channelSecrets(): string[] | undefined {
     const raw = process.env.FACILITATOR_STELLAR_CHANNEL_SECRETS;
     if (!raw) return undefined;
-    const secrets = raw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const secrets = parseCommaSeparatedList(raw);
     return secrets.length > 0 ? secrets : undefined;
   }
 
@@ -89,9 +88,6 @@ export class Env {
   static get trustProxy(): string[] {
     const raw = process.env.TRUST_PROXY;
     const defaultValue = "loopback,linklocal,uniquelocal";
-    return (raw ?? defaultValue)
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    return parseCommaSeparatedList(raw ?? defaultValue);
   }
 }

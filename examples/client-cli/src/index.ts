@@ -1,19 +1,12 @@
 import "dotenv/config";
-import { parseX402PaymentRequiredHeaderError } from "@x402-stellar/shared";
+import { parseError, parseX402PaymentRequiredHeaderError } from "@x402-stellar/shared";
 import { x402Client, x402HTTPClient } from "@x402/core/client";
 import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import { logger } from "./utils/logger.js";
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-}
-
 function isInsufficientBalanceSimulationError(error: unknown): boolean {
-  return getErrorMessage(error).includes("resulting balance is not within the allowed range");
+  return parseError(error).includes("resulting balance is not within the allowed range");
 }
 
 const STELLAR_PRIVATE_KEY = process.env.STELLAR_PRIVATE_KEY;
