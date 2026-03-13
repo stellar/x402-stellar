@@ -196,6 +196,8 @@ FROM node:22-alpine AS facilitator
 WORKDIR /app
 
 COPY --from=base /app/node_modules                               /app/node_modules
+COPY --from=base /app/packages/shared/dist                       /app/packages/shared/dist
+COPY --from=base /app/packages/shared/package.json               /app/packages/shared/package.json
 COPY --from=base /app/examples/facilitator                       /app/examples/facilitator
 
 EXPOSE 4022
