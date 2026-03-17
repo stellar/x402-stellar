@@ -18,7 +18,7 @@
       "@creit.tech/stellar-wallets-kit@2.0.0": "patches/@creit.tech__stellar-wallets-kit@2.0.0.patch"
     },
     "overrides": {
-      "flatted": ">=3.4.0"
+      "flatted": "^3.4.2"
     }
   },
   "devDependencies": {
