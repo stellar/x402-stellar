@@ -96,14 +96,23 @@ async function main() {
   console.log("Submitting channel account creation transaction...");
   const result = await server.sendTransaction(transaction);
 
-  if (result.status === "ERROR") {
-    console.error("Transaction submission failed:", JSON.stringify(result, null, 2));
+  if (result.status !== "PENDING") {
+    console.error(
+      `Transaction submission returned unexpected status: ${result.status}`,
+      JSON.stringify(result, null, 2),
+    );
     process.exit(1);
   }
 
-  // Poll for confirmation
+  // Poll for confirmation with timeout
+  const MAX_POLLS = 60;
+  let polls = 0;
   let getResult = await server.getTransaction(result.hash);
   while (getResult.status === "NOT_FOUND") {
+    if (++polls > MAX_POLLS) {
+      console.error("Transaction confirmation timed out after 2 minutes");
+      process.exit(1);
+    }
     console.log("Waiting for transaction confirmation...");
     await new Promise((r) => setTimeout(r, 2000));
     getResult = await server.getTransaction(result.hash);
