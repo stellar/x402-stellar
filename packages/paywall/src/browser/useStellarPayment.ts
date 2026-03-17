@@ -1,7 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 import { x402Client } from "@x402/core/client";
-import { encodePaymentSignatureHeader } from "@x402/core/http";
+import { decodePaymentRequiredHeader, encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
 import { parseError } from "@x402-stellar/shared";
@@ -39,16 +39,19 @@ type X402Runtime = {
 export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPaymentResult {
   const { walletSigner, paymentRequired, onSuccessfulResponse, setStatus } = params;
   const [isPaying, setIsPaying] = useState(false);
+  const inFlightRef = useRef(false);
 
   const x402 = (window as Window & { x402?: X402Runtime }).x402;
   const runtimeRpcUrl = x402?.config?.rpcUrl;
 
   const submitPayment = useCallback(async () => {
+    if (inFlightRef.current) return;
     if (!x402 || !walletSigner || !paymentRequired) {
       setStatus(statusError("Unable to submit Stellar payment; wallet or config missing."));
       return;
     }
 
+    inFlightRef.current = true;
     setIsPaying(true);
     try {
       setStatus(statusInfo("Waiting for user signature..."));
@@ -86,7 +89,14 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
         if (parsedBody && typeof parsedBody.x402Version === "number") {
           setStatus(statusInfo("Retrying payment..."));
 
-          const retryPayload = await client.createPaymentPayload(paymentRequired);
+          // Use fresh requirements from the 402 response instead of the
+          // original (potentially stale) paymentRequired prop.
+          const freshHeader = response.headers.get("PAYMENT-REQUIRED");
+          const freshRequirements = freshHeader
+            ? decodePaymentRequiredHeader(freshHeader)
+            : (parsedBody as unknown as PaymentRequired);
+
+          const retryPayload = await client.createPaymentPayload(freshRequirements);
           const retryHeader = encodePaymentSignatureHeader(retryPayload);
 
           const retryResponse = await fetch(targetUrl, {
@@ -133,6 +143,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
     } catch (error) {
       setStatus(statusError(parseError(error, "Payment failed.")));
     } finally {
+      inFlightRef.current = false;
       setIsPaying(false);
     }
   }, [walletSigner, x402, paymentRequired, onSuccessfulResponse, setStatus, runtimeRpcUrl]);

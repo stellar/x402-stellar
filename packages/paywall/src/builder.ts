@@ -21,7 +21,7 @@ export class PaywallBuilder {
 
   build(): PaywallProvider {
     const builderConfig = this.config;
-    const handlers = this.handlers;
+    const handlers = [...this.handlers];
 
     return {
       generateHtml: (paymentRequired: PaymentRequired, runtimeConfig?: PaywallConfig): string => {
