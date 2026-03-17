@@ -1,6 +1,4 @@
-import dotenv from "dotenv";
-
-dotenv.config();
+import "dotenv/config";
 
 import { Env } from "./config/env.js";
 import { logger } from "./utils/logger.js";
