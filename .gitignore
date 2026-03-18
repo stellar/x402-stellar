@@ -4,5 +4,21 @@ dist
 .turbo
 *.tsbuildinfo
 
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Test coverage
+coverage/
+
 # Generated channel account keys (contain secrets)
 examples/facilitator/scripts/output/
