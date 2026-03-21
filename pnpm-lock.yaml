@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  flatted: '>=3.4.0'
+  flatted: ^3.4.2
 
 patchedDependencies:
   '@creit.tech/stellar-wallets-kit@2.0.0':
