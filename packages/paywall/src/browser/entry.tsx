@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import type {} from "./window";
 import { StellarPaywall } from "./StellarPaywall";
 import { validateX402Config } from "./validate";
+import { sanitizeHTML } from "./sanitize";
 
 // Stellar-specific paywall entry point
 window.addEventListener("load", () => {
@@ -42,7 +43,7 @@ window.addEventListener("load", () => {
       onSuccessfulResponse={async (response: Response) => {
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("text/html")) {
-          document.documentElement.innerHTML = await response.text();
+          document.documentElement.innerHTML = sanitizeHTML(await response.text());
         } else {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
