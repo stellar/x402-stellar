@@ -2,7 +2,7 @@
   "name": "x402-stellar",
   "private": true,
   "license": "Apache-2.0",
-  "packageManager": "pnpm@10.7.0",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "build": "turbo run build --filter='@x402-stellar/*'",
     "dev": "turbo run dev --filter='@x402-stellar/*'",
