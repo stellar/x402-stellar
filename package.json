@@ -18,15 +18,7 @@
       "@creit.tech/stellar-wallets-kit@2.0.0": "patches/@creit.tech__stellar-wallets-kit@2.0.0.patch"
     },
     "overrides": {
-      "flatted": "^3.4.2",
-      "path-to-regexp": "^8.4.0",
-      "anymatch>picomatch": "^2.3.2",
-      "fdir>picomatch": "^4.0.4",
-      "tinyglobby>picomatch": "^4.0.4",
-      "vite>picomatch": "^4.0.4",
-      "vitest>picomatch": "^4.0.4",
-      "brace-expansion@1": "^1.1.13",
-      "brace-expansion@5": "^5.0.5"
+      "flatted": "^3.4.2"
     }
   },
   "devDependencies": {
