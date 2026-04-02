@@ -188,7 +188,9 @@ describe("POST /settle", () => {
   // BUG-008: settle error should not leak internal error details
   it("does not leak internal error details in settlement-aborted response", async () => {
     mockSettle.mockRejectedValueOnce(
-      new Error("Settlement aborted: account GABC123 sequence 99 RPC timeout at soroban-rpc.stellar.org"),
+      new Error(
+        "Settlement aborted: account GABC123 sequence 99 RPC timeout at soroban-rpc.stellar.org",
+      ),
     );
 
     const res = await request(app)
