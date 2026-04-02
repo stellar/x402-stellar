@@ -81,6 +81,17 @@ describe("Env", () => {
       vi.stubEnv("CORS_ORIGINS", "http://localhost:3001,http://localhost:5173");
       expect(Env.corsOrigins).toEqual(["http://localhost:3001", "http://localhost:5173"]);
     });
+
+    // BUG-005: whitespace in CORS_ORIGINS must be trimmed
+    it("trims whitespace from CORS_ORIGINS entries", () => {
+      vi.stubEnv("CORS_ORIGINS", "http://app.example.com, http://admin.example.com");
+      expect(Env.corsOrigins).toEqual(["http://app.example.com", "http://admin.example.com"]);
+    });
+
+    it("filters empty entries from CORS_ORIGINS", () => {
+      vi.stubEnv("CORS_ORIGINS", "http://app.example.com,,http://admin.example.com,");
+      expect(Env.corsOrigins).toEqual(["http://app.example.com", "http://admin.example.com"]);
+    });
   });
 
   describe("feeBumpSecret", () => {
