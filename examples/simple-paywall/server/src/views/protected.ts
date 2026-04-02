@@ -4,7 +4,7 @@ function safeHref(raw?: string): string | undefined {
   const trimmed = raw.trim();
   if (!trimmed) return undefined;
 
-  if (trimmed.startsWith("/")) return trimmed;
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return trimmed;
 
   try {
     const { protocol } = new URL(trimmed);
