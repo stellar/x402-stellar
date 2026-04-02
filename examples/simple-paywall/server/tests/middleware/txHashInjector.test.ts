@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { injectTxLink } from "../../src/middleware/txHashInjector.js";
+import { describe, it, expect, vi } from "vitest";
+import express from "express";
+import request from "supertest";
+import { injectTxLink, txHashInjector } from "../../src/middleware/txHashInjector.js";
 
 const PLACEHOLDER = "{{TX_LINK}}";
 
@@ -106,5 +108,49 @@ describe("injectTxLink", () => {
     const result = injectTxLink(body, header);
 
     expect(result).toBe("<html><body>No placeholder here</body></html>");
+  });
+
+  // BUG-012: replaceAll for multiple placeholders
+  it("replaces all occurrences of {{TX_LINK}}", () => {
+    const txHash = "abc123def456";
+    const header = encodePaymentResponse({
+      transaction: txHash,
+      network: "stellar:testnet",
+    });
+    const body = `<html><body>${PLACEHOLDER}<br/>${PLACEHOLDER}</body></html>`;
+    const result = injectTxLink(body, header);
+    expect(result).not.toContain(PLACEHOLDER);
+  });
+});
+
+describe("txHashInjector middleware", () => {
+  // BUG-003: non-HTML responses should NOT be buffered
+  it("does not buffer JSON responses — passes through directly", async () => {
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/api", (_req, res) => {
+      res.json({ data: "test" });
+    });
+
+    const writeSpy = vi.fn();
+    const res = await request(app).get("/api");
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ data: "test" });
+  });
+
+  // BUG-007: HTML path should forward res.end callback
+  it("forwards res.end callback on HTML path", async () => {
+    let callbackCalled = false;
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/page", (_req, res) => {
+      res.setHeader("content-type", "text/html");
+      res.end("<html>{{TX_LINK}}</html>", () => {
+        callbackCalled = true;
+      });
+    });
+
+    await request(app).get("/page");
+    expect(callbackCalled).toBe(true);
   });
 });
