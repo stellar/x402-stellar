@@ -96,6 +96,20 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
             ? decodePaymentRequiredHeader(freshHeader)
             : (parsedBody as unknown as PaymentRequired);
 
+          // BUG-006: Validate that critical payment fields haven't changed
+          const originalAccept = paymentRequired.accepts?.[0];
+          const freshAccept = freshRequirements.accepts?.[0];
+          if (
+            originalAccept &&
+            freshAccept &&
+            (freshAccept.payTo !== originalAccept.payTo ||
+              freshAccept.network !== originalAccept.network)
+          ) {
+            throw new Error(
+              "Server changed payment recipient or network on retry — aborting for safety",
+            );
+          }
+
           const retryPayload = await client.createPaymentPayload(freshRequirements);
           const retryHeader = encodePaymentSignatureHeader(retryPayload);
 
