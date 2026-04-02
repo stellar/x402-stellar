@@ -95,7 +95,14 @@ export function createApp(): Express {
         paymentRequirements: PaymentRequirements;
       };
 
-      if (!paymentPayload || !paymentRequirements) {
+      if (
+        !paymentPayload ||
+        typeof paymentPayload !== "object" ||
+        Array.isArray(paymentPayload) ||
+        !paymentRequirements ||
+        typeof paymentRequirements !== "object" ||
+        Array.isArray(paymentRequirements)
+      ) {
         res.status(400).json({
           error: "Missing paymentPayload or paymentRequirements",
         });
@@ -126,7 +133,14 @@ export function createApp(): Express {
     try {
       const { paymentPayload, paymentRequirements } = req.body;
 
-      if (!paymentPayload || !paymentRequirements) {
+      if (
+        !paymentPayload ||
+        typeof paymentPayload !== "object" ||
+        Array.isArray(paymentPayload) ||
+        !paymentRequirements ||
+        typeof paymentRequirements !== "object" ||
+        Array.isArray(paymentRequirements)
+      ) {
         res.status(400).json({
           error: "Missing paymentPayload or paymentRequirements",
         });
@@ -145,9 +159,10 @@ export function createApp(): Express {
       if (error instanceof Error && error.message.includes("Settlement aborted:")) {
         res.json({
           success: false,
-          errorReason: error.message.replace("Settlement aborted: ", ""),
+          transaction: "",
+          errorReason: "Settlement aborted",
           network: req.body?.paymentPayload?.network || "unknown",
-        } as SettleResponse);
+        } satisfies SettleResponse);
         return;
       }
 

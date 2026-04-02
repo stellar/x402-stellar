@@ -3,6 +3,11 @@ import request from "supertest";
 import type express from "express";
 
 const mockVerify = vi.fn().mockResolvedValue({ isValid: true });
+const mockSettle = vi.fn().mockResolvedValue({
+  success: true,
+  network: "stellar:testnet",
+  transaction: "mock_tx_hash",
+});
 
 vi.mock("@x402/core/facilitator", () => {
   return {
@@ -16,11 +21,7 @@ vi.mock("@x402/core/facilitator", () => {
         onSettleFailure: vi.fn().mockReturnThis(),
         register: vi.fn(),
         verify: mockVerify,
-        settle: vi.fn().mockResolvedValue({
-          success: true,
-          network: "stellar:testnet",
-          transaction: "mock_tx_hash",
-        }),
+        settle: mockSettle,
         getSupported: vi.fn().mockReturnValue({
           kinds: [{ scheme: "exact", network: "stellar:testnet" }],
         }),
@@ -144,6 +145,80 @@ describe("POST /settle", () => {
       });
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("success");
+  });
+
+  // BUG-001: settle abort response must include `transaction` field
+  it("includes transaction field in settlement-aborted error response", async () => {
+    mockSettle.mockRejectedValueOnce(new Error("Settlement aborted: insufficient balance"));
+
+    const res = await request(app)
+      .post("/settle")
+      .send({
+        paymentPayload: { network: "stellar:testnet" },
+        paymentRequirements: { scheme: "exact" },
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("transaction");
+    expect(res.body.success).toBe(false);
+  });
+
+  // BUG-004: body shape validation — truthy non-object values must be rejected
+  it("returns 400 when paymentPayload is a string (truthy but wrong shape)", async () => {
+    const res = await request(app)
+      .post("/settle")
+      .send({ paymentPayload: "not-an-object", paymentRequirements: { scheme: "exact" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when paymentPayload is an array", async () => {
+    const res = await request(app)
+      .post("/settle")
+      .send({ paymentPayload: [1, 2], paymentRequirements: { scheme: "exact" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when paymentRequirements is a number", async () => {
+    const res = await request(app)
+      .post("/settle")
+      .send({ paymentPayload: { network: "stellar:testnet" }, paymentRequirements: 42 });
+    expect(res.status).toBe(400);
+  });
+
+  // BUG-008: settle error should not leak internal error details
+  it("does not leak internal error details in settlement-aborted response", async () => {
+    mockSettle.mockRejectedValueOnce(
+      new Error("Settlement aborted: account GABC123 sequence 99 RPC timeout at soroban-rpc.stellar.org"),
+    );
+
+    const res = await request(app)
+      .post("/settle")
+      .send({
+        paymentPayload: { network: "stellar:testnet" },
+        paymentRequirements: { scheme: "exact" },
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(false);
+    expect(res.body.errorReason).not.toContain("GABC123");
+    expect(res.body.errorReason).not.toContain("soroban-rpc");
+  });
+});
+
+describe("POST /verify — body shape validation", () => {
+  // BUG-004: same validation on /verify
+  it("returns 400 when paymentPayload is a string", async () => {
+    const res = await request(app)
+      .post("/verify")
+      .send({ paymentPayload: "not-an-object", paymentRequirements: { scheme: "exact" } });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 400 when paymentRequirements is an array", async () => {
+    const res = await request(app)
+      .post("/verify")
+      .send({ paymentPayload: { network: "stellar:testnet" }, paymentRequirements: [1] });
+    expect(res.status).toBe(400);
   });
 });
 
