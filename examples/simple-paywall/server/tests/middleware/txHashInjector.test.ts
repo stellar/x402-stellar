@@ -124,18 +124,32 @@ describe("injectTxLink", () => {
 });
 
 describe("txHashInjector middleware", () => {
-  // BUG-003: non-HTML responses should NOT be buffered
-  it("does not buffer JSON responses — passes through directly", async () => {
+  // BUG-003: non-HTML responses should NOT be buffered — res.write passes through
+  it("passes non-HTML res.write calls through to original write", async () => {
     const app = express();
     app.use(txHashInjector());
     app.get("/api", (_req, res) => {
+      // res.json sets content-type to application/json before writing
       res.json({ data: "test" });
     });
 
-    const writeSpy = vi.fn();
     const res = await request(app).get("/api");
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ data: "test" });
+  });
+
+  it("still buffers HTML responses for {{TX_LINK}} replacement", async () => {
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/page", (_req, res) => {
+      res.setHeader("content-type", "text/html");
+      res.write("<html>{{TX_LINK}}");
+      res.end("</html>");
+    });
+
+    const res = await request(app).get("/page");
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain("{{TX_LINK}}");
   });
 
   // BUG-007: HTML path should forward res.end callback

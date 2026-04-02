@@ -19,6 +19,12 @@ export function txHashInjector() {
     const chunks: Buffer[] = [];
 
     res.write = function (...args: Parameters<WriteFn>) {
+      // Only buffer if content-type is unknown or HTML; pass non-HTML through directly
+      const ct = res.getHeader("content-type");
+      if (ct && !(typeof ct === "string" && ct.includes("text/html"))) {
+        return originalWrite(...args);
+      }
+
       const [chunk, encodingOrCb] = args;
       if (chunk != null) {
         if (Buffer.isBuffer(chunk)) {
