@@ -138,7 +138,12 @@ export class Env {
   }
 
   static get paymentPrice(): string {
-    return process.env.PAYMENT_PRICE ?? "0.01";
+    const raw = process.env.PAYMENT_PRICE ?? "0.01";
+    const num = Number(raw);
+    if (isNaN(num) || num <= 0) {
+      throw new Error(`Invalid PAYMENT_PRICE: ${raw}. Must be a positive number.`);
+    }
+    return raw;
   }
 
   static get paymentDescription(): string {

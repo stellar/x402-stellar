@@ -59,6 +59,27 @@ describe("Env", () => {
     expect(Env.paymentDescription).toBe("Access to protected content");
   });
 
+  // BUG-011: PAYMENT_PRICE must be a valid positive number
+  it("throws on non-numeric PAYMENT_PRICE", () => {
+    vi.stubEnv("PAYMENT_PRICE", "abc");
+    expect(() => Env.paymentPrice).toThrow("Invalid PAYMENT_PRICE");
+  });
+
+  it("throws on zero PAYMENT_PRICE", () => {
+    vi.stubEnv("PAYMENT_PRICE", "0");
+    expect(() => Env.paymentPrice).toThrow("Invalid PAYMENT_PRICE");
+  });
+
+  it("throws on negative PAYMENT_PRICE", () => {
+    vi.stubEnv("PAYMENT_PRICE", "-5");
+    expect(() => Env.paymentPrice).toThrow("Invalid PAYMENT_PRICE");
+  });
+
+  it("accepts valid PAYMENT_PRICE", () => {
+    vi.stubEnv("PAYMENT_PRICE", "1.5");
+    expect(Env.paymentPrice).toBe("1.5");
+  });
+
   it("returns '*' when CORS_ORIGINS is set to '*'", () => {
     vi.stubEnv("CORS_ORIGINS", "*");
     expect(Env.corsOrigins).toBe("*");
