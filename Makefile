@@ -1,4 +1,4 @@
-.PHONY: help install build dev lint lint-fix format format-check typecheck test check clean \
+.PHONY: help install build dev lint lint-fix format format-check typecheck test audit check clean \
        docker-build-facilitator docker-build-server docker-build-client docker-build-all docker-push-all
 
 # ── Docker image tags (overridable by CI) ──────────────────────
@@ -43,7 +43,10 @@ typecheck: ## Type check the project
 test: ## Run tests
 	pnpm test
 
-check: install format lint typecheck test build ## Install, run all checks (format, lint, typecheck, test), and build
+audit: ## Check dependencies for high/critical vulnerabilities
+	pnpm audit --audit-level high
+
+check: install format lint typecheck test audit build ## Install, run all checks (format, lint, typecheck, test, audit), and build
 
 clean: ## Clean build artifacts
 	rm -rf dist
