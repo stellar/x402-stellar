@@ -59,7 +59,7 @@ describe("Env", () => {
     expect(Env.paymentDescription).toBe("Access to protected content");
   });
 
-  // BUG-011: PAYMENT_PRICE must be a valid positive number
+  // PAYMENT_PRICE must be a valid positive number
   it("throws on non-numeric PAYMENT_PRICE", () => {
     vi.stubEnv("PAYMENT_PRICE", "abc");
     expect(() => Env.paymentPrice).toThrow("Invalid PAYMENT_PRICE");

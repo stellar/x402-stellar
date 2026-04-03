@@ -110,7 +110,7 @@ describe("injectTxLink", () => {
     expect(result).toBe("<html><body>No placeholder here</body></html>");
   });
 
-  // BUG-012: replaceAll for multiple placeholders
+  // replaceAll for multiple placeholders
   it("replaces all occurrences of {{TX_LINK}}", () => {
     const txHash = "abc123def456";
     const header = encodePaymentResponse({
@@ -124,7 +124,7 @@ describe("injectTxLink", () => {
 });
 
 describe("txHashInjector middleware", () => {
-  // BUG-003: non-HTML responses should NOT be buffered — res.write passes through
+  // non-HTML responses should NOT be buffered — res.write passes through
   it("passes non-HTML res.write calls through to original write", async () => {
     const app = express();
     app.use(txHashInjector());
@@ -152,7 +152,7 @@ describe("txHashInjector middleware", () => {
     expect(res.text).not.toContain("{{TX_LINK}}");
   });
 
-  // BUG-007: HTML path should forward res.end callback
+  // HTML path should forward res.end callback
   it("forwards res.end callback on HTML path", async () => {
     let callbackCalled = false;
     const app = express();

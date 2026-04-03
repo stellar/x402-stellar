@@ -147,7 +147,7 @@ describe("POST /settle", () => {
     expect(res.body).toHaveProperty("success");
   });
 
-  // BUG-001: settle abort response must include `transaction` field
+  // settle abort response must include `transaction` field
   it("includes transaction field in settlement-aborted error response", async () => {
     mockSettle.mockRejectedValueOnce(new Error("Settlement aborted: insufficient balance"));
 
@@ -163,7 +163,7 @@ describe("POST /settle", () => {
     expect(res.body.success).toBe(false);
   });
 
-  // BUG-004: body shape validation — truthy non-object values must be rejected
+  // body shape validation — truthy non-object values must be rejected
   it("returns 400 when paymentPayload is a string (truthy but wrong shape)", async () => {
     const res = await request(app)
       .post("/settle")
@@ -185,7 +185,7 @@ describe("POST /settle", () => {
     expect(res.status).toBe(400);
   });
 
-  // BUG-008: settle error should not leak internal error details
+  // settle error should not leak internal error details
   it("does not leak internal error details in settlement-aborted response", async () => {
     mockSettle.mockRejectedValueOnce(
       new Error(
@@ -208,7 +208,7 @@ describe("POST /settle", () => {
 });
 
 describe("POST /verify — body shape validation", () => {
-  // BUG-004: same validation on /verify
+  // same validation on /verify
   it("returns 400 when paymentPayload is a string", async () => {
     const res = await request(app)
       .post("/verify")
