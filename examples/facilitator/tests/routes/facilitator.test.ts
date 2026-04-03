@@ -183,6 +183,19 @@ describe("POST /settle", () => {
     expect(res.body.success).toBe(false);
   });
 
+  it("uses network from validated paymentRequirements in settlement-aborted response", async () => {
+    mockSettle.mockRejectedValueOnce(new Error("Settlement aborted: insufficient balance"));
+
+    const res = await request(app).post("/settle").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: { ...validPaymentRequirements, network: "stellar:pubnet" },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(false);
+    expect(res.body.network).toBe("stellar:pubnet");
+  });
+
   // body shape validation — truthy non-object values must be rejected
   it("returns 400 when paymentPayload is a string (truthy but wrong shape)", async () => {
     const res = await request(app)

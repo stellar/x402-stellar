@@ -75,6 +75,11 @@ describe("Env", () => {
     expect(() => Env.paymentPrice).toThrow("Invalid PAYMENT_PRICE");
   });
 
+  it("throws on Infinity PAYMENT_PRICE (e.g. 1e999)", () => {
+    vi.stubEnv("PAYMENT_PRICE", "1e999");
+    expect(() => Env.paymentPrice).toThrow("Invalid PAYMENT_PRICE");
+  });
+
   it("accepts valid PAYMENT_PRICE", () => {
     vi.stubEnv("PAYMENT_PRICE", "1.5");
     expect(Env.paymentPrice).toBe("1.5");

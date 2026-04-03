@@ -21,7 +21,10 @@ export function txHashInjector() {
     res.write = function (...args: Parameters<WriteFn>) {
       // Only buffer if content-type is unknown or HTML; pass non-HTML through directly
       const ct = res.getHeader("content-type");
-      if (ct && !(typeof ct === "string" && ct.includes("text/html"))) {
+      const isHtml = Array.isArray(ct)
+        ? ct.some((v) => v.includes("text/html"))
+        : typeof ct === "string" && ct.includes("text/html");
+      if (ct && !isHtml) {
         return originalWrite(...args);
       }
 
@@ -51,7 +54,9 @@ export function txHashInjector() {
       }
 
       const contentType = res.getHeader("content-type");
-      const isHtml = typeof contentType === "string" && contentType.includes("text/html");
+      const isHtml = Array.isArray(contentType)
+        ? contentType.some((v) => v.includes("text/html"))
+        : typeof contentType === "string" && contentType.includes("text/html");
 
       if (!isHtml) {
         // Non-HTML: replay original buffers without transformation

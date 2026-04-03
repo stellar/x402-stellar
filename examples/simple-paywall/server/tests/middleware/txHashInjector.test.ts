@@ -152,6 +152,20 @@ describe("txHashInjector middleware", () => {
     expect(res.text).not.toContain("{{TX_LINK}}");
   });
 
+  it("still buffers HTML when content-type is a string array containing text/html", async () => {
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/page", (_req, res) => {
+      res.setHeader("content-type", ["text/html; charset=utf-8", "charset=utf-8"]);
+      res.write("<html>{{TX_LINK}}");
+      res.end("</html>");
+    });
+
+    const res = await request(app).get("/page");
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain("{{TX_LINK}}");
+  });
+
   // HTML path should forward res.end callback
   it("forwards res.end callback on HTML path", async () => {
     let callbackCalled = false;

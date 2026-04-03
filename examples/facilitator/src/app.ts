@@ -126,8 +126,8 @@ export function createApp(): Express {
   });
 
   app.post("/settle", async (req, res): Promise<void> => {
+    const { paymentPayload, paymentRequirements } = req.body ?? {};
     try {
-      const { paymentPayload, paymentRequirements } = req.body ?? {};
 
       const payloadError = validatePaymentPayload(paymentPayload);
       if (payloadError) {
@@ -155,7 +155,7 @@ export function createApp(): Express {
           success: false,
           transaction: "",
           errorReason: "Settlement aborted",
-          network: req.body?.paymentRequirements?.network || "unknown",
+          network: paymentRequirements?.network || "unknown",
         } satisfies SettleResponse);
         return;
       }

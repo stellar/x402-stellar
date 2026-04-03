@@ -140,7 +140,7 @@ export class Env {
   static get paymentPrice(): string {
     const raw = process.env.PAYMENT_PRICE ?? "0.01";
     const num = Number(raw);
-    if (isNaN(num) || num <= 0) {
+    if (!Number.isFinite(num) || num <= 0) {
       throw new Error(`Invalid PAYMENT_PRICE: ${raw}. Must be a positive number.`);
     }
     return raw;
