@@ -11,7 +11,7 @@ const mockSettle = vi.fn().mockResolvedValue({
 
 vi.mock("@x402/core/facilitator", () => {
   return {
-    x402Facilitator: vi.fn().mockImplementation(() => {
+    x402Facilitator: vi.fn().mockImplementation(function () {
       const instance = {
         onBeforeVerify: vi.fn().mockReturnThis(),
         onAfterVerify: vi.fn().mockReturnThis(),
@@ -62,6 +62,30 @@ vi.mock("../../src/utils/logger.js", () => {
 
 let app: express.Express;
 
+const validPaymentPayload = {
+  x402Version: 1,
+  accepted: {
+    scheme: "exact",
+    network: "stellar:testnet",
+    asset: "native",
+    amount: "100",
+    payTo: "GABCDEF",
+    maxTimeoutSeconds: 60,
+    extra: {},
+  },
+  payload: { signature: "mock" },
+};
+
+const validPaymentRequirements = {
+  scheme: "exact",
+  network: "stellar:testnet",
+  asset: "native",
+  amount: "100",
+  payTo: "GABCDEF",
+  maxTimeoutSeconds: 60,
+  extra: {},
+};
+
 beforeAll(async () => {
   const mod = await import("../../src/app.js");
   app = mod.createApp();
@@ -91,12 +115,10 @@ describe("POST /verify", () => {
       invalidReason: "invalid_exact_stellar_payload_wrong_amount",
     });
 
-    const res = await request(app)
-      .post("/verify")
-      .send({
-        paymentPayload: { network: "stellar:testnet" },
-        paymentRequirements: { scheme: "exact" },
-      });
+    const res = await request(app).post("/verify").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: validPaymentRequirements,
+    });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -106,24 +128,24 @@ describe("POST /verify", () => {
   });
 
   it("returns 400 when paymentPayload is missing", async () => {
-    const res = await request(app).post("/verify").send({ paymentRequirements: {} });
+    const res = await request(app)
+      .post("/verify")
+      .send({ paymentRequirements: validPaymentRequirements });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain("Missing");
+    expect(res.body.error).toContain("paymentPayload");
   });
 
   it("returns 400 when paymentRequirements is missing", async () => {
-    const res = await request(app).post("/verify").send({ paymentPayload: {} });
+    const res = await request(app).post("/verify").send({ paymentPayload: validPaymentPayload });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain("Missing");
+    expect(res.body.error).toContain("paymentRequirements");
   });
 
   it("returns verify response for valid request", async () => {
-    const res = await request(app)
-      .post("/verify")
-      .send({
-        paymentPayload: { network: "stellar:testnet" },
-        paymentRequirements: { scheme: "exact" },
-      });
+    const res = await request(app).post("/verify").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: validPaymentRequirements,
+    });
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("isValid");
   });
@@ -131,18 +153,18 @@ describe("POST /verify", () => {
 
 describe("POST /settle", () => {
   it("returns 400 when paymentPayload is missing", async () => {
-    const res = await request(app).post("/settle").send({ paymentRequirements: {} });
+    const res = await request(app)
+      .post("/settle")
+      .send({ paymentRequirements: validPaymentRequirements });
     expect(res.status).toBe(400);
-    expect(res.body.error).toContain("Missing");
+    expect(res.body.error).toContain("paymentPayload");
   });
 
   it("returns settle response for valid request", async () => {
-    const res = await request(app)
-      .post("/settle")
-      .send({
-        paymentPayload: { network: "stellar:testnet" },
-        paymentRequirements: { scheme: "exact" },
-      });
+    const res = await request(app).post("/settle").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: validPaymentRequirements,
+    });
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("success");
   });
@@ -151,12 +173,10 @@ describe("POST /settle", () => {
   it("includes transaction field in settlement-aborted error response", async () => {
     mockSettle.mockRejectedValueOnce(new Error("Settlement aborted: insufficient balance"));
 
-    const res = await request(app)
-      .post("/settle")
-      .send({
-        paymentPayload: { network: "stellar:testnet" },
-        paymentRequirements: { scheme: "exact" },
-      });
+    const res = await request(app).post("/settle").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: validPaymentRequirements,
+    });
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty("transaction");
@@ -167,21 +187,21 @@ describe("POST /settle", () => {
   it("returns 400 when paymentPayload is a string (truthy but wrong shape)", async () => {
     const res = await request(app)
       .post("/settle")
-      .send({ paymentPayload: "not-an-object", paymentRequirements: { scheme: "exact" } });
+      .send({ paymentPayload: "not-an-object", paymentRequirements: validPaymentRequirements });
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when paymentPayload is an array", async () => {
     const res = await request(app)
       .post("/settle")
-      .send({ paymentPayload: [1, 2], paymentRequirements: { scheme: "exact" } });
+      .send({ paymentPayload: [1, 2], paymentRequirements: validPaymentRequirements });
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when paymentRequirements is a number", async () => {
     const res = await request(app)
       .post("/settle")
-      .send({ paymentPayload: { network: "stellar:testnet" }, paymentRequirements: 42 });
+      .send({ paymentPayload: validPaymentPayload, paymentRequirements: 42 });
     expect(res.status).toBe(400);
   });
 
@@ -193,12 +213,10 @@ describe("POST /settle", () => {
       ),
     );
 
-    const res = await request(app)
-      .post("/settle")
-      .send({
-        paymentPayload: { network: "stellar:testnet" },
-        paymentRequirements: { scheme: "exact" },
-      });
+    const res = await request(app).post("/settle").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: validPaymentRequirements,
+    });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(false);
@@ -212,14 +230,14 @@ describe("POST /verify — body shape validation", () => {
   it("returns 400 when paymentPayload is a string", async () => {
     const res = await request(app)
       .post("/verify")
-      .send({ paymentPayload: "not-an-object", paymentRequirements: { scheme: "exact" } });
+      .send({ paymentPayload: "not-an-object", paymentRequirements: validPaymentRequirements });
     expect(res.status).toBe(400);
   });
 
   it("returns 400 when paymentRequirements is an array", async () => {
     const res = await request(app)
       .post("/verify")
-      .send({ paymentPayload: { network: "stellar:testnet" }, paymentRequirements: [1] });
+      .send({ paymentPayload: validPaymentPayload, paymentRequirements: [1] });
     expect(res.status).toBe(400);
   });
 });

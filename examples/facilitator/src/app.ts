@@ -14,6 +14,7 @@ import proxyAddr from "proxy-addr";
 
 import { Env } from "./config/env.js";
 import { logger, httpLogger } from "./utils/logger.js";
+import { validatePaymentPayload, validatePaymentRequirements } from "./utils/validation.js";
 
 export function createApp(): Express {
   const feeBumpSecret = Env.feeBumpSecret;
@@ -90,22 +91,17 @@ export function createApp(): Express {
 
   app.post("/verify", async (req, res): Promise<void> => {
     try {
-      const { paymentPayload, paymentRequirements } = req.body as {
-        paymentPayload: PaymentPayload;
-        paymentRequirements: PaymentRequirements;
-      };
+      const { paymentPayload, paymentRequirements } = req.body ?? {};
 
-      if (
-        !paymentPayload ||
-        typeof paymentPayload !== "object" ||
-        Array.isArray(paymentPayload) ||
-        !paymentRequirements ||
-        typeof paymentRequirements !== "object" ||
-        Array.isArray(paymentRequirements)
-      ) {
-        res.status(400).json({
-          error: "Missing paymentPayload or paymentRequirements",
-        });
+      const payloadError = validatePaymentPayload(paymentPayload);
+      if (payloadError) {
+        res.status(400).json({ error: payloadError });
+        return;
+      }
+
+      const requirementsError = validatePaymentRequirements(paymentRequirements);
+      if (requirementsError) {
+        res.status(400).json({ error: requirementsError });
         return;
       }
 
@@ -131,19 +127,17 @@ export function createApp(): Express {
 
   app.post("/settle", async (req, res): Promise<void> => {
     try {
-      const { paymentPayload, paymentRequirements } = req.body;
+      const { paymentPayload, paymentRequirements } = req.body ?? {};
 
-      if (
-        !paymentPayload ||
-        typeof paymentPayload !== "object" ||
-        Array.isArray(paymentPayload) ||
-        !paymentRequirements ||
-        typeof paymentRequirements !== "object" ||
-        Array.isArray(paymentRequirements)
-      ) {
-        res.status(400).json({
-          error: "Missing paymentPayload or paymentRequirements",
-        });
+      const payloadError = validatePaymentPayload(paymentPayload);
+      if (payloadError) {
+        res.status(400).json({ error: payloadError });
+        return;
+      }
+
+      const requirementsError = validatePaymentRequirements(paymentRequirements);
+      if (requirementsError) {
+        res.status(400).json({ error: requirementsError });
         return;
       }
 
