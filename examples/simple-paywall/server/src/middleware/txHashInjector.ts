@@ -19,6 +19,15 @@ export function txHashInjector() {
     const chunks: Buffer[] = [];
 
     res.write = function (...args: Parameters<WriteFn>) {
+      // Only buffer if content-type is unknown or HTML; pass non-HTML through directly
+      const ct = res.getHeader("content-type");
+      const isHtml = Array.isArray(ct)
+        ? ct.some((v) => v.includes("text/html"))
+        : typeof ct === "string" && ct.includes("text/html");
+      if (ct && !isHtml) {
+        return originalWrite(...args);
+      }
+
       const [chunk, encodingOrCb] = args;
       if (chunk != null) {
         if (Buffer.isBuffer(chunk)) {
@@ -45,7 +54,9 @@ export function txHashInjector() {
       }
 
       const contentType = res.getHeader("content-type");
-      const isHtml = typeof contentType === "string" && contentType.includes("text/html");
+      const isHtml = Array.isArray(contentType)
+        ? contentType.some((v) => v.includes("text/html"))
+        : typeof contentType === "string" && contentType.includes("text/html");
 
       if (!isHtml) {
         // Non-HTML: replay original buffers without transformation
@@ -70,8 +81,14 @@ export function txHashInjector() {
         body = injectTxLink(body, header);
       }
 
+      const cb =
+        typeof chunk === "function"
+          ? chunk
+          : typeof encodingOrCb === "function"
+            ? encodingOrCb
+            : undefined;
       res.setHeader("content-length", Buffer.byteLength(body));
-      return originalEnd(body);
+      return originalEnd(body, cb as (() => void) | undefined);
     } as typeof originalEnd;
 
     next();
@@ -89,17 +106,17 @@ const STELLAR_EXPERT_BASE: Record<string, string> = {
  */
 export function injectTxLink(body: string, paymentResponseHeader: string | undefined): string {
   if (!paymentResponseHeader) {
-    return body.replace("{{TX_LINK}}", "");
+    return body.replaceAll("{{TX_LINK}}", "");
   }
 
   const decoded = parseX402Header<X402PaymentResponsePayload>(paymentResponseHeader);
   if (!decoded) {
-    return body.replace("{{TX_LINK}}", "");
+    return body.replaceAll("{{TX_LINK}}", "");
   }
 
   const txHash = decoded.transaction;
   if (!txHash || !/^[0-9a-fA-F]+$/.test(txHash)) {
-    return body.replace("{{TX_LINK}}", "");
+    return body.replaceAll("{{TX_LINK}}", "");
   }
 
   // Derive the Stellar Expert network segment from the x402 network string
@@ -112,5 +129,5 @@ export function injectTxLink(body: string, paymentResponseHeader: string | undef
     `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
     `View transaction on Stellar Expert <span aria-hidden="true">&#8599;</span></a>`;
 
-  return body.replace("{{TX_LINK}}", link);
+  return body.replaceAll("{{TX_LINK}}", link);
 }

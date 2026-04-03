@@ -1,3 +1,6 @@
+minimumReleaseAge: 10080 # 7 days, in minutes
+minimumReleaseAgeExclude:
+  - lodash # security patch (GHSA-r5fr-rjxr-66jc): 4.18.x fixes _.template code injection
 packages:
   - examples/*/server
   - examples/*/client
