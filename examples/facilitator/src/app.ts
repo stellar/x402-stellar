@@ -155,7 +155,7 @@ export function createApp(): Express {
           success: false,
           transaction: "",
           errorReason: "Settlement aborted",
-          network: req.body?.paymentPayload?.network || "unknown",
+          network: req.body?.paymentRequirements?.network || "unknown",
         } satisfies SettleResponse);
         return;
       }

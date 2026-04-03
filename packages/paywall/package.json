@@ -7,7 +7,7 @@
   "scripts": {
     "codegen": "tsx src/browser/build.ts",
     "build": "tsup",
-    "test": "tsx --test src/**/*.test.ts",
+    "test": "tsx --test src/*.test.ts src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ignore-pattern src/browser/",
     "lint:fix": "eslint src/ --ignore-pattern src/browser/ --fix"
