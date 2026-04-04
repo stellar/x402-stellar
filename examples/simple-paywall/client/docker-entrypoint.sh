@@ -1,7 +1,7 @@
 #!/bin/sh
 # Generate runtime config from environment variables.
 # This runs at container startup (via nginx's /docker-entrypoint.d/ mechanism
-# in the standalone client image, or via start.sh in the heroku image)
+# in the standalone client image)
 # so the URL doesn't need to be known at build time.
 #
 # Values are escaped to prevent JS injection if env vars contain

@@ -93,7 +93,7 @@ Turborepo resolves `^build` dependencies. In practice: `paywall` builds first (e
 
 **txHashInjector middleware**: Registered before the `@x402/express` middleware. It wraps `res.end`/`res.write` to intercept the response body after payment settlement and replaces `{{TX_LINK}}` with a Stellar Expert transaction link. This lets the protected content reference its own payment transaction.
 
-**Facilitator is internal**: In the Heroku all-in-one deploy, nginx only proxies `/health`, `/networks`, and `/protected/` to Express. Facilitator routes (`/verify`, `/settle`, `/supported`) are NOT externally accessible — they run on `localhost:4022` inside the container. This is intentional: the facilitator is an internal service, not a public API.
+**Facilitator is internal**: In the all-in-one deploy, the facilitator routes (`/verify`, `/settle`, `/supported`) are NOT externally accessible — they run on `localhost:4022` inside the container. This is intentional: the facilitator is an internal service, not a public API.
 
 **Startup validation**: Before creating the Express app, the server calls `Env.validateFacilitators()` which fetches `GET /supported` from every configured facilitator (with optional `Authorization: Bearer` header). If any facilitator is unreachable or returns a non-200 status, the server throws with aggregated diagnostics. The `start.sh` script also has a readiness loop for the facilitator, providing defense-in-depth.
 
@@ -135,11 +135,8 @@ x402-stellar/
 │       └── docker-compose.yml     # 3-container local setup
 ├── vendors/x402/                  # Git submodule (dist-only, never modify)
 │   └── typescript/packages/{core,extensions,http/express,mechanisms/stellar}
-├── infra/heroku/
-│   ├── start.sh                   # Launches facilitator + server + nginx
-│   └── nginx.conf.template        # Proxies /health, /networks, /protected/; serves SPA
-├── Dockerfile                     # Multi-target: facilitator, server, client, heroku
-├── heroku.yml                     # Container deploy manifest
+├── infra/
+├── Dockerfile                     # Multi-target: facilitator, server, client
 ├── Makefile                       # check = install + format + lint + typecheck + test + build
 ├── turbo.json                     # Task config with ^build dependency
 ├── pnpm-workspace.yaml            # Workspace globs
@@ -152,7 +149,6 @@ x402-stellar/
 | --------------------- | ------------------------------------------------------------------ | ------------------------------ |
 | **Local dev**         | 3 separate processes (facilitator, server, client)                 | `pnpm dev`                     |
 | **Docker Compose**    | 3 containers, facilitator internal, server on 3001, client on 8080 | `docker-compose.yml`           |
-| **Heroku**            | Single container (`heroku` target), nginx fronts everything        | `heroku.yml` + `Dockerfile`    |
 | **Standalone Docker** | Any individual target (`facilitator`, `server`, `client`)          | `docker build --target <name>` |
 
 ## Environment Variables

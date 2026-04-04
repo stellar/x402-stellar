@@ -67,7 +67,7 @@ Docker build must pass before considering a change fully verified.
 .opencode/skills/x402-stellar-checks/scripts/smoke-test.sh
 
 # Remote / all-in-one deploy
-.opencode/skills/x402-stellar-checks/scripts/smoke-test.sh https://x402-stellar-491bf9f7e30b.herokuapp.com
+.opencode/skills/x402-stellar-checks/scripts/smoke-test.sh https://your-app.example.com
 
 # Custom ports
 FACILITATOR=http://host:4022 SERVER=http://host:3001 CLIENT=http://host:8080 \
@@ -76,12 +76,12 @@ FACILITATOR=http://host:4022 SERVER=http://host:3001 CLIENT=http://host:8080 \
 
 ## Docker Verification
 
-Multi-stage `Dockerfile` at repo root. Targets: `facilitator`, `server`, `client`, `heroku`.
+Multi-stage `Dockerfile` at repo root. Targets: `facilitator`, `server`, `client`.
 
 ### Quick build check (no run)
 
 ```bash
-docker build --target heroku -t x402-heroku-test .
+docker build --target client -t x402-client-test .
 ```
 
 ### Full docker compose test
@@ -90,7 +90,6 @@ docker build --target heroku -t x402-heroku-test .
 
 ```bash
 .opencode/skills/x402-stellar-checks/scripts/docker-smoke-test.sh          # docker compose (3 containers)
-.opencode/skills/x402-stellar-checks/scripts/docker-smoke-test.sh heroku   # heroku all-in-one target
 ```
 
 Compose file: `examples/simple-paywall/docker-compose.yml` (reads secrets from `../../.env`).
