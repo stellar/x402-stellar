@@ -15,7 +15,7 @@ import { openapiRouter } from "./routes/openapi.js";
 export function createApp(): Express {
   const app = express();
 
-  // Trust reverse proxies (Heroku router, nginx) so req.protocol reflects
+  // Trust reverse proxies so req.protocol reflects
   // the client's actual scheme (https) via X-Forwarded-Proto.
   // Configurable via TRUST_PROXY env var; defaults to loopback, link-local
   // and unique-local addresses (matching laboratory-backend).
