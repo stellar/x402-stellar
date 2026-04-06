@@ -140,6 +140,36 @@ describe("validatePaymentRequirements", () => {
     );
   });
 
+  it("rejects network with uppercase characters", () => {
+    expect(
+      validatePaymentRequirements({ ...validRequirements, network: "Stellar:testnet" }),
+    ).toContain("network");
+  });
+
+  it("rejects network with special characters", () => {
+    expect(
+      validatePaymentRequirements({ ...validRequirements, network: "stellar:test-net" }),
+    ).toContain("network");
+  });
+
+  it("rejects network with only a colon", () => {
+    expect(validatePaymentRequirements({ ...validRequirements, network: ":" })).toContain(
+      "network",
+    );
+  });
+
+  it("rejects network with empty segments around colon", () => {
+    expect(validatePaymentRequirements({ ...validRequirements, network: "stellar:" })).toContain(
+      "network",
+    );
+  });
+
+  it("accepts valid namespaced network", () => {
+    expect(
+      validatePaymentRequirements({ ...validRequirements, network: "stellar:pubnet" }),
+    ).toBeNull();
+  });
+
   it("rejects when network is missing", () => {
     const { network: _, ...rest } = validRequirements;
     expect(validatePaymentRequirements(rest)).toContain("network");
