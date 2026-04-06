@@ -27,7 +27,7 @@ export class Env {
 
   static get corsOrigins(): string | string[] {
     const raw = process.env.CORS_ORIGINS ?? "*";
-    return raw === "*" ? "*" : raw.split(",");
+    return raw === "*" ? "*" : parseCommaSeparatedList(raw);
   }
 
   static get stellarPrivateKey(): string {

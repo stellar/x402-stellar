@@ -15,15 +15,15 @@
   "dependencies": {
     "@x402-stellar/paywall": "workspace:*",
     "@x402-stellar/shared": "workspace:*",
-    "@x402/core": "2.6.0",
-    "@x402/express": "2.6.0",
-    "@x402/stellar": "2.6.0",
+    "@x402/core": "^2.8.0",
+    "@x402/express": "^2.8.0",
+    "@x402/stellar": "^2.8.0",
     "cors": "^2.8.6",
-    "dotenv": "^16.6.1",
+    "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
-    "pino": "^9.14.0",
-    "pino-http": "^10.5.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
     "proxy-addr": "^2.0.7"
   },
   "devDependencies": {
@@ -35,6 +35,7 @@
     "supertest": "^7.2.2",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
-    "vitest": "^3.2.4"
+    "vite": "^7.3.2",
+    "vitest": "^4.1.2"
   }
 }
