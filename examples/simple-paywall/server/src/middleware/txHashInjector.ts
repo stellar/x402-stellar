@@ -11,6 +11,11 @@ import { parseX402Header, type X402PaymentResponsePayload } from "@x402-stellar/
  * final bytes (after the x402 middleware has already set the header and
  * replayed the buffered body).
  */
+function isHtmlContentType(ct: string | number | string[] | undefined): boolean {
+  if (Array.isArray(ct)) return ct.some((v) => v.includes("text/html"));
+  return typeof ct === "string" && ct.includes("text/html");
+}
+
 export function txHashInjector() {
   return (_req: Request, res: Response, next: NextFunction) => {
     const originalWrite = res.write.bind(res) as Response["write"];
@@ -19,6 +24,12 @@ export function txHashInjector() {
     const chunks: Buffer[] = [];
 
     res.write = function (...args: Parameters<WriteFn>) {
+      // Only buffer if content-type is unknown or HTML; pass non-HTML through directly
+      const ct = res.getHeader("content-type");
+      if (ct && !isHtmlContentType(ct)) {
+        return originalWrite(...args);
+      }
+
       const [chunk, encodingOrCb] = args;
       if (chunk != null) {
         if (Buffer.isBuffer(chunk)) {
@@ -44,10 +55,7 @@ export function txHashInjector() {
         }
       }
 
-      const contentType = res.getHeader("content-type");
-      const isHtml = typeof contentType === "string" && contentType.includes("text/html");
-
-      if (!isHtml) {
+      if (!isHtmlContentType(res.getHeader("content-type"))) {
         // Non-HTML: replay original buffers without transformation
         res.write = originalWrite;
         res.end = originalEnd;
@@ -70,8 +78,14 @@ export function txHashInjector() {
         body = injectTxLink(body, header);
       }
 
+      const cb =
+        typeof chunk === "function"
+          ? chunk
+          : typeof encodingOrCb === "function"
+            ? encodingOrCb
+            : undefined;
       res.setHeader("content-length", Buffer.byteLength(body));
-      return originalEnd(body);
+      return originalEnd(body, cb as (() => void) | undefined);
     } as typeof originalEnd;
 
     next();
@@ -89,17 +103,17 @@ const STELLAR_EXPERT_BASE: Record<string, string> = {
  */
 export function injectTxLink(body: string, paymentResponseHeader: string | undefined): string {
   if (!paymentResponseHeader) {
-    return body.replace("{{TX_LINK}}", "");
+    return body.replaceAll("{{TX_LINK}}", "");
   }
 
   const decoded = parseX402Header<X402PaymentResponsePayload>(paymentResponseHeader);
   if (!decoded) {
-    return body.replace("{{TX_LINK}}", "");
+    return body.replaceAll("{{TX_LINK}}", "");
   }
 
   const txHash = decoded.transaction;
   if (!txHash || !/^[0-9a-fA-F]+$/.test(txHash)) {
-    return body.replace("{{TX_LINK}}", "");
+    return body.replaceAll("{{TX_LINK}}", "");
   }
 
   // Derive the Stellar Expert network segment from the x402 network string
@@ -112,5 +126,5 @@ export function injectTxLink(body: string, paymentResponseHeader: string | undef
     `<a href="${url}" target="_blank" rel="noopener noreferrer">` +
     `View transaction on Stellar Expert <span aria-hidden="true">&#8599;</span></a>`;
 
-  return body.replace("{{TX_LINK}}", link);
+  return body.replaceAll("{{TX_LINK}}", link);
 }

@@ -30,7 +30,6 @@ WORKDIR /app
 
 # Copy workspace manifests first for layer caching
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json tsconfig.base.json ./
-COPY patches/ patches/
 
 # Activate pnpm version from package.json
 RUN corepack install
@@ -168,7 +167,6 @@ RUN set -ex \
     && rm -rf node_modules/.pnpm/@sinclair+typebox@* \
     && rm -rf node_modules/.pnpm/rxjs@* \
     && rm -rf node_modules/.pnpm/es-toolkit@* \
-    && rm -rf node_modules/.pnpm/zod@* \
     #
     # ── Duplicate Stellar versions (only 14.6.1 / 14.0.4 needed) ─
     && rm -rf node_modules/.pnpm/@stellar+stellar-sdk@13.3.0 \

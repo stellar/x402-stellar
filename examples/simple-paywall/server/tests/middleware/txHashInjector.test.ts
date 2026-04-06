@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
-import { injectTxLink } from "../../src/middleware/txHashInjector.js";
+import { describe, it, expect, vi } from "vitest";
+import express from "express";
+import request from "supertest";
+import { injectTxLink, txHashInjector } from "../../src/middleware/txHashInjector.js";
 
 const PLACEHOLDER = "{{TX_LINK}}";
 
@@ -106,5 +108,77 @@ describe("injectTxLink", () => {
     const result = injectTxLink(body, header);
 
     expect(result).toBe("<html><body>No placeholder here</body></html>");
+  });
+
+  // replaceAll for multiple placeholders
+  it("replaces all occurrences of {{TX_LINK}}", () => {
+    const txHash = "abc123def456";
+    const header = encodePaymentResponse({
+      transaction: txHash,
+      network: "stellar:testnet",
+    });
+    const body = `<html><body>${PLACEHOLDER}<br/>${PLACEHOLDER}</body></html>`;
+    const result = injectTxLink(body, header);
+    expect(result).not.toContain(PLACEHOLDER);
+  });
+});
+
+describe("txHashInjector middleware", () => {
+  // non-HTML responses should NOT be buffered — res.write passes through
+  it("passes non-HTML res.write calls through to original write", async () => {
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/api", (_req, res) => {
+      // res.json sets content-type to application/json before writing
+      res.json({ data: "test" });
+    });
+
+    const res = await request(app).get("/api");
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ data: "test" });
+  });
+
+  it("still buffers HTML responses for {{TX_LINK}} replacement", async () => {
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/page", (_req, res) => {
+      res.setHeader("content-type", "text/html");
+      res.write("<html>{{TX_LINK}}");
+      res.end("</html>");
+    });
+
+    const res = await request(app).get("/page");
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain("{{TX_LINK}}");
+  });
+
+  it("still buffers HTML when content-type is a string array containing text/html", async () => {
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/page", (_req, res) => {
+      res.setHeader("content-type", ["text/html; charset=utf-8", "charset=utf-8"]);
+      res.write("<html>{{TX_LINK}}");
+      res.end("</html>");
+    });
+
+    const res = await request(app).get("/page");
+    expect(res.status).toBe(200);
+    expect(res.text).not.toContain("{{TX_LINK}}");
+  });
+
+  // HTML path should forward res.end callback
+  it("forwards res.end callback on HTML path", async () => {
+    let callbackCalled = false;
+    const app = express();
+    app.use(txHashInjector());
+    app.get("/page", (_req, res) => {
+      res.setHeader("content-type", "text/html");
+      res.end("<html>{{TX_LINK}}</html>", () => {
+        callbackCalled = true;
+      });
+    });
+
+    await request(app).get("/page");
+    expect(callbackCalled).toBe(true);
   });
 });

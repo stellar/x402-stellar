@@ -86,13 +86,18 @@ export const stellarPaywall: PaywallNetworkHandler = {
     paymentRequired: PaymentRequired,
     config: PaywallConfig,
   ): string {
-    // Stellar USDC uses 7 decimal places (stroops)
-    const rawAmount = requirement.amount
-      ? parseFloat(requirement.amount) / 1e7
-      : requirement.maxAmountRequired
-        ? parseFloat(requirement.maxAmountRequired) / 1e7
-        : 0;
-    const amount = Number.isFinite(rawAmount) ? rawAmount : 0;
+    // Stellar USDC uses 7 decimal places (stroops).
+    // Use BigInt to avoid IEEE 754 precision loss on large amounts.
+    const rawStr = requirement.amount ?? requirement.maxAmountRequired ?? "0";
+    let amount: number;
+    try {
+      const rawBigint = BigInt(rawStr);
+      amount = Number(rawBigint / 10_000_000n) + Number(rawBigint % 10_000_000n) / 1e7;
+    } catch {
+      // Fall back to parseFloat for non-integer strings
+      const parsed = parseFloat(rawStr) / 1e7;
+      amount = Number.isFinite(parsed) ? parsed : 0;
+    }
 
     return getStellarPaywallHtml({
       amount,

@@ -89,19 +89,34 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
         if (parsedBody && typeof parsedBody.x402Version === "number") {
           setStatus(statusInfo("Retrying payment..."));
 
-          // Use fresh requirements from the 402 response instead of the
-          // original (potentially stale) paymentRequired prop.
+          // Validate fresh requirements only for the error message context.
           const freshHeader = response.headers.get("PAYMENT-REQUIRED");
           const freshRequirements = freshHeader
             ? decodePaymentRequiredHeader(freshHeader)
             : (parsedBody as unknown as PaymentRequired);
 
-          const retryPayload = await client.createPaymentPayload(freshRequirements);
-          const retryHeader = encodePaymentSignatureHeader(retryPayload);
+          // clientReq is the paymentRequirement chosen by the x402 client
+          const clientReq = paymentPayload.accepted;
+          const freshMatch = freshRequirements.accepts?.find(
+            (f) =>
+              f.scheme === clientReq.scheme &&
+              f.network === clientReq.network &&
+              f.asset === clientReq.asset,
+          );
+          if (!freshMatch) {
+            throw new Error(
+              "Server removed the accepted payment option on retry — aborting for safety",
+            );
+          }
+          if (freshMatch.payTo !== clientReq.payTo || freshMatch.amount !== clientReq.amount) {
+            throw new Error(
+              "Server changed payment recipient or amount on retry — aborting for safety",
+            );
+          }
 
           const retryResponse = await fetch(targetUrl, {
             headers: {
-              "PAYMENT-SIGNATURE": retryHeader,
+              "PAYMENT-SIGNATURE": paymentHeader,
             },
           });
 

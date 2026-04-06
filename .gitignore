@@ -4,5 +4,7 @@ dist
 .turbo
 *.tsbuildinfo
 
+coverage
+
 # Generated channel account keys (contain secrets)
 examples/facilitator/scripts/output/

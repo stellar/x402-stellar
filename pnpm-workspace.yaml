@@ -1,3 +1,8 @@
+minimumReleaseAge: 10080 # 7 days, in minutes
+minimumReleaseAgeExclude:
+  - lodash@4.18.1 # security patch (GHSA-r5fr-rjxr-66jc): fixes _.template code injection
+  - "vite@6.4.2 || 7.3.2" # security patches (GHSA-v2wj-q39q-566r, GHSA-p9ff-h696-f583)
+  - defu@6.1.5 # security patch (GHSA-737v-mqg7-c878): prototype pollution fix
 packages:
   - examples/*/server
   - examples/*/client

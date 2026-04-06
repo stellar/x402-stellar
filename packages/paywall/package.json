@@ -7,7 +7,7 @@
   "scripts": {
     "codegen": "tsx src/browser/build.ts",
     "build": "tsup",
-    "test": "tsx --test src/**/*.test.ts",
+    "test": "tsx --test src/*.test.ts src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/ --ignore-pattern src/browser/",
     "lint:fix": "eslint src/ --ignore-pattern src/browser/ --fix"
@@ -24,22 +24,22 @@
   },
   "dependencies": {
     "@x402-stellar/shared": "workspace:*",
-    "@x402/core": "2.6.0"
+    "@x402/core": "^2.8.0"
   },
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.9.0",
-    "@creit.tech/stellar-wallets-kit": "^2.0.0",
-    "@stellar/stellar-sdk": "^14.6.1",
-    "@types/node": "^22.19.13",
+    "@creit.tech/stellar-wallets-kit": "^2.1.0",
+    "@stellar/stellar-sdk": "^15.0.0",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@x402/stellar": "2.6.0",
+    "@x402/stellar": "^2.8.0",
     "buffer": "^6.0.3",
-    "esbuild": "^0.25.12",
+    "esbuild": "^0.27.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }

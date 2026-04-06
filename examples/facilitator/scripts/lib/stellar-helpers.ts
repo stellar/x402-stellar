@@ -65,12 +65,12 @@ const OUTPUT_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..",
 
 /** Write env-var lines to `scripts/output/<timestamp>.env`. Returns the file path. */
 export function saveEnvFile(entries: Record<string, string>): string {
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true, mode: 0o700 });
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const outputFile = path.join(OUTPUT_DIR, `${timestamp}.env`);
   const content = Object.entries(entries)
     .map(([key, value]) => `${key}=${value}`)
     .join("\n");
-  fs.writeFileSync(outputFile, content + "\n");
+  fs.writeFileSync(outputFile, content + "\n", { mode: 0o600 });
   return outputFile;
 }
