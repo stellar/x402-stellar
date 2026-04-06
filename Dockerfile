@@ -5,7 +5,6 @@
 #   facilitator  – x402 facilitator service (port 4022)
 #   server       – simple-paywall Express server (port 3001)
 #   client       – static SPA served by nginx (port 80)
-#   heroku       – all-in-one: nginx + server + facilitator ($PORT)
 #
 # Optimizations:
 #   - Alpine base images (node:22-alpine) — ~86MB smaller per stage
@@ -19,7 +18,6 @@
 #   docker build --target facilitator -t x402-facilitator .
 #   docker build --target server      -t x402-server .
 #   docker build --target client      -t x402-client .
-#   docker build --target heroku      -t x402-heroku .
 # ──────────────────────────────────────────────────────────────
 
 # ── Stage: base ──────────────────────────────────────────────
@@ -46,8 +44,6 @@ COPY examples/simple-paywall/server/package.json                 examples/simple
 COPY examples/simple-paywall/client/package.json                 examples/simple-paywall/client/package.json
 
 # Install all workspace deps.
-# Note: --mount=type=cache is omitted for Heroku compatibility (no BuildKit).
-# Locally, you can add DOCKER_BUILDKIT=1 and --mount=type=cache for faster rebuilds.
 RUN pnpm install --frozen-lockfile
 
 # Copy own package source (needed for build:paywall + tsup)
@@ -249,45 +245,3 @@ ENV PORT=80
 ENV NGINX_ENVSUBST_FILTER=PORT
 EXPOSE 80
 
-
-# ── Stage: heroku ────────────────────────────────────────────
-FROM node:22-alpine AS heroku
-
-RUN apk add --no-cache bash nginx gettext
-
-WORKDIR /app
-
-# Copy pruned workspace tree
-COPY --from=base /app/node_modules                               /app/node_modules
-COPY --from=base /app/packages/paywall/dist                      /app/packages/paywall/dist
-COPY --from=base /app/packages/paywall/package.json              /app/packages/paywall/package.json
-COPY --from=base /app/packages/shared/dist                       /app/packages/shared/dist
-COPY --from=base /app/packages/shared/package.json               /app/packages/shared/package.json
-COPY --from=base /app/examples/facilitator/dist                  /app/examples/facilitator/dist
-COPY --from=base /app/examples/facilitator/package.json          /app/examples/facilitator/package.json
-COPY --from=base /app/examples/facilitator/node_modules          /app/examples/facilitator/node_modules
-COPY --from=base /app/examples/simple-paywall/server/dist        /app/examples/simple-paywall/server/dist
-COPY --from=base /app/examples/simple-paywall/server/package.json /app/examples/simple-paywall/server/package.json
-COPY --from=base /app/examples/simple-paywall/server/node_modules /app/examples/simple-paywall/server/node_modules
-
-# Built SPA
-COPY --from=base /app/examples/simple-paywall/client/dist        /app/client
-
-# Runtime config injection
-COPY examples/simple-paywall/client/docker-entrypoint.sh /app/scripts/runtime-config.sh
-RUN chmod +x /app/scripts/runtime-config.sh
-
-# nginx config template
-COPY infra/heroku/nginx.conf.template /app/nginx.conf.template
-
-# Entrypoint — rewrite paths for the pruned workspace layout.
-# The readiness loop (wait for facilitator before starting server) lives in
-# start.sh itself so there is no need for sed injection here.
-COPY infra/heroku/start.sh /app/start-original.sh
-RUN sed \
-    -e 's|node /app/facilitator/dist/index.js|node /app/examples/facilitator/dist/index.js|' \
-    -e 's|node /app/server/dist/index.js|node /app/examples/simple-paywall/server/dist/index.js|' \
-    /app/start-original.sh > /app/start.sh && \
-    chmod +x /app/start.sh && rm /app/start-original.sh
-
-CMD ["/app/start.sh"]

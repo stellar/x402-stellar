@@ -3,7 +3,7 @@
 #
 # Usage:
 #   ./smoke-test.sh                        # local defaults (3 separate services)
-#   ./smoke-test.sh https://my-app.com     # all-in-one deploy (Heroku-style)
+#   ./smoke-test.sh https://my-app.com     # all-in-one deploy
 #   FACILITATOR=http://host:4022 SERVER=http://host:3001 CLIENT=http://host:8080 ./smoke-test.sh
 #
 # In all-in-one mode (single base URL argument), only externally-proxied routes
@@ -18,7 +18,7 @@ SERVER="${SERVER:-http://localhost:3001}"
 CLIENT="${CLIENT:-http://localhost:5173}"
 ALL_IN_ONE=false
 
-# If a base URL is passed, treat it as an all-in-one deploy (Heroku-style)
+# If a base URL is passed, treat it as an all-in-one deploy
 # where nginx only proxies /health and /protected. Facilitator routes are
 # internal-only and not reachable from outside.
 if [[ $# -ge 1 ]]; then
