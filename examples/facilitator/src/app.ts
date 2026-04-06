@@ -128,7 +128,6 @@ export function createApp(): Express {
   app.post("/settle", async (req, res): Promise<void> => {
     const { paymentPayload, paymentRequirements } = req.body ?? {};
     try {
-
       const payloadError = validatePaymentPayload(paymentPayload);
       if (payloadError) {
         res.status(400).json({ error: payloadError });
