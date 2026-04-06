@@ -95,18 +95,22 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
             ? decodePaymentRequiredHeader(freshHeader)
             : (parsedBody as unknown as PaymentRequired);
 
-          const originalAccept = paymentRequired.accepts?.[0];
-          const freshAccept = freshRequirements.accepts?.[0];
-          if (
-            originalAccept &&
-            freshAccept &&
-            (freshAccept.payTo !== originalAccept.payTo ||
-              freshAccept.network !== originalAccept.network ||
-              freshAccept.amount !== originalAccept.amount ||
-              freshAccept.asset !== originalAccept.asset)
-          ) {
+          // clientReq is the paymentRequirement chosen by the x402 client
+          const clientReq = paymentPayload.accepted;
+          const freshMatch = freshRequirements.accepts?.find(
+            (f) =>
+              f.scheme === clientReq.scheme &&
+              f.network === clientReq.network &&
+              f.asset === clientReq.asset,
+          );
+          if (!freshMatch) {
             throw new Error(
-              "Server changed payment recipient, network, amount, or asset on retry — aborting for safety",
+              "Server removed the accepted payment option on retry — aborting for safety",
+            );
+          }
+          if (freshMatch.payTo !== clientReq.payTo || freshMatch.amount !== clientReq.amount) {
+            throw new Error(
+              "Server changed payment recipient or amount on retry — aborting for safety",
             );
           }
 

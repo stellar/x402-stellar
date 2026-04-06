@@ -171,7 +171,6 @@ RUN set -ex \
     && rm -rf node_modules/.pnpm/@sinclair+typebox@* \
     && rm -rf node_modules/.pnpm/rxjs@* \
     && rm -rf node_modules/.pnpm/es-toolkit@* \
-    && rm -rf node_modules/.pnpm/zod@* \
     #
     # ── Duplicate Stellar versions (only 14.6.1 / 14.0.4 needed) ─
     && rm -rf node_modules/.pnpm/@stellar+stellar-sdk@13.3.0 \
