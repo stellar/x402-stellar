@@ -37,7 +37,7 @@ export function validatePaymentRequirements(value: unknown): string | null {
     return "paymentRequirements.scheme must be a non-empty string";
   }
 
-  if (typeof value.network !== "string" || !value.network.includes(":")) {
+  if (typeof value.network !== "string" || !/^[a-z]+:[a-z0-9]+$/.test(value.network)) {
     return "paymentRequirements.network must be a namespaced string (e.g. stellar:testnet)";
   }
 

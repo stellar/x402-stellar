@@ -62,20 +62,6 @@ vi.mock("../../src/utils/logger.js", () => {
 
 let app: express.Express;
 
-const validPaymentPayload = {
-  x402Version: 1,
-  accepted: {
-    scheme: "exact",
-    network: "stellar:testnet",
-    asset: "native",
-    amount: "100",
-    payTo: "GABCDEF",
-    maxTimeoutSeconds: 60,
-    extra: {},
-  },
-  payload: { signature: "mock" },
-};
-
 const validPaymentRequirements = {
   scheme: "exact",
   network: "stellar:testnet",
@@ -84,6 +70,12 @@ const validPaymentRequirements = {
   payTo: "GABCDEF",
   maxTimeoutSeconds: 60,
   extra: {},
+};
+
+const validPaymentPayload = {
+  x402Version: 1,
+  accepted: validPaymentRequirements,
+  payload: { signature: "mock" },
 };
 
 beforeAll(async () => {
@@ -186,10 +178,12 @@ describe("POST /settle", () => {
   it("uses network from validated paymentRequirements in settlement-aborted response", async () => {
     mockSettle.mockRejectedValueOnce(new Error("Settlement aborted: insufficient balance"));
 
-    const res = await request(app).post("/settle").send({
-      paymentPayload: validPaymentPayload,
-      paymentRequirements: { ...validPaymentRequirements, network: "stellar:pubnet" },
-    });
+    const res = await request(app)
+      .post("/settle")
+      .send({
+        paymentPayload: validPaymentPayload,
+        paymentRequirements: { ...validPaymentRequirements, network: "stellar:pubnet" },
+      });
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(false);

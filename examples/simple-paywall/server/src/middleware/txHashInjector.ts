@@ -11,6 +11,11 @@ import { parseX402Header, type X402PaymentResponsePayload } from "@x402-stellar/
  * final bytes (after the x402 middleware has already set the header and
  * replayed the buffered body).
  */
+function isHtmlContentType(ct: string | number | string[] | undefined): boolean {
+  if (Array.isArray(ct)) return ct.some((v) => v.includes("text/html"));
+  return typeof ct === "string" && ct.includes("text/html");
+}
+
 export function txHashInjector() {
   return (_req: Request, res: Response, next: NextFunction) => {
     const originalWrite = res.write.bind(res) as Response["write"];
@@ -21,10 +26,7 @@ export function txHashInjector() {
     res.write = function (...args: Parameters<WriteFn>) {
       // Only buffer if content-type is unknown or HTML; pass non-HTML through directly
       const ct = res.getHeader("content-type");
-      const isHtml = Array.isArray(ct)
-        ? ct.some((v) => v.includes("text/html"))
-        : typeof ct === "string" && ct.includes("text/html");
-      if (ct && !isHtml) {
+      if (ct && !isHtmlContentType(ct)) {
         return originalWrite(...args);
       }
 
@@ -53,12 +55,7 @@ export function txHashInjector() {
         }
       }
 
-      const contentType = res.getHeader("content-type");
-      const isHtml = Array.isArray(contentType)
-        ? contentType.some((v) => v.includes("text/html"))
-        : typeof contentType === "string" && contentType.includes("text/html");
-
-      if (!isHtml) {
+      if (!isHtmlContentType(res.getHeader("content-type"))) {
         // Non-HTML: replay original buffers without transformation
         res.write = originalWrite;
         res.end = originalEnd;
