@@ -14,19 +14,17 @@
     "test": "turbo run test --filter='@x402-stellar/*'"
   },
   "pnpm": {
-    "patchedDependencies": {
-      "@creit.tech/stellar-wallets-kit@2.0.0": "patches/@creit.tech__stellar-wallets-kit@2.0.0.patch"
-    },
     "overrides": {
       "flatted": "^3.4.2",
       "h3": "^1.15.9",
       "lodash": "4.18.1",
-      "defu": ">=6.1.5"
+      "defu": ">=6.1.5",
+      "typescript": "^5.9.3"
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "eslint": "^9.39.4",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.1.0",
     "prettier": "^3.8.1",
     "turbo": "^2.9.1",
     "typescript": "^5.9.3",

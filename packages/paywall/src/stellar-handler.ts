@@ -89,7 +89,7 @@ export const stellarPaywall: PaywallNetworkHandler = {
     // Stellar USDC uses 7 decimal places (stroops).
     // Use BigInt to avoid IEEE 754 precision loss on large amounts.
     const rawStr = requirement.amount ?? requirement.maxAmountRequired ?? "0";
-    let amount = 0;
+    let amount: number;
     try {
       const rawBigint = BigInt(rawStr);
       amount = Number(rawBigint / 10_000_000n) + Number(rawBigint % 10_000_000n) / 1e7;
