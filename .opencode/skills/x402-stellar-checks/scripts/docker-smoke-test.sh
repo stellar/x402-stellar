@@ -8,6 +8,12 @@
 # Exit codes: 0 = all passed, 1 = failure.
 set -euo pipefail
 
+if [ "$#" -ne 0 ]; then
+  echo "Usage: $0" >&2
+  echo "Error: unexpected argument(s): $*" >&2
+  exit 1
+fi
+
 COMPOSE_FILE="examples/simple-paywall/docker-compose.yml"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
