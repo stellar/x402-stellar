@@ -10,10 +10,7 @@ x402-stellar/
 │   ├── facilitator/              # Stellar facilitator service
 │   └── simple-paywall/           # Paywall demo (server + client)
 │       └── docker-compose.yml
-├── infra/
-│   └── heroku/                   # Heroku support files (start.sh, nginx.conf.template)
-├── Dockerfile                    # Multi-target Dockerfile (must be at root for Heroku)
-├── heroku.yml                    # Heroku build manifest (must be at root)
+├── Dockerfile                    # Multi-target Dockerfile
 ├── package.json
 ├── pnpm-workspace.yaml
 ├── turbo.json
@@ -121,9 +118,7 @@ make clean        # remove dist/ and node_modules/ from examples
 
 ## Deployment
 
-Heroku deployment uses `heroku.yml` and `Dockerfile` at the repo root (required by Heroku — both the build manifest and Dockerfile must be at root level so the Docker build context includes the full workspace). Supporting files (`start.sh`, `nginx.conf.template`) live in `infra/heroku/`.
-
-The Dockerfile is a multi-target build with targets for `facilitator`, `server`, `client`, and `heroku` (all-in-one). See `heroku.yml` for the build configuration.
+The Dockerfile is a multi-target build with targets for `facilitator`, `server`, and `client`. See `examples/simple-paywall/docker-compose.yml` for the compose configuration.
 
 ## Environment Variables
 
