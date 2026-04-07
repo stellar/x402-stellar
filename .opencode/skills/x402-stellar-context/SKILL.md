@@ -95,7 +95,7 @@ Turborepo resolves `^build` dependencies. In practice: `paywall` builds first (e
 
 **Facilitator is internal**: In the Docker Compose setup, the facilitator is not exposed externally — it runs on an internal network. Facilitator routes (`/verify`, `/settle`, `/supported`) are NOT externally accessible — they are an internal service, not a public API.
 
-**Startup validation**: Before creating the Express app, the server calls `Env.validateFacilitators()` which fetches `GET /supported` from every configured facilitator (with optional `Authorization: Bearer` header). If any facilitator is unreachable or returns a non-200 status, the server throws with aggregated diagnostics. The `start.sh` script also has a readiness loop for the facilitator, providing defense-in-depth.
+**Startup validation**: Before creating the Express app, the server calls `Env.validateFacilitators()` which fetches `GET /supported` from every configured facilitator (with optional `Authorization: Bearer` header). If any facilitator is unreachable or returns a non-200 status, the server throws with aggregated diagnostics.
 
 **`trust proxy` via `proxy-addr`**: Both server and facilitator use the `proxy-addr` package with `TRUST_PROXY` env var (defaulting to `loopback,linklocal,uniquelocal`) instead of Express's built-in string-based trust. This matches the pattern used in Stellar's `laboratory-backend`.
 
