@@ -108,7 +108,10 @@ export function injectTxLink(body: string, paymentResponseHeader: string | undef
   }
 
   const decoded = parseX402Header<X402PaymentResponsePayload>(paymentResponseHeader, (err, raw) => {
-    logger.warn({ err, rawHeader: raw.slice(0, 200) }, "Malformed payment-response header in txHashInjector");
+    logger.warn(
+      { err, rawHeader: raw.slice(0, 200) },
+      "Malformed payment-response header in txHashInjector",
+    );
   });
   if (!decoded) {
     return body.replaceAll("{{TX_LINK}}", "");
