@@ -50,9 +50,12 @@ function decodeX402HeaderBase64Value(base64HeaderValue: string): string {
  * Parses a base64-encoded JSON x402 header value into a typed payload.
  *
  * Returns `undefined` when the value is absent, empty, or not valid JSON.
+ * Pass `onParseError` to surface malformed/tampered headers to callers
+ * (e.g. for logging or alerting) without interrupting the request flow.
  */
 export function parseX402Header<T = unknown>(
   x402HeaderValue: string | null | undefined,
+  onParseError?: (err: unknown, raw: string) => void,
 ): T | undefined {
   if (!x402HeaderValue) {
     return undefined;
@@ -60,7 +63,8 @@ export function parseX402Header<T = unknown>(
 
   try {
     return JSON.parse(decodeX402HeaderBase64Value(x402HeaderValue)) as T;
-  } catch {
+  } catch (err) {
+    onParseError?.(err, x402HeaderValue);
     return undefined;
   }
 }

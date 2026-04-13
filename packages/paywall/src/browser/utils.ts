@@ -55,7 +55,9 @@ export function formatPaymentError(
   paymentRequiredHeader?: string | null,
 ): string {
   const paymentRequiredError = getX402ErrorMessage(
-    parseX402Header<Record<string, unknown>>(paymentRequiredHeader),
+    parseX402Header<Record<string, unknown>>(paymentRequiredHeader, (err) => {
+      console.warn("Malformed x402 payment-required header:", err);
+    }),
   );
   if (paymentRequiredError) {
     return `${prefix}: ${paymentRequiredError}`;
