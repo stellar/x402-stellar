@@ -41,6 +41,18 @@ function createMocks(paymentHeader: boolean, statusCode: number) {
       return res;
     }),
     getHeader: vi.fn((name: string) => headers.get(name.toLowerCase())),
+    writeHead: vi.fn((_statusCode: number, ...args: unknown[]) => {
+      for (const arg of args) {
+        if (arg && typeof arg === "object" && !Array.isArray(arg)) {
+          for (const [name, value] of Object.entries(arg as Record<string, unknown>)) {
+            if (typeof value === "string") {
+              headers.set(name.toLowerCase(), value);
+            }
+          }
+        }
+      }
+      return res;
+    }),
     once: events.once.bind(events),
   } as unknown as Response;
 

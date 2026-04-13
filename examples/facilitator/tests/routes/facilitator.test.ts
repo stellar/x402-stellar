@@ -170,7 +170,7 @@ describe("POST /settle", () => {
       paymentRequirements: validPaymentRequirements,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(502);
     expect(res.body).toHaveProperty("transaction");
     expect(res.body.success).toBe(false);
   });
@@ -185,7 +185,7 @@ describe("POST /settle", () => {
         paymentRequirements: { ...validPaymentRequirements, network: "stellar:pubnet" },
       });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(502);
     expect(res.body.success).toBe(false);
     expect(res.body.network).toBe("stellar:pubnet");
   });
@@ -225,7 +225,7 @@ describe("POST /settle", () => {
       paymentRequirements: validPaymentRequirements,
     });
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(502);
     expect(res.body.success).toBe(false);
     expect(res.body.errorReason).not.toContain("GABC123");
     expect(res.body.errorReason).not.toContain("soroban-rpc");
@@ -261,5 +261,89 @@ describe("unknown routes", () => {
   it("GET /nonexistent returns 404", async () => {
     const res = await request(app).get("/nonexistent");
     expect(res.status).toBe(404);
+  });
+});
+
+describe("API key authentication", () => {
+  const TEST_API_KEY = "test-secret-key-12345";
+  let authApp: express.Express;
+
+  beforeAll(async () => {
+    // Set env var before calling createApp() — Env.apiKey is a getter that reads
+    // process.env at call time, so createApp() will capture the key correctly.
+    process.env.FACILITATOR_API_KEY = TEST_API_KEY;
+    const mod = await import("../../src/app.js");
+    authApp = mod.createApp();
+    delete process.env.FACILITATOR_API_KEY;
+  });
+
+  it("returns 401 on /verify when no Authorization header is provided", async () => {
+    const res = await request(authApp).post("/verify").send({
+      paymentPayload: validPaymentPayload,
+      paymentRequirements: validPaymentRequirements,
+    });
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe("Unauthorized");
+  });
+
+  it("returns 401 on /settle when Authorization header has wrong key", async () => {
+    const res = await request(authApp)
+      .post("/settle")
+      .set("Authorization", "Bearer wrong-key")
+      .send({
+        paymentPayload: validPaymentPayload,
+        paymentRequirements: validPaymentRequirements,
+      });
+    expect(res.status).toBe(401);
+  });
+
+  it("returns 401 on /supported when Authorization header is missing", async () => {
+    const res = await request(authApp).get("/supported");
+    expect(res.status).toBe(401);
+  });
+
+  it("allows /verify with correct Bearer token", async () => {
+    const res = await request(authApp)
+      .post("/verify")
+      .set("Authorization", `Bearer ${TEST_API_KEY}`)
+      .send({
+        paymentPayload: validPaymentPayload,
+        paymentRequirements: validPaymentRequirements,
+      });
+    expect(res.status).toBe(200);
+  });
+
+  it("allows /settle with correct Bearer token", async () => {
+    const res = await request(authApp)
+      .post("/settle")
+      .set("Authorization", `Bearer ${TEST_API_KEY}`)
+      .send({
+        paymentPayload: validPaymentPayload,
+        paymentRequirements: validPaymentRequirements,
+      });
+    expect(res.status).toBe(200);
+  });
+
+  it("allows /supported with correct Bearer token", async () => {
+    const res = await request(authApp)
+      .get("/supported")
+      .set("Authorization", `Bearer ${TEST_API_KEY}`);
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects token with wrong casing of key value (case-sensitive comparison)", async () => {
+    const res = await request(authApp)
+      .post("/verify")
+      .set("Authorization", `Bearer ${TEST_API_KEY.toUpperCase()}`)
+      .send({
+        paymentPayload: validPaymentPayload,
+        paymentRequirements: validPaymentRequirements,
+      });
+    expect(res.status).toBe(401);
+  });
+
+  it("does not protect /health (always open)", async () => {
+    const res = await request(authApp).get("/health");
+    expect(res.status).toBe(200);
   });
 });

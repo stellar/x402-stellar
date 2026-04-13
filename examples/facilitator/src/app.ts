@@ -10,6 +10,7 @@ import { ExactStellarScheme } from "@x402/stellar/exact/facilitator";
 import cors from "cors";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
+import { createHash, timingSafeEqual } from "node:crypto";
 import proxyAddr from "proxy-addr";
 
 import { Env } from "./config/env.js";
@@ -89,7 +90,26 @@ export function createApp(): Express {
   app.use(httpLogger);
   app.use(express.json());
 
-  app.post("/verify", async (req, res): Promise<void> => {
+  const expectedApiKey = Env.apiKey;
+  function requireApiKey(req: Request, res: Response, next: NextFunction): void {
+    if (!expectedApiKey) {
+      next();
+      return;
+    }
+    const provided = req.headers.authorization?.replace(/^Bearer\s+/i, "") ?? "";
+    // Hash both values with SHA-256 before comparing so that (a) the buffers are
+    // always the same length (avoiding a length-based timing side-channel) and
+    // (b) timingSafeEqual can run to completion regardless of key length.
+    const providedHash = createHash("sha256").update(provided).digest();
+    const expectedHash = createHash("sha256").update(expectedApiKey).digest();
+    if (!timingSafeEqual(providedHash, expectedHash)) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    next();
+  }
+
+  app.post("/verify", requireApiKey, async (req, res): Promise<void> => {
     try {
       const { paymentPayload, paymentRequirements } = req.body ?? {};
 
@@ -125,7 +145,7 @@ export function createApp(): Express {
     }
   });
 
-  app.post("/settle", async (req, res): Promise<void> => {
+  app.post("/settle", requireApiKey, async (req, res): Promise<void> => {
     const { paymentPayload, paymentRequirements } = req.body ?? {};
     try {
       const payloadError = validatePaymentPayload(paymentPayload);
@@ -150,7 +170,7 @@ export function createApp(): Express {
       logger.error({ err: error }, "Settle error");
 
       if (error instanceof Error && error.message.includes("Settlement aborted:")) {
-        res.json({
+        res.status(502).json({
           success: false,
           transaction: "",
           errorReason: "Settlement aborted",
@@ -163,7 +183,7 @@ export function createApp(): Express {
     }
   });
 
-  app.get("/supported", async (_req, res) => {
+  app.get("/supported", requireApiKey, async (_req, res) => {
     try {
       const response = facilitator.getSupported();
       res.json(response);

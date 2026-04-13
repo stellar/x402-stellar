@@ -127,7 +127,10 @@ async function main(): Promise<void> {
     const facilitatorError =
       paidResponse.status === 402
         ? getX402ErrorMessage(
-            parseX402Header<Record<string, unknown>>(paidResponse.headers.get("payment-required")),
+            parseX402Header<Record<string, unknown>>(
+              paidResponse.headers.get("payment-required"),
+              (err) => logger.warn({ err }, "Malformed payment-required header"),
+            ),
           )
         : undefined;
     logger.error(

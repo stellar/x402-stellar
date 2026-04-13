@@ -41,10 +41,8 @@ export function paymentLogger() {
     let paymentResponseHeader: string | undefined;
     let extractedErrorFields: Record<string, string> = {};
 
-    // Intercepts res.setHeader to capture payment headers as they're set.
-    // Express's res.set() and res.header() delegate to setHeader, so those are
-    // covered. However, res.writeHead() can set headers directly — if upstream
-    // middleware ever uses writeHead, those headers won't be captured here.
+    // Intercept res.setHeader to capture payment headers set via Express's
+    // res.set() / res.header() (which both delegate to setHeader).
     res.setHeader = function (name: string, value: number | string | readonly string[]) {
       const normalizedName = name.toLowerCase();
       const normalizedValue = normalizeHeaderValue(value);
@@ -60,6 +58,32 @@ export function paymentLogger() {
       return originalSetHeader(name, value);
     };
 
+    // Also intercept res.writeHead so that headers set directly through the
+    // low-level Node.js API are captured (e.g. middleware that bypasses Express).
+    const originalWriteHead = res.writeHead.bind(res) as typeof res.writeHead;
+    res.writeHead = function (
+      statusCode: number,
+      ...args: Parameters<typeof res.writeHead> extends [number, ...infer Rest] ? Rest : never[]
+    ) {
+      // Headers may appear as the 1st extra arg (no reason phrase) or the 2nd
+      // (when a string reason phrase is provided first).
+      for (const arg of args) {
+        if (arg && typeof arg === "object" && !Array.isArray(arg)) {
+          const headers = arg as Record<string, string | number | string[]>;
+          for (const [name, value] of Object.entries(headers)) {
+            const lower = name.toLowerCase();
+            if (lower === PAYMENT_REQUIRED_HEADER && typeof value === "string") {
+              paymentRequiredHeader = value;
+            } else if (lower === PAYMENT_RESPONSE_HEADER && typeof value === "string") {
+              paymentResponseHeader = value;
+            }
+          }
+        }
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (originalWriteHead as any)(statusCode, ...args);
+    } as typeof res.writeHead;
+
     res.json = function (body: unknown) {
       if (res.statusCode >= 400) {
         extractedErrorFields = extractErrorFields(body);
@@ -69,8 +93,14 @@ export function paymentLogger() {
     };
 
     res.once("finish", () => {
-      const decodedPaymentRequired = parseX402Header(paymentRequiredHeader);
-      const decodedPaymentResponse = parseX402Header(paymentResponseHeader);
+      const onHeaderParseError = (err: unknown, raw: string) => {
+        logger.warn(
+          { err, rawHeader: raw.slice(0, 200) },
+          "Malformed x402 header — possible tampering",
+        );
+      };
+      const decodedPaymentRequired = parseX402Header(paymentRequiredHeader, onHeaderParseError);
+      const decodedPaymentResponse = parseX402Header(paymentResponseHeader, onHeaderParseError);
 
       if (res.statusCode >= 400) {
         const paymentContext =

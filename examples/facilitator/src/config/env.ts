@@ -90,4 +90,13 @@ export class Env {
     const defaultValue = "loopback,linklocal,uniquelocal";
     return parseCommaSeparatedList(raw ?? defaultValue);
   }
+
+  /**
+   * Optional API key for authenticating requests to the facilitator.
+   * When set, all /verify, /settle, and /supported requests must include an
+   * `Authorization: Bearer <key>` header. Unset in dev mode = open access.
+   */
+  static get apiKey(): string | undefined {
+    return process.env.FACILITATOR_API_KEY || undefined;
+  }
 }
