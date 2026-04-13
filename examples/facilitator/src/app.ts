@@ -11,6 +11,7 @@ import cors from "cors";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
 import { createHash, timingSafeEqual } from "node:crypto";
+import rateLimit from "express-rate-limit";
 import proxyAddr from "proxy-addr";
 
 import { Env } from "./config/env.js";
@@ -109,7 +110,17 @@ export function createApp(): Express {
     next();
   }
 
-  app.post("/verify", requireApiKey, async (req, res): Promise<void> => {
+  // Rate-limit auth-protected endpoints to mitigate brute-force against the API key
+  // and to cap resource consumption on /verify (RPC simulation) and /settle (XLM fees).
+  const authRateLimit = rateLimit({
+    windowMs: 60_000,
+    max: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too Many Requests" },
+  });
+
+  app.post("/verify", authRateLimit, requireApiKey, async (req, res): Promise<void> => {
     try {
       const { paymentPayload, paymentRequirements } = req.body ?? {};
 
@@ -145,7 +156,7 @@ export function createApp(): Express {
     }
   });
 
-  app.post("/settle", requireApiKey, async (req, res): Promise<void> => {
+  app.post("/settle", authRateLimit, requireApiKey, async (req, res): Promise<void> => {
     const { paymentPayload, paymentRequirements } = req.body ?? {};
     try {
       const payloadError = validatePaymentPayload(paymentPayload);
@@ -183,7 +194,7 @@ export function createApp(): Express {
     }
   });
 
-  app.get("/supported", requireApiKey, async (_req, res) => {
+  app.get("/supported", authRateLimit, requireApiKey, async (_req, res) => {
     try {
       const response = facilitator.getSupported();
       res.json(response);
