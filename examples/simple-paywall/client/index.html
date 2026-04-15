@@ -41,6 +41,8 @@
     />
   </head>
   <body>
+    <!-- Apply saved theme before React mounts to prevent flash -->
+    <script>if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark')</script>
     <div id="root"></div>
     <!-- Runtime config injected by docker-entrypoint.sh (noop in dev) -->
     <script src="/config.js"></script>

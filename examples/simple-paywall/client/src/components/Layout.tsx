@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router";
 import { APP_NAME } from "../constants.ts";
 
@@ -6,13 +6,24 @@ export function Layout() {
   const location = useLocation();
   const isTryPage = location.pathname.startsWith("/try");
 
+  const [isDark, setIsDark] = useState(
+    () => document.documentElement.classList.contains("dark"),
+  );
+
   useEffect(() => {
     document.title = APP_NAME;
   }, []);
 
+  function toggleTheme() {
+    const next = !isDark;
+    setIsDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+  }
+
   return (
-    <div className="min-h-screen bg-[#f8f8f8] text-[#171717] flex flex-col">
-      <header className="border-b border-[#e2e2e2] bg-[#fcfcfc]">
+    <div className="min-h-screen bg-base text-fg flex flex-col">
+      <header className="border-b border-line bg-surface">
         <nav className="w-full px-[32px] py-[8px] flex items-center justify-between">
           <Link to="/" className="flex items-center gap-[12px]">
             <div className="flex items-center gap-[8px]">
@@ -27,22 +38,37 @@ export function Layout() {
                 <path d="M69.3629 19.9647V4.08019H71.3596V19.9647H69.3629Z" fill="currentColor"/>
                 <path d="M73.8121 4.08019V19.9647H75.8087V4.08019H73.8121Z" fill="currentColor"/>
               </svg>
-              <span className="font-semibold text-[14px] leading-[20px] rounded-full px-[8px] py-[2px] bg-[#fbfaff] border border-[#d7cff9] text-[#5746af]">
+              <span className="font-semibold text-[14px] leading-[20px] rounded-full px-[8px] py-[2px] bg-brand-fill border border-brand-subtle text-brand">
                 x402
               </span>
             </div>
           </Link>
+
           <div className="flex items-center gap-[8px]">
-            <div className="bg-[#ededed] rounded-full w-[48px] p-[2px] flex items-center relative">
+            <button
+              onClick={toggleTheme}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="bg-toggle rounded-full w-[48px] p-[2px] flex items-center relative cursor-pointer"
+            >
               <div className="w-[22px] h-[22px] rounded-full bg-white toggle-knob" />
-              <svg className="absolute left-[6px] top-[6px]" width="14" height="14" viewBox="0 0 13.1667 13.1667" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <path d="M6.58333 0.75V1.91667M6.58333 11.25V12.4167M1.91667 6.58333H0.75M3.26657 3.26657L2.44161 2.44161M9.9001 3.26657L10.7251 2.44161M3.26657 9.9025L2.44161 10.7275M9.9001 9.9025L10.7251 10.7275M12.4167 6.58333H11.25M9.5 6.58333C9.5 8.19416 8.19416 9.5 6.58333 9.5C4.9725 9.5 3.66667 8.19416 3.66667 6.58333C3.66667 4.9725 4.9725 3.66667 6.58333 3.66667C8.19416 3.66667 9.5 4.9725 9.5 6.58333Z" stroke="#8F8F8F" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
+              {/* Sun icon – visible in light mode */}
+              <span className="toggle-sun text-icon absolute left-[6px] top-[6px]">
+                <svg width="14" height="14" viewBox="0 0 13.1667 13.1667" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                  <path d="M6.58333 0.75V1.91667M6.58333 11.25V12.4167M1.91667 6.58333H0.75M3.26657 3.26657L2.44161 2.44161M9.9001 3.26657L10.7251 2.44161M3.26657 9.9025L2.44161 10.7275M9.9001 9.9025L10.7251 10.7275M12.4167 6.58333H11.25M9.5 6.58333C9.5 8.19416 8.19416 9.5 6.58333 9.5C4.9725 9.5 3.66667 8.19416 3.66667 6.58333C3.66667 4.9725 4.9725 3.66667 6.58333 3.66667C8.19416 3.66667 9.5 4.9725 9.5 6.58333Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+              {/* Moon icon – visible in dark mode */}
+              <span className="toggle-moon text-icon absolute right-[6px] top-[6px]">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+                  <path d="M12.25 7.46A5.25 5.25 0 1 1 6.54 1.75 4.08 4.08 0 0 0 12.25 7.46z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
+            </button>
+
             {!isTryPage && (
               <Link
                 to="/try"
-                className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[6px] px-[10px] py-[6px] inline-flex items-center gap-1"
+                className="bg-action text-action-fg text-[14px] leading-[20px] font-semibold rounded-[6px] px-[10px] py-[6px] inline-flex items-center gap-1"
               >
                 Try demo
                 <span aria-hidden>→</span>
@@ -56,13 +82,13 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <footer className="w-full border-t border-[#e2e2e2] px-[32px] py-[24px] text-center text-[14px] leading-[20px] font-medium text-[#6f6f6f]">
+      <footer className="w-full border-t border-line px-[32px] py-[24px] text-center text-[14px] leading-[20px] font-medium text-muted">
         Powered by{" "}
         <a
           href="https://www.x402.org/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#5746af] hover:underline"
+          className="text-brand hover:underline"
         >
           x402
         </a>{" "}
@@ -71,7 +97,7 @@ export function Layout() {
           href="https://stellar.org/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#5746af] hover:underline"
+          className="text-brand hover:underline"
         >
           Stellar
         </a>
