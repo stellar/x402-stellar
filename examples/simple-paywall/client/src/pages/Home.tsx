@@ -116,11 +116,11 @@ export function Home() {
         </Link>
       </section>
 
-      <section className="w-full grid gap-[32px] md:grid-cols-3">
+      <section className="flex gap-[32px]">
         {features.map((f) => (
           <div
             key={f.title}
-            className="bg-[#fcfcfc] rounded-[8px] p-[24px] text-left"
+            className="bg-[#fcfcfc] rounded-[8px] p-[24px] text-left w-[304px] shrink-0"
           >
             <h3 className="text-[18px] leading-[26px] font-semibold text-[#171717] mb-[8px]">
               {f.title}
