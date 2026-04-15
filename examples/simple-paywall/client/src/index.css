@@ -10,3 +10,8 @@
   color: #171717;
   background-color: #f8f8f8;
 }
+
+/* Toggle knob drop-shadow (matches Figma filter0_d spec) */
+.toggle-knob {
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.08);
+}

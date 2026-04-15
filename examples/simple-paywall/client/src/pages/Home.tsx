@@ -15,10 +15,10 @@ const features = [
   {
     title: "Stellar + USDC",
     description:
-      "Payments settle in ~5 seconds on Stellar using a Stellar asset contract. This demo uses USDC on testnet.",
+      "Payments settle in ~5 seconds on Stellar using Soroban token contracts. This demo uses USDC on testnet.",
   },
   {
-    title: "HTTP 402 Protocol",
+    title: "HTTPS 402 Protocol",
     description:
       "x402 activates the dormant HTTP 402 status code. Clients pay for resources via request headers -- no accounts, no OAuth, no subscriptions.",
   },
@@ -45,7 +45,7 @@ const resources = [
     label: "@x402/stellar Package",
     href: "https://github.com/coinbase/x402/tree/main/typescript/packages/mechanisms/stellar",
     description:
-      "TypeScript package providing Stellar blockchain support for the x402 protocol (client, facilitator, and server).",
+      "The pull request adding Stellar blockchain support to the x402 protocol (client, facilitator, and server).",
   },
   {
     label: "x402 Protocol",
@@ -56,7 +56,7 @@ const resources = [
 
 const compatibleWallets = [
   {
-    label: "Freighter (browser extension)",
+    label: "Freighter (Browser extension)",
     href: "https://www.freighter.app/",
   },
   {
@@ -87,13 +87,13 @@ export function Home() {
   return (
     <div className="max-w-[960px] mx-auto px-6 py-[80px] flex flex-col items-center gap-[80px]">
       <section className="text-center flex flex-col items-center gap-[24px]">
-        <div className="flex items-end gap-2 justify-center">
+        <div className="flex items-end gap-[8px] justify-center pl-[24px]">
           <h1 className="text-[64px] leading-[54px] font-semibold tracking-[-1.28px] font-[Inconsolata]">
             {heroTitle}
           </h1>
           <span className="text-[16px] leading-[24px] font-medium text-[#171717]">on Stellar</span>
         </div>
-        <div className="text-[16px] leading-[24px] font-medium text-[#171717] max-w-[600px]">
+        <div className="text-[16px] leading-[24px] font-normal text-[#171717] max-w-[600px]">
           HTTP-native payments on the Stellar network. This demo shows a working paywall powered by
           the{" "}
           <a
@@ -105,11 +105,11 @@ export function Home() {
             x402 protocol
             <span aria-hidden>↗</span>
           </a>{" "}
-          and Stellar smart contracts.
+          and Soroban smart contracts.
         </div>
         <Link
           to="/try"
-          className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] py-[8px] inline-flex items-center gap-2"
+          className="bg-[#171717] text-white text-[14px] leading-[20px] font-semibold rounded-[8px] px-[12px] py-[8px] inline-flex items-center gap-2"
         >
           Try the demo
           <span aria-hidden>→</span>
@@ -120,12 +120,12 @@ export function Home() {
         {features.map((f) => (
           <div
             key={f.title}
-            className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] text-left"
+            className="bg-[#fcfcfc] rounded-[8px] p-[24px] text-left"
           >
             <h3 className="text-[18px] leading-[26px] font-semibold text-[#171717] mb-[8px]">
               {f.title}
             </h3>
-            <p className="text-[16px] leading-[24px] font-medium text-[#6f6f6f]">{f.description}</p>
+            <p className="text-[16px] leading-[24px] font-normal text-[#6f6f6f]">{f.description}</p>
           </div>
         ))}
       </section>
@@ -134,15 +134,15 @@ export function Home() {
         <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
           How x402 Works
         </h2>
-        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] w-full max-w-[960px] flex flex-col gap-[24px]">
+        <div className="bg-[#fcfcfc] rounded-[8px] p-[24px] w-full max-w-[960px] flex flex-col gap-[24px]">
           <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
-            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0">
               1
             </span>
             <span>Client requests a protected resource from the server.</span>
           </div>
           <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
-            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0">
               2
             </span>
             <span>
@@ -154,20 +154,20 @@ export function Home() {
             </span>
           </div>
           <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
-            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0">
               3
             </span>
             <span>
-              Client builds a Stellar contract{" "}
+              Client builds a Soroban{" "}
               <span className="text-[#5746af] font-semibold font-[Inconsolata] tracking-[-0.32px]">
-                transfer()
-              </span>
+                transfer( )
+              </span>{" "}
               call, signs the authorization entries, and sends the transaction in the request
               header.
             </span>
           </div>
           <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
-            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0">
               4
             </span>
             <span>
@@ -176,7 +176,7 @@ export function Home() {
             </span>
           </div>
           <div className="flex items-start gap-[8px] text-[16px] leading-[24px] font-medium">
-            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0 mt-[2px]">
+            <span className="w-[24px] h-[24px] rounded-full border border-[#e2e2e2] flex items-center justify-center text-[14px] font-semibold shrink-0">
               5
             </span>
             <span>
@@ -194,7 +194,7 @@ export function Home() {
         <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
           Compatible Wallets
         </h2>
-        <div className="text-[16px] leading-[24px] font-medium text-center">
+        <div className="text-[16px] leading-[24px] font-normal text-center">
           x402 on Stellar requires wallets that support{" "}
           <a
             href={walletLinks.authEntry}
@@ -214,7 +214,7 @@ export function Home() {
               href={wallet.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#fcfcfc] border border-[#e2e2e2] text-[#171717] text-[14px] leading-[20px] px-[12px] py-[8px] rounded-[8px] inline-flex items-center gap-2"
+              className="bg-[#fcfcfc] border border-[#e2e2e2] text-[#171717] text-[14px] leading-[20px] font-semibold px-[12px] py-[8px] rounded-[8px] inline-flex items-center gap-2"
             >
               {wallet.label}
               <span aria-hidden>↗</span>
@@ -227,7 +227,7 @@ export function Home() {
         <h2 className="text-[24px] leading-[32px] font-semibold tracking-[-0.96px] text-center">
           Facilitator
         </h2>
-        <div className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] w-full max-w-[960px] text-center text-[16px] leading-[24px] font-medium">
+        <div className="bg-[#fcfcfc] rounded-[8px] p-[24px] w-full max-w-[960px] text-center text-[16px] leading-[24px] font-normal">
           The x402 Facilitator Service is now live. Under the hood, the plugin leverages{" "}
           <a
             href="https://www.openzeppelin.com/"
@@ -238,18 +238,16 @@ export function Home() {
             OpenZeppelin
             <span aria-hidden>↗</span>
           </a>{" "}
-          channels to submit transactions onchain via a managed Relayer and Facilitator setup. Check
-          out{" "}
+          channels to submit transactions onchain via a managed Relayer and Facilitator setup.{" "}
           <a
             href="https://developers.stellar.org/docs/build/apps/x402"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[#5746af] font-medium inline-flex items-center gap-1"
           >
-            Stellar Developer docs
+            Check out Stellar Developer docs
             <span aria-hidden>↗</span>
           </a>
-          .
         </div>
       </section>
 
@@ -264,12 +262,12 @@ export function Home() {
               href={r.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#fcfcfc] border border-[#e2e2e2] rounded-[8px] p-[24px] block"
+              className="bg-[#fcfcfc] rounded-[8px] p-[24px] block"
             >
               <h3 className="text-[18px] leading-[26px] font-semibold text-[#5746af] mb-[8px]">
                 {r.label}
               </h3>
-              <p className="text-[16px] leading-[24px] font-medium text-[#6f6f6f]">
+              <p className="text-[16px] leading-[24px] font-normal text-[#6f6f6f]">
                 {r.description}
               </p>
             </a>
