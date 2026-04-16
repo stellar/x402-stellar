@@ -24,7 +24,7 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-base text-fg flex flex-col">
       <header className="border-b border-line bg-surface">
-        <nav className="w-full px-[32px] py-[8px] flex items-center justify-between">
+        <nav className="w-full px-[32px] h-[48px] flex items-center justify-between">
           <Link to="/" className="flex items-center gap-[12px]">
             <div className="flex items-center gap-[8px]">
               <svg width="96" height="24" viewBox="0 0 96 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Stellar">

@@ -109,7 +109,7 @@ export function Home() {
         </div>
         <Link
           to="/try"
-          className="bg-action text-action-fg text-[14px] leading-[20px] font-semibold rounded-[8px] px-[12px] py-[8px] inline-flex items-center gap-2"
+          className="bg-action text-action-fg text-[14px] leading-[20px] font-semibold rounded-[8px] px-[16px] h-[48px] inline-flex items-center gap-2"
         >
           Try the demo
           <span aria-hidden>→</span>
