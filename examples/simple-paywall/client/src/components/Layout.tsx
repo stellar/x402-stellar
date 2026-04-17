@@ -19,7 +19,11 @@ export function Layout() {
     const next = !isDark;
     setIsDark(next);
     document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
+    try {
+      localStorage.setItem("theme", next ? "dark" : "light");
+    } catch (err) {
+      console.error("Failed to persist theme preference:", err);
+    }
   }
 
   return (

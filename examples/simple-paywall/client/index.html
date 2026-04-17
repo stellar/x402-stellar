@@ -44,7 +44,12 @@
     <!-- Apply theme before React mounts to prevent flash; falls back to OS preference when unset -->
     <script>
       (function () {
-        var stored = localStorage.getItem("theme");
+        var stored = null;
+        try {
+          stored = localStorage.getItem("theme");
+        } catch (err) {
+          console.error("Failed to read saved theme; falling back to OS preference:", err);
+        }
         var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         if (stored === "dark" || (stored === null && prefersDark)) {
           document.documentElement.classList.add("dark");
