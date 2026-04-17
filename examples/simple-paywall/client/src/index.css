@@ -23,6 +23,7 @@
   --color-action: #171717; /* CTA button background          */
   --color-action-fg: #ffffff; /* CTA button text                */
   --color-toggle: #ededed; /* Gray 4   – toggle pill         */
+  --color-toggle-knob: #ffffff; /* Toggle knob (high contrast) */
   --color-icon: #8f8f8f; /* Gray 9   – subtle icon/stroke  */
   --color-error: #b91c1c; /* Error text (light)             */
 
@@ -49,6 +50,7 @@
   --color-action: #ededed; /* CTA bg inverted   */
   --color-action-fg: #171717; /* CTA text inverted */
   --color-toggle: #282828; /* Gray 4 dark   */
+  --color-toggle-knob: #ffffff; /* Knob stays light for high contrast in both modes */
   --color-icon: #707070; /* Gray 9 dark   */
   --color-error: #f87171; /* Error text (dark – better contrast) */
 }
@@ -75,6 +77,9 @@
   }
   .bg-toggle {
     background-color: var(--color-toggle);
+  }
+  .bg-toggle-knob {
+    background-color: var(--color-toggle-knob);
   }
 
   /* Text */

@@ -47,7 +47,7 @@ export function Layout() {
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               className="bg-toggle rounded-full w-[48px] p-[2px] flex items-center relative cursor-pointer"
             >
-              <div className="w-[22px] h-[22px] rounded-full bg-white toggle-knob" />
+              <div className="w-[22px] h-[22px] rounded-full bg-toggle-knob toggle-knob" />
               <span className="toggle-sun text-icon absolute left-[6px] top-[6px]">
                 <SunIcon />
               </span>
