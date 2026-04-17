@@ -96,9 +96,7 @@ export function TryIt() {
         </p>
         <div className="flex flex-wrap gap-[12px]">
           {status === "loading" && (
-            <span className="text-[14px] text-muted font-medium">
-              Loading available networks…
-            </span>
+            <span className="text-[14px] text-muted font-medium">Loading available networks…</span>
           )}
           {status === "error" && (
             <span className="text-[14px] text-error font-medium">

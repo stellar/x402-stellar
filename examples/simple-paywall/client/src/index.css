@@ -7,46 +7,50 @@
 
 :root {
   /* Gray scale (light) */
-  --color-base:         #F8F8F8; /* Gray 2   – page background     */
-  --color-surface:      #FCFCFC; /* Gray 1   – card / header bg    */
-  --color-fg:           #171717; /* Gray 12  – primary text        */
-  --color-muted:        #6F6F6F; /* Gray 11  – secondary text      */
-  --color-line:         #E2E2E2; /* Gray 6   – default border      */
+  --color-base: #f8f8f8; /* Gray 2   – page background     */
+  --color-surface: #fcfcfc; /* Gray 1   – card / header bg    */
+  --color-fg: #171717; /* Gray 12  – primary text        */
+  --color-muted: #6f6f6f; /* Gray 11  – secondary text      */
+  --color-line: #e2e2e2; /* Gray 6   – default border      */
 
   /* Lilac scale (light) */
-  --color-brand:        #5746AF; /* Lilac 11 – brand accent        */
-  --color-brand-subtle: #D7CFF9; /* Lilac 6  – brand border        */
-  --color-brand-fill:   #FBFAFF; /* Lilac 2  – brand bg (badge)    */
-  --color-brand-tint:   #F5F2FF; /* Lilac 3  – brand bg (prereq)   */
+  --color-brand: #5746af; /* Lilac 11 – brand accent        */
+  --color-brand-subtle: #d7cff9; /* Lilac 6  – brand border        */
+  --color-brand-fill: #fbfaff; /* Lilac 2  – brand bg (badge)    */
+  --color-brand-tint: #f5f2ff; /* Lilac 3  – brand bg (prereq)   */
 
   /* Semantic */
-  --color-action:       #171717; /* CTA button background          */
-  --color-action-fg:    #FFFFFF; /* CTA button text                */
-  --color-toggle:       #EDEDED; /* Gray 4   – toggle pill         */
-  --color-icon:         #8F8F8F; /* Gray 9   – subtle icon/stroke  */
-  --color-error:        #B91C1C; /* Error text (light)             */
+  --color-action: #171717; /* CTA button background          */
+  --color-action-fg: #ffffff; /* CTA button text                */
+  --color-toggle: #ededed; /* Gray 4   – toggle pill         */
+  --color-icon: #8f8f8f; /* Gray 9   – subtle icon/stroke  */
+  --color-error: #b91c1c; /* Error text (light)             */
 
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   color: var(--color-fg);
   background-color: var(--color-base);
 }
 
 /* ─── Dark mode overrides ─────────────────────────────────────────── */
 .dark {
-  --color-base:         #161616; /* Gray 1 dark   */
-  --color-surface:      #1C1C1C; /* Gray 2 dark   */
-  --color-fg:           #EDEDED; /* Gray 12 dark  */
-  --color-muted:        #A0A0A0; /* Gray 11 dark  */
-  --color-line:         #343434; /* Gray 6 dark   */
-  --color-brand:        #9E8CFC; /* Lilac 11 dark */
-  --color-brand-subtle: #392C72; /* Lilac 6 dark  */
-  --color-brand-fill:   #1C172B; /* Lilac 2 dark  */
-  --color-brand-tint:   #17151F; /* Lilac 1 dark  */
-  --color-action:       #EDEDED; /* CTA bg inverted   */
-  --color-action-fg:    #171717; /* CTA text inverted */
-  --color-toggle:       #282828; /* Gray 4 dark   */
-  --color-icon:         #707070; /* Gray 9 dark   */
-  --color-error:        #F87171; /* Error text (dark – better contrast) */
+  --color-base: #161616; /* Gray 1 dark   */
+  --color-surface: #1c1c1c; /* Gray 2 dark   */
+  --color-fg: #ededed; /* Gray 12 dark  */
+  --color-muted: #a0a0a0; /* Gray 11 dark  */
+  --color-line: #343434; /* Gray 6 dark   */
+  --color-brand: #9e8cfc; /* Lilac 11 dark */
+  --color-brand-subtle: #392c72; /* Lilac 6 dark  */
+  --color-brand-fill: #1c172b; /* Lilac 2 dark  */
+  --color-brand-tint: #17151f; /* Lilac 1 dark  */
+  --color-action: #ededed; /* CTA bg inverted   */
+  --color-action-fg: #171717; /* CTA text inverted */
+  --color-toggle: #282828; /* Gray 4 dark   */
+  --color-icon: #707070; /* Gray 9 dark   */
+  --color-error: #f87171; /* Error text (dark – better contrast) */
 }
 
 /* ─── Semantic utility classes ────────────────────────────────────── */
@@ -54,24 +58,52 @@
 /* override same-specificity generated classes when needed.            */
 @layer utilities {
   /* Backgrounds */
-  .bg-base           { background-color: var(--color-base); }
-  .bg-surface        { background-color: var(--color-surface); }
-  .bg-brand-fill     { background-color: var(--color-brand-fill); }
-  .bg-brand-tint     { background-color: var(--color-brand-tint); }
-  .bg-action         { background-color: var(--color-action); }
-  .bg-toggle         { background-color: var(--color-toggle); }
+  .bg-base {
+    background-color: var(--color-base);
+  }
+  .bg-surface {
+    background-color: var(--color-surface);
+  }
+  .bg-brand-fill {
+    background-color: var(--color-brand-fill);
+  }
+  .bg-brand-tint {
+    background-color: var(--color-brand-tint);
+  }
+  .bg-action {
+    background-color: var(--color-action);
+  }
+  .bg-toggle {
+    background-color: var(--color-toggle);
+  }
 
   /* Text */
-  .text-fg           { color: var(--color-fg); }
-  .text-muted        { color: var(--color-muted); }
-  .text-brand        { color: var(--color-brand); }
-  .text-action-fg    { color: var(--color-action-fg); }
-  .text-icon         { color: var(--color-icon); }
-  .text-error        { color: var(--color-error); }
+  .text-fg {
+    color: var(--color-fg);
+  }
+  .text-muted {
+    color: var(--color-muted);
+  }
+  .text-brand {
+    color: var(--color-brand);
+  }
+  .text-action-fg {
+    color: var(--color-action-fg);
+  }
+  .text-icon {
+    color: var(--color-icon);
+  }
+  .text-error {
+    color: var(--color-error);
+  }
 
   /* Borders */
-  .border-line         { border-color: var(--color-line); }
-  .border-brand-subtle { border-color: var(--color-brand-subtle); }
+  .border-line {
+    border-color: var(--color-line);
+  }
+  .border-brand-subtle {
+    border-color: var(--color-brand-subtle);
+  }
 }
 
 /* ─── Theme toggle ────────────────────────────────────────────────── */
@@ -87,8 +119,17 @@
 }
 
 /* Sun shown in light mode; moon shown in dark mode */
-.toggle-sun  { transition: opacity 0.15s ease; }
-.toggle-moon { opacity: 0; transition: opacity 0.15s ease; }
+.toggle-sun {
+  transition: opacity 0.15s ease;
+}
+.toggle-moon {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
 
-.dark .toggle-sun  { opacity: 0; }
-.dark .toggle-moon { opacity: 1; }
+.dark .toggle-sun {
+  opacity: 0;
+}
+.dark .toggle-moon {
+  opacity: 1;
+}

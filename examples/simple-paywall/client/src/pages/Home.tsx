@@ -18,7 +18,7 @@ const features = [
       "Payments settle in ~5 seconds on Stellar using Soroban token contracts. This demo uses USDC on testnet.",
   },
   {
-    title: "HTTPS 402 Protocol",
+    title: "HTTP 402 Protocol",
     description:
       "x402 activates the dormant HTTP 402 status code. Clients pay for resources via request headers -- no accounts, no OAuth, no subscriptions.",
   },
@@ -122,9 +122,7 @@ export function Home() {
             key={f.title}
             className="bg-surface rounded-[8px] p-[24px] text-left w-[304px] shrink-0"
           >
-            <h3 className="text-[18px] leading-[26px] font-semibold text-fg mb-[8px]">
-              {f.title}
-            </h3>
+            <h3 className="text-[18px] leading-[26px] font-semibold text-fg mb-[8px]">{f.title}</h3>
             <p className="text-[16px] leading-[24px] font-normal text-muted">{f.description}</p>
           </div>
         ))}
@@ -267,9 +265,7 @@ export function Home() {
               <h3 className="text-[18px] leading-[26px] font-semibold text-brand mb-[8px]">
                 {r.label}
               </h3>
-              <p className="text-[16px] leading-[24px] font-normal text-muted">
-                {r.description}
-              </p>
+              <p className="text-[16px] leading-[24px] font-normal text-muted">{r.description}</p>
             </a>
           ))}
         </div>
