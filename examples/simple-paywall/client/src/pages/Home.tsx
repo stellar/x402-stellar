@@ -85,7 +85,7 @@ export function Home() {
   const heroTitle = "x402";
 
   return (
-    <div className="max-w-[960px] mx-auto px-6 py-[80px] flex flex-col items-center gap-[80px]">
+    <div className="max-w-[1024px] mx-auto px-6 py-[80px] flex flex-col items-center gap-[80px]">
       <section className="text-center flex flex-col items-center gap-[24px]">
         <div className="flex items-end gap-[8px] justify-center pl-[24px]">
           <h1 className="text-[64px] leading-[54px] font-semibold tracking-[-1.28px] font-[Inconsolata]">
@@ -116,11 +116,11 @@ export function Home() {
         </Link>
       </section>
 
-      <section className="flex gap-[32px]">
+      <section className="flex flex-wrap justify-center gap-[32px]">
         {features.map((f) => (
           <div
             key={f.title}
-            className="bg-surface rounded-[8px] p-[24px] text-left w-[304px] shrink-0"
+            className="bg-surface rounded-[8px] p-[24px] text-left w-full md:w-[304px] md:shrink-0"
           >
             <h3 className="text-[18px] leading-[26px] font-semibold text-fg mb-[8px]">{f.title}</h3>
             <p className="text-[16px] leading-[24px] font-normal text-muted">{f.description}</p>
