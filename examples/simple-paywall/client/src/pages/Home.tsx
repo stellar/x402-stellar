@@ -43,9 +43,9 @@ const resources = [
   },
   {
     label: "@x402/stellar Package",
-    href: "https://github.com/coinbase/x402/tree/main/typescript/packages/mechanisms/stellar",
+    href: "https://www.npmjs.com/package/@x402/stellar",
     description:
-      "The pull request adding Stellar blockchain support to the x402 protocol (client, facilitator, and server).",
+      "The npm package providing Stellar client, facilitator, and server support for the x402 protocol.",
   },
   {
     label: "x402 Protocol",
@@ -158,7 +158,7 @@ export function Home() {
             <span>
               Client builds a Soroban{" "}
               <span className="text-brand font-semibold font-[Inconsolata] tracking-[-0.32px]">
-                transfer( )
+                transfer()
               </span>{" "}
               call, signs the authorization entries, and sends the transaction in the request
               header.
