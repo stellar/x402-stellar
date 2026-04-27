@@ -8,3 +8,6 @@ coverage
 
 # Generated channel account keys (contain secrets)
 examples/facilitator/scripts/output/
+
+PR.local.md
+NOTES_PR.md
