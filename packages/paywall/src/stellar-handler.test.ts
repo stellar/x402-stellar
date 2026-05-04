@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { stellarPaywall } from "./stellar-handler.js";
+import { stellarPaywallProvider } from "./stellarPaywallProvider.js";
 import type { PaymentRequired, PaymentRequirements } from "./types.js";
 
 function makeRequirement(overrides: Partial<PaymentRequirements> = {}): PaymentRequirements {
@@ -78,5 +79,21 @@ describe("stellarPaywall.generateHtml amount conversion", () => {
     const req = makeRequirement({ amount: undefined, maxAmountRequired: undefined });
     const html = stellarPaywall.generateHtml(req, makePaymentRequired(req), {});
     assert.equal(extractAmount(html), 0);
+  });
+});
+
+describe("stellarPaywallProvider (pre-built provider)", () => {
+  it("converts 5_100_000 stroops to 0.51 USDC (issue #55 regression)", () => {
+    const req = makeRequirement({ amount: "5100000" });
+    const pr = makePaymentRequired(req);
+    const html = stellarPaywallProvider.generateHtml(pr);
+    assert.equal(extractAmount(html), 0.51);
+  });
+
+  it("converts 10_000_000 stroops to 1.0 USDC", () => {
+    const req = makeRequirement({ amount: "10000000" });
+    const pr = makePaymentRequired(req);
+    const html = stellarPaywallProvider.generateHtml(pr);
+    assert.equal(extractAmount(html), 1);
   });
 });
