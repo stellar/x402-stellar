@@ -19,7 +19,8 @@
       "typescript": "^5.9.3",
       "axios": "^1.15.0",
       "protobufjs": "^7.5.5",
-      "follow-redirects": "^1.16.0"
+      "follow-redirects": "^1.16.0",
+      "uuid": "^14.0.0"
     }
   },
   "devDependencies": {
