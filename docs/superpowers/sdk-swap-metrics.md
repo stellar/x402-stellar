@@ -172,3 +172,72 @@ Wall time: 3.046s (pnpm test 2>&1 4.54s user 1.03s system 182% cpu 3.046 total)
 | Test | 3.046s | ✅ SUCCESS (~151 tests, 0 failures) |
 | Docker facilitator image | 366 MB | ✅ Built |
 | Docker server image | 374 MB | ✅ Built |
+
+---
+
+## After (15.0.1 class-xdr, PR #1422)
+
+All builds/checks green on the vendored SDK. Both consumers link to 15.0.1
+(verified). Commands run on the same machine, same warm caches busted for the
+SDK-affected tasks.
+
+### 1. Installed SDK size (on disk, unpacked)
+
+| Package | Version | Size |
+|---------|---------|------|
+| @stellar/stellar-sdk (vendored tarball, unpacked) | 15.0.1 class-xdr | **58 MB** |
+
+> ⚠️ **Larger on disk than baseline (14 MB).** The from-source `build:prod`
+> output ships ESM **and** CJS **and** the 18 MB axios variant **plus**
+> sourcemaps. The published npm release is leaner (14 MB). This is an artifact
+> of building the draft branch from source, not an inherent property of the new
+> SDK. A production publish that drops the axios variant + maps would be smaller.
+
+### 2 & 3. Build + browser bundle
+
+| Metric | Before (15.0.0) | After (15.0.1) | Delta |
+|--------|-----------------|----------------|-------|
+| `pnpm build` (turbo) | 3.78 s | 3.42 s | ≈ same |
+| Paywall **browser bundle** (`template.ts`) | 3,846,480 B (3.67 MB) | **1,068,846 B (1.02 MB)** | **−72.2%** |
+| Paywall `entry.js` (esbuild IIFE, minified) | ~3.6 MB | **1,038,325 B (0.99 MB)** | **−~71%** |
+
+> The browser bundle is the artifact actually shipped to end users (embedded
+> inline in the paywall HTML template). Bundle verified non-empty & valid:
+> contains `scValToNative`/`nativeToScVal`/`AssembledTransaction`/
+> `simulateTransaction`/`getLedgerEntries`, passes `node --check`, 27 paywall
+> tests pass.
+
+### 4. Typecheck / Lint / Test
+
+| Check | Before | After | Result |
+|-------|--------|-------|--------|
+| Typecheck | 2.03 s | 1.81 s | ✅ 9 tasks |
+| Lint | 2.00 s | 1.65 s | ✅ 6 tasks |
+| Test | 3.05 s | 2.88 s | ✅ facilitator 101 + paywall 27 + others, 0 failures |
+
+### 5. Docker image sizes
+
+| Image | Before | After | Delta |
+|-------|--------|-------|-------|
+| `x402-facilitator` | 366 MB | 366 MB | 0 |
+| `x402-server` | 374 MB | 368 MB | −6 MB (−1.6%) |
+
+> Net-neutral despite the new SDK being ~44 MB larger on disk. Reason: swapping
+> to a single pinned 15.0.1 evicted the duplicate transitive SDK copies
+> (`stellar-sdk@14.2.0`, `@14.6.1`, `@15.0.0`) that previously co-existed in
+> `node_modules`, roughly offsetting the larger from-source build. Required a
+> one-line Dockerfile change: `COPY vendor/ vendor/` before `pnpm install`
+> (the lockfile references the tarball by `file:` path).
+
+---
+
+## Summary of deltas
+
+| Dimension | Result |
+|-----------|--------|
+| **Browser bundle (shipped to users)** | **−72%** (3.85 MB → 1.07 MB) — headline win, from XDR class rewrite + better tree-shaking |
+| Build / typecheck / lint / test time | ≈ unchanged (all slightly faster, within noise) |
+| Tests | 100% pass on new SDK (no source changes needed) |
+| node_modules SDK size (disk) | +44 MB (from-source build ships ESM+CJS+axios+maps; published release is leaner) |
+| Docker image size | facilitator flat, server −6 MB |
+| Source code changes required | **none** (repo only uses high-level APIs unaffected by the XDR breaking changes) |
