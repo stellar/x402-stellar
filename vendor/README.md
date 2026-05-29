@@ -10,7 +10,7 @@ i.e. [PR #1422 — "[DRAFT] Class XDR Implementation"](https://github.com/stella
 | Version | `15.0.1` |
 | Branch | `class-xdr` (base: `modernization`) |
 | Source commit | `c7eb18e` ("remove exports from the old js xdr") |
-| Tarball size | ~6.3 MB |
+| Tarball size | ~672 KB (slimmed) |
 
 ## How it was built
 
@@ -19,10 +19,22 @@ git clone --depth 1 --branch class-xdr https://github.com/stellar/js-stellar-sdk
 cd js-stellar-sdk
 pnpm install
 pnpm run build:prod        # clean + rollup (lib + axios) + tsc types — succeeded, exit 0
-npm pack                   # -> stellar-stellar-sdk-15.0.1.tgz
+
+# --- slim: drop what this repo never imports ---
+#   * lib/axios/  (18 MB) — the alternate axios-transport build; repo uses the
+#     default feaxios build in lib/esm + lib/cjs via the base import + /contract + /rpc
+#   * dist/       (22 MB) — standalone UMD/IIFE browser bundles; esbuild resolves
+#     the SDK via the `module` field (lib/esm), never `dist/`
+#   * **/*.map     (~9 MB) — sourcemaps, not needed for a vendored prod artifact
+# Also pruned the ./axios* entries from `exports` and /dist from `files`, and
+# stripped the `prepare`/`prepack` scripts so `npm pack` does NOT rebuild them back.
+rm -rf lib/axios dist && find lib types -name '*.map' -delete
+npm pack --ignore-scripts  # -> stellar-stellar-sdk-15.0.1.tgz (~672 KB)
 ```
 
-Built `lib/` is 37 MB on disk (esm 10 MB, cjs 7.8 MB, axios variant 18 MB, types 8 KB).
+Slimmed `lib/` is **9.2 MB** on disk (esm + cjs only, no sourcemaps), down from
+37 MB for the full from-source build. Installed (unpacked) footprint is **9.2 MB**
+— smaller than the published 15.0.0 baseline (14 MB).
 
 ## Why a vendored tarball (not a git dependency)
 

@@ -1929,7 +1929,7 @@ packages:
     engines: {node: '>=20.0.0'}
 
   '@stellar/stellar-sdk@file:vendor/stellar-sdk-15.0.1-class-xdr.tgz':
-    resolution: {integrity: sha512-S098V6ZHH+0PQ5rAr3vv6qjhSWvF9V5OsG7UYNvC51/H39uRx4Twwseugu4Bfz2kBEQy403b0NLfpD3+kxyibA==, tarball: file:vendor/stellar-sdk-15.0.1-class-xdr.tgz}
+    resolution: {integrity: sha512-0YbNBVvb7YPdMCrmDZ6NGuzVsflsjQ/CGezds5l7fKQe7fzNTaL2c2rHs5tmmPcUnnk12NzwjOAAyPDAKI61Qw==, tarball: file:vendor/stellar-sdk-15.0.1-class-xdr.tgz}
     version: 15.0.1
     engines: {node: '>=20.0.0'}
     hasBin: true

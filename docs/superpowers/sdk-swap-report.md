@@ -46,9 +46,10 @@
 | `entry.js` (esbuild IIFE, minified) | ~3.6 MB | 1,038,325 B (0.99 MB) | −~71% |
 | Build / typecheck / lint / test wall time | 4.86 / 2.03 / 2.00 / 3.05 s | 4.83 / 1.81 / 1.65 / 2.88 s | ≈ same (within noise) |
 | Tests | green | **296 pass / 0 fail** | no regressions |
-| **Docker — facilitator** | 366 MB | 366 MB | **0** |
-| **Docker — server** | 374 MB | **368 MB** | **−6 MB** |
-| node_modules SDK (on disk) | 14 MB | 58 MB | **+44 MB** ⚠️ |
+| **Docker — facilitator** | 366 MB | **325 MB** | **−41 MB (−11%)** |
+| **Docker — server** | 374 MB | **327 MB** | **−47 MB (−13%)** |
+| node_modules SDK (on disk) | 14 MB | **9.2 MB** | **−4.8 MB** |
+| Vendored tarball | — | **672 KB** | slimmed from 6.3 MB |
 
 **Bundle size** is the clear win: **−72%** on the artifact end users download — directly
 from the new XDR layer's tree-shakeability.
@@ -58,16 +59,18 @@ runtime-memory benchmark was run, but a 2.8 MB smaller browser bundle means prop
 less parse/compile and heap for the SDK in-browser. No runtime regressions observed across
 296 tests.
 
-**Docker:** essentially neutral — facilitator flat, server −6 MB (−1.6%). The bigger
-58 MB on-disk SDK is offset by the swap evicting the duplicate old SDK copies
-(`14.2.0`/`14.6.1`/`15.0.0`) that previously co-existed in `node_modules`. Required one
-extra `COPY vendor/` line. A published (non-source) release would shrink the on-disk
-footprint further and likely turn Docker net-positive.
+**Docker:** net-positive after slimming the vendored tarball — facilitator −41 MB (−11%),
+server −47 MB (−13%). The initial from-source build was 58 MB on disk (net-neutral after
+evicting the old duplicate SDK copies `14.2.0`/`14.6.1`/`15.0.0`); **slimming** out the
+unused axios variant + standalone `dist/` + sourcemaps cut the installed SDK to 9.2 MB
+(below the 14 MB baseline), which flows straight through to the images. Required one extra
+`COPY vendor/` line in the Dockerfile.
 
 ## Caveats / honesty notes
 
-- 58 MB on-disk install is a **from-source-build artifact** (axios variant 18 MB +
-  sourcemaps ~9 MB + dual ESM/CJS), not an inherent SDK property.
+- The vendored tarball is **slimmed** (672 KB, 9.2 MB unpacked) by dropping the axios
+  transport variant, the standalone `dist/` browser bundles, and sourcemaps — none of which
+  this repo imports. The raw from-source build was 58 MB unpacked.
 - `@stellar/js-xdr` is **not** eliminated (verified in built output).
 - The stellar-wallets-kit `^13.3.0` peer warning is **pre-existing** (present with 15.0.0).
 - This is a **draft** branch — fine for evaluation, not for shipping.

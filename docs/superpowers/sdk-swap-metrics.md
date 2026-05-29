@@ -185,13 +185,15 @@ SDK-affected tasks.
 
 | Package | Version | Size |
 |---------|---------|------|
-| @stellar/stellar-sdk (vendored tarball, unpacked) | 15.0.1 class-xdr | **58 MB** |
+| @stellar/stellar-sdk — initial from-source build | 15.0.1 class-xdr | 58 MB |
+| @stellar/stellar-sdk — **slimmed vendored tarball** | 15.0.1 class-xdr | **9.2 MB** |
 
-> ⚠️ **Larger on disk than baseline (14 MB).** The from-source `build:prod`
-> output ships ESM **and** CJS **and** the 18 MB axios variant **plus**
-> sourcemaps. The published npm release is leaner (14 MB). This is an artifact
-> of building the draft branch from source, not an inherent property of the new
-> SDK. A production publish that drops the axios variant + maps would be smaller.
+> The first from-source `build:prod` shipped ESM + CJS + an 18 MB axios variant +
+> a 22 MB standalone `dist/` browser bundle + ~9 MB sourcemaps → 58 MB unpacked
+> (6.3 MB tarball). **Slimming** drops `lib/axios`, `dist/`, and all `*.map`
+> (none of which this repo imports — esbuild resolves via the `module` field =
+> `lib/esm`), leaving only `lib/esm` + `lib/cjs`. Result: **9.2 MB unpacked /
+> 672 KB tarball — now smaller than the published 15.0.0 baseline (14 MB).**
 
 ### 2 & 3. Build + browser bundle
 
@@ -217,17 +219,17 @@ SDK-affected tasks.
 
 ### 5. Docker image sizes
 
-| Image | Before | After | Delta |
-|-------|--------|-------|-------|
-| `x402-facilitator` | 366 MB | 366 MB | 0 |
-| `x402-server` | 374 MB | 368 MB | −6 MB (−1.6%) |
+| Image | Baseline (15.0.0) | Full build (58 MB SDK) | **Slimmed (9.2 MB SDK)** | Δ vs baseline |
+|-------|-------------------|------------------------|--------------------------|---------------|
+| `x402-facilitator` | 366 MB | 366 MB | **325 MB** | **−41 MB (−11.2%)** |
+| `x402-server` | 374 MB | 368 MB | **327 MB** | **−47 MB (−12.6%)** |
 
-> Net-neutral despite the new SDK being ~44 MB larger on disk. Reason: swapping
-> to a single pinned 15.0.1 evicted the duplicate transitive SDK copies
-> (`stellar-sdk@14.2.0`, `@14.6.1`, `@15.0.0`) that previously co-existed in
-> `node_modules`, roughly offsetting the larger from-source build. Required a
-> one-line Dockerfile change: `COPY vendor/ vendor/` before `pnpm install`
-> (the lockfile references the tarball by `file:` path).
+> With the full from-source build, images were net-neutral (the +44 MB SDK was
+> offset by evicting the old duplicate SDK copies `14.2.0`/`14.6.1`/`15.0.0`).
+> After **slimming** the vendored tarball (drop axios variant + `dist/` + maps),
+> images drop ~40–47 MB below baseline. Required a one-line Dockerfile change:
+> `COPY vendor/ vendor/` before `pnpm install` (the lockfile references the
+> tarball by `file:` path).
 
 ---
 
@@ -238,6 +240,6 @@ SDK-affected tasks.
 | **Browser bundle (shipped to users)** | **−72%** (3.85 MB → 1.07 MB) — headline win, from XDR class rewrite + better tree-shaking |
 | Build / typecheck / lint / test time | ≈ unchanged (all slightly faster, within noise) |
 | Tests | 100% pass on new SDK (no source changes needed) |
-| node_modules SDK size (disk) | +44 MB (from-source build ships ESM+CJS+axios+maps; published release is leaner) |
-| Docker image size | facilitator flat, server −6 MB |
+| node_modules SDK size (disk) | **−4.8 MB** after slimming (14 MB → 9.2 MB); was +44 MB before slimming |
+| Docker image size | **−41 MB facilitator / −47 MB server** (−11% to −13%) after slimming |
 | Source code changes required | **none** (repo only uses high-level APIs unaffected by the XDR breaking changes) |
