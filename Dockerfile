@@ -31,10 +31,6 @@ WORKDIR /app
 # Copy workspace manifests first for layer caching
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json turbo.json tsconfig.base.json ./
 
-# Vendored @stellar/stellar-sdk 15.0.1 (class-xdr / PR #1422) tarball — referenced
-# by file: path in pnpm-lock.yaml, so it must be present before pnpm install.
-COPY vendor/ vendor/
-
 # Activate pnpm version from package.json
 RUN corepack install
 
