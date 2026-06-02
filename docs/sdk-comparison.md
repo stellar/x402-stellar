@@ -8,6 +8,69 @@ Direct, package-to-package comparison of the **previous** `@stellar/stellar-sdk@
 No vendoring, no app integration — both artifacts measured standalone. Numbers are
 reproducible (see bottom). Benchmarks are best-of-3, stable across runs.
 
+> Speed is **not** the deciding factor for this app and is de-emphasized below
+> (§4 kept for completeness). The decision hinges on the runtime/compat findings
+> in §0 and the pros/cons that follow.
+
+## 0. Runtime verification — a real testnet payment ✅
+
+**The new SDK was wired into the app and a real x402 payment was settled on Stellar
+testnet.** Not a unit test — the full `client-cli → local server → OpenZeppelin
+facilitator → testnet` flow, paying a **USDC Soroban-contract** asset (the hardest
+path: `scVal` / i128 / `AssembledTransaction`).
+
+```
+[cli] Payment details  asset: CBIELTK6…(USDC)  amount: 100000  payTo: GCHEI4PQ…
+[cli] Payment accepted  status: 200
+[cli] Settlement  transaction: f92253fd10604d4aa43e745e5826f2c6e7f24dbc9720831e0772692282f0ef59
+```
+
+Independently confirmed on-chain (Horizon testnet): `successful: true`, ledger
+`2884601`, 2026-06-02T21:05:05Z —
+[stellar.expert tx](https://stellar.expert/explorer/testnet/tx/f92253fd10604d4aa43e745e5826f2c6e7f24dbc9720831e0772692282f0ef59).
+
+**But it did NOT work out of the box.** Two fixes were required to get there — this is
+the core finding:
+
+1. **API rename shim (`toXDR`→`toXdr`, `fromXDR`→`fromXdr`).** `@x402/stellar@2.8.0`
+   calls the old names (13 sites). class-xdr renamed them. Bridged by aliasing
+   `TransactionBase.prototype.toXDR = toXdr`, `TransactionBuilder.fromXDR = fromXdr`,
+   and `xdr.*.fromXDR` (thin, mechanical).
+2. **`@stellar/js-xdr` ESM packaging bug.** The branch's `rollup.config.mjs`
+   deliberately *inlines* js-xdr (its `main` is a webpack UMD with no ESM-visible named
+   exports), but the inlined output throws under ESM/tsx:
+   `SyntaxError: … does not provide an export named 'UnsignedHyper'` (in `base/memo.js`)
+   — crashing the server on load. Fixed by externalizing js-xdr and routing the 3
+   consumer files through a default-import interop shim (`base/jsxdr.ts`). The SDK's
+   own config carries a `TODO: remove once js-xdr ships an ESM build` — so upstream
+   knows this is unfinished.
+
+Wire format is unchanged, so a tx signed by the new SDK verified/settled fine on the
+remote facilitator's stable SDK.
+
+## Pros & Cons (for adopting the draft in this app)
+
+**Pros**
+- ✅ **It works end-to-end** once bridged — real Soroban USDC payment settled on testnet.
+- ✅ **Far smaller footprint**: −75% tree-shaken bundle (§1), −36% dependency tree, no
+  `@stellar/stellar-base` (inlined), no native modules (§2), −15% import memory (§3).
+- ✅ **Modern, cleaner deps** (noble crypto, smol-toml) replacing browserify-era cruft.
+- ✅ **Wire-compatible** with the existing ecosystem (stable-SDK facilitators verify its txs).
+
+**Cons**
+- ❌ **Not a drop-in.** `@x402/stellar@2.8.0` breaks on the renamed API — needs a compat
+  shim (or an upstream `@x402/stellar` release targeting class-xdr).
+- ❌ **ESM packaging is broken in the draft** — the js-xdr inlining crashes under
+  ESM/tsx; needs a build fix. This is the bigger blocker (a server won't even boot).
+- ❌ **Can't be consumed normally**: unpublished, and won't install as a git dependency
+  (its `prepare` runs `git config`, which dies in the package manager's temp dir).
+- ⚠️ **Draft, unstable**: API names and packaging are still in flux; `js-xdr` is *not*
+  removed (now a direct `4.0.0` dep). Don't pin production to it yet.
+
+**Bottom line:** technically sound and much lighter, and it *does* process real payments —
+but as a `[DRAFT]` it needs (a) an ESM/js-xdr build fix and (b) a class-xdr-aware
+`@x402/stellar` before it's adoptable without local patches.
+
 ## 1. Bundle size
 
 | Metric | Prev 15.0.0 | New `class-xdr` | Δ |
