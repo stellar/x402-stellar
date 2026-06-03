@@ -1,7 +1,5 @@
 minimumReleaseAge: 10080 # 7 days, in minutes
 packages:
-  - examples/*/server
-  - examples/*/client
-  - examples/facilitator
-  - examples/client-cli
   - packages/*
+  - examples/*
+  - examples/*/*

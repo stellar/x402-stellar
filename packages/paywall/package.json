@@ -24,22 +24,22 @@
   },
   "dependencies": {
     "@x402-stellar/shared": "workspace:*",
-    "@x402/core": "^2.8.0"
+    "@x402/core": "^2.13.0"
   },
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.9.0",
-    "@creit.tech/stellar-wallets-kit": "^2.1.0",
-    "@stellar/stellar-sdk": "^15.0.0",
-    "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
+    "@creit.tech/stellar-wallets-kit": "^2.2.0",
+    "@stellar/stellar-sdk": "^15.1.0",
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
-    "@x402/stellar": "^2.8.0",
+    "@x402/stellar": "^2.12.0",
     "buffer": "^6.0.3",
-    "esbuild": "^0.27.4",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "esbuild": "^0.28.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "tsup": "^8.5.1",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.3",
     "typescript": "^6.0.2"
   }
 }
