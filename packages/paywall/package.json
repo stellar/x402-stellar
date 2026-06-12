@@ -35,7 +35,7 @@
     "@types/react-dom": "^19.2.3",
     "@x402/stellar": "^2.14.0",
     "buffer": "^6.0.3",
-    "esbuild": "^0.28.0",
+    "esbuild": "^0.28.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tsup": "^8.5.1",
