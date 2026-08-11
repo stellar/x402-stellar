@@ -11,6 +11,11 @@ declare global {
       appLogo?: string;
       config: {
         rpcUrl?: string;
+        /**
+         * How long the payment receipt stays up before the paid content is
+         * loaded. `0` skips the receipt and hands off immediately.
+         */
+        receiptDelayMs?: number;
         chainConfig: Record<
           string,
           {
