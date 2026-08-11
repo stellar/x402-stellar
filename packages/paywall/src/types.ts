@@ -12,6 +12,12 @@ export interface PaywallConfig {
   currentUrl?: string;
   testnet?: boolean;
   stellarRpcUrl?: string;
+  /**
+   * Wallet ids to offer in the Stellar paywall, in order. Omit to offer every
+   * wallet the paywall supports. See `SUPPORTED_WALLET_IDS` in
+   * `src/browser/walletModules.ts` for the accepted values.
+   */
+  stellarWallets?: string[];
 }
 
 export interface PaymentRequirements {
