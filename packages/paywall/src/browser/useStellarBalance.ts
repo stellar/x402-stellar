@@ -25,7 +25,13 @@ export type UseBalanceReturn = {
   tokenBalanceFormatted: string;
   isMissingTrustline: boolean | null;
   assetMetadata: AssetMetadata | null;
-  refreshBalance: () => Promise<string>;
+  /**
+   * Re-reads the balance and returns it in raw atomic units, or `null` when the
+   * read failed. Raw units are returned (rather than the formatted string) so
+   * callers can compare against `PaymentRequirements.amount` exactly, without
+   * a float round-trip.
+   */
+  refreshBalance: () => Promise<bigint | null>;
   resetBalance: () => void;
 };
 
@@ -90,10 +96,10 @@ export function useStellarBalance({
     }
   }, [network, asset, runtimeRpcUrl]);
 
-  const refreshBalance = useCallback(async (): Promise<string> => {
+  const refreshBalance = useCallback(async (): Promise<bigint | null> => {
     if (!address) {
       resetBalance();
-      return "";
+      return null;
     }
 
     setIsFetchingBalance(true);
@@ -142,7 +148,7 @@ export function useStellarBalance({
       setTokenBalanceRaw(balanceRaw);
       setTokenBalanceFormatted(balanceFormatted);
       setIsMissingTrustline(false);
-      return balanceFormatted;
+      return balanceRaw;
     } catch (error) {
       console.error("Failed to fetch Stellar USDC balance", error);
       const msg = parseError(error, "Unable to read balance. Please retry.");
@@ -154,7 +160,7 @@ export function useStellarBalance({
         onStatus(statusError(msg));
       }
       resetBalance();
-      return "";
+      return null;
     } finally {
       setIsFetchingBalance(false);
     }
