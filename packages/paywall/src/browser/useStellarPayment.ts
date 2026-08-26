@@ -27,6 +27,26 @@ type X402Runtime = {
 };
 
 /**
+ * Builds the x402 client used to pay the paywall.
+ *
+ * Spend controls guard unattended agent clients; here the user sees the
+ * price and approves the exact amount in their wallet, so the default
+ * $1-per-payment cap would only break servers priced above it.
+ *
+ * @param walletSigner - The signer responsible for Stellar signatures.
+ * @param rpcUrl - Optional Soroban RPC URL override.
+ * @returns A client with spend controls disabled and the Stellar scheme registered.
+ */
+export function createPaywallClient(
+  walletSigner: ClientStellarSigner,
+  rpcUrl?: string,
+): x402Client {
+  const client = new x402Client().setSpendControls(false);
+  client.register("stellar:*", new ExactStellarScheme(walletSigner, { url: rpcUrl }));
+  return client;
+}
+
+/**
  * Handles Stellar payment submission.
  *
  * @param params - Hook parameters.
@@ -56,8 +76,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
     try {
       setStatus(statusInfo("Waiting for user signature..."));
 
-      const client = new x402Client();
-      client.register("stellar:*", new ExactStellarScheme(walletSigner, { url: runtimeRpcUrl }));
+      const client = createPaywallClient(walletSigner, runtimeRpcUrl);
 
       const paymentPayload = await client.createPaymentPayload(paymentRequired);
 

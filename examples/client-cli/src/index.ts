@@ -35,6 +35,10 @@ if (!stellarNetwork) {
 }
 
 const signer = createEd25519Signer(STELLAR_PRIVATE_KEY, stellarNetwork);
+// Spend controls are deliberately left at their defaults: this client pays
+// unattended, so the SDK's default-assets-only filter and $1-per-payment cap
+// are the safety net an agent should have. Payments above $1 will be rejected;
+// pass spendControls to setSpendControls() to raise the cap intentionally.
 const coreClient = new x402Client().register("stellar:*", new ExactStellarScheme(signer));
 const client = new x402HTTPClient(coreClient);
 
