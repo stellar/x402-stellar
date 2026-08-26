@@ -1,4 +1,9 @@
 minimumReleaseAge: 10080 # 7 days, in minutes
+# stellar-sdk v17 (Protocol 28) shipped 2026-08-20/25, inside the 7-day window,
+# but must be in before the testnet P28 vote on 2026-08-27. Remove after 2026-09-01.
+minimumReleaseAgeExclude:
+  - "@stellar/stellar-sdk"
+  - "@stellar/js-xdr"
 packages:
   - packages/*
   - examples/*

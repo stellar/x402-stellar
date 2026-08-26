@@ -17,10 +17,10 @@
     "refund-accounts-from-remote": "tsx scripts/refund-accounts-from-remote.ts"
   },
   "dependencies": {
-    "@stellar/stellar-sdk": "^15.1.0",
+    "@stellar/stellar-sdk": "^17.0.1",
     "@x402-stellar/shared": "workspace:*",
-    "@x402/core": "^2.14.0",
-    "@x402/stellar": "^2.14.0",
+    "@x402/core": "^2.23.0",
+    "@x402/stellar": "^2.23.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
