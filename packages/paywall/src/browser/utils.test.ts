@@ -1,6 +1,6 @@
 import { describe, it, mock } from "node:test";
 import assert from "node:assert/strict";
-import { formatPaymentError } from "./utils.ts";
+import { formatPaymentError, isBalanceInsufficient } from "./utils.ts";
 
 describe("formatPaymentError", () => {
   it("returns status code when body is empty", () => {
@@ -137,5 +137,43 @@ describe("formatPaymentError", () => {
       formatPaymentError("Payment request rejected", 403, body),
       "Payment request rejected: timeout",
     );
+  });
+});
+
+describe("isBalanceInsufficient", () => {
+  it("returns null when the balance is not known yet", () => {
+    assert.equal(isBalanceInsufficient(null, "1000"), null);
+  });
+
+  it("returns null when the requirement carries no amount", () => {
+    assert.equal(isBalanceInsufficient(10n, undefined), null);
+  });
+
+  it("returns null when the amount is not a valid integer string", () => {
+    assert.equal(isBalanceInsufficient(10n, "0.51"), null);
+    assert.equal(isBalanceInsufficient(10n, "not-a-number"), null);
+  });
+
+  it("reports insufficient when the balance is below the amount", () => {
+    assert.equal(isBalanceInsufficient(0n, "5100000"), true);
+    assert.equal(isBalanceInsufficient(5099999n, "5100000"), true);
+  });
+
+  it("reports sufficient when the balance covers the amount exactly", () => {
+    assert.equal(isBalanceInsufficient(5100000n, "5100000"), false);
+  });
+
+  it("reports sufficient when the balance is above the amount", () => {
+    assert.equal(isBalanceInsufficient(5100001n, "5100000"), false);
+  });
+
+  it("treats a zero-amount requirement as payable", () => {
+    assert.equal(isBalanceInsufficient(0n, "0"), false);
+  });
+
+  it("stays exact past the range where doubles lose precision", () => {
+    // Both operands round to 9007199254740992 as doubles, so a Number-based
+    // comparison would wrongly report this balance as sufficient.
+    assert.equal(isBalanceInsufficient(9007199254740993n, "9007199254740994"), true);
   });
 });
