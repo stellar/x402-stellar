@@ -1,10 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PaymentRequired, PaymentRequirements } from "@x402/core/types";
-import { getNetworkDisplayName } from "./utils";
+import { formatDuration, getExplorerTxUrl, getNetworkDisplayName, truncateHash } from "./utils";
 import { Spinner } from "./Spinner";
 import { statusError, statusInfo, type Status } from "./status";
 import { useStellarBalance } from "./useStellarBalance";
-import { useStellarPayment } from "./useStellarPayment";
+import { useStellarPayment, type PaymentReceipt } from "./useStellarPayment";
 import { useSWKConnection } from "./useSWKConnection";
 import { useSWKSigner } from "./useSWKSigner";
 
@@ -20,6 +20,14 @@ type StellarPaywallMainProps = {
 };
 
 const STELLAR_PAYMENT_SCALE = 10_000_000;
+
+/**
+ * How long the receipt stays up before the paid content takes over. The paid
+ * response usually replaces the whole document, so without this pause the payer
+ * never sees what they paid or the hash it settled under. Hosts can override it
+ * with `receiptDelayMs`; `0` skips the receipt entirely and hands off at once.
+ */
+const DEFAULT_RECEIPT_DELAY_MS = 3000;
 
 /**
  * Paywall experience for Stellar networks. Validates that a Stellar payment
@@ -75,6 +83,9 @@ function StellarPaywallMain({
 }: StellarPaywallMainProps) {
   const [status, setStatus] = useState<Status | null>(null);
   const [hideBalance, setHideBalance] = useState(true);
+  const [receipt, setReceipt] = useState<PaymentReceipt | null>(null);
+  // Resolves the promise `onReceipt` returns, releasing the paid content.
+  const continueRef = useRef<(() => void) | null>(null);
 
   const x402 = window.x402;
   const { network, asset } = stellarRequirement;
@@ -109,11 +120,42 @@ function StellarPaywallMain({
     address,
   });
 
+  const receiptDelayMs = x402.config?.receiptDelayMs ?? DEFAULT_RECEIPT_DELAY_MS;
+
+  const handleReceipt = useCallback(
+    (settled: PaymentReceipt) => {
+      if (receiptDelayMs <= 0) {
+        return;
+      }
+
+      setReceipt(settled);
+
+      return new Promise<void>((resolve) => {
+        const timer = window.setTimeout(() => {
+          continueRef.current = null;
+          resolve();
+        }, receiptDelayMs);
+
+        continueRef.current = () => {
+          window.clearTimeout(timer);
+          continueRef.current = null;
+          resolve();
+        };
+      });
+    },
+    [receiptDelayMs],
+  );
+
+  // A pending hand-off must never outlive the component, or the paid content
+  // would never load.
+  useEffect(() => () => continueRef.current?.(), []);
+
   const { isPaying, submitPayment } = useStellarPayment({
     paymentRequired,
     walletSigner,
     onSuccessfulResponse,
     setStatus,
+    onReceipt: handleReceipt,
   });
 
   const amount =
@@ -176,6 +218,73 @@ function StellarPaywallMain({
     refreshBalance,
     submitPayment,
   ]);
+
+  if (receipt) {
+    // Prefer the network the facilitator reported, but fall back to the one the
+    // requirement named — facilitators are not guaranteed to report it in CAIP-2
+    // form, and losing the explorer link over that would defeat the receipt.
+    const explorerUrl =
+      getExplorerTxUrl(receipt.network, receipt.transaction) ??
+      getExplorerTxUrl(network, receipt.transaction);
+
+    return (
+      <div className="container gap-8">
+        <div className="header">
+          <h1 className="title">Payment Settled</h1>
+          <p>
+            Paid ${amount} {assetCode} on {chainName}. Loading the content you paid for…
+          </p>
+        </div>
+
+        <div className="content w-full">
+          <div className="payment-details">
+            <div className="payment-row">
+              <span className="payment-label">Amount:</span>
+              <span className="payment-value">
+                ${amount} {assetCode}
+              </span>
+            </div>
+            <div className="payment-row">
+              <span className="payment-label">Paid to:</span>
+              <span className="payment-value receipt-mono">
+                {truncateHash(stellarRequirement.payTo, 6)}
+              </span>
+            </div>
+            <div className="payment-row">
+              <span className="payment-label">Transaction:</span>
+              <span className="payment-value receipt-mono">
+                {receipt.transaction ? (
+                  explorerUrl ? (
+                    <a href={explorerUrl} target="_blank" rel="noopener noreferrer">
+                      {truncateHash(receipt.transaction)} ↗
+                    </a>
+                  ) : (
+                    truncateHash(receipt.transaction)
+                  )
+                ) : (
+                  "not reported"
+                )}
+              </span>
+            </div>
+            <div className="payment-row">
+              <span className="payment-label">Settled in:</span>
+              <span className="payment-value">{formatDuration(receipt.settlementMs)}</span>
+            </div>
+          </div>
+
+          <div className="cta-container">
+            <button
+              className="button button-primary"
+              onClick={() => continueRef.current?.()}
+              autoFocus
+            >
+              Continue →
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container gap-8">

@@ -4,15 +4,33 @@ import { x402Client } from "@x402/core/client";
 import { decodePaymentRequiredHeader, encodePaymentSignatureHeader } from "@x402/core/http";
 import type { ClientStellarSigner } from "@x402/stellar";
 import type { PaymentRequired } from "@x402/core/types";
-import { parseError } from "@x402-stellar/shared";
+import { parseError, parseX402Header, type X402PaymentResponsePayload } from "@x402-stellar/shared";
 import { statusError, statusInfo, statusSuccess, type Status } from "./status";
 import { formatPaymentError } from "./utils";
+
+/** What the payer gets to see once settlement succeeds. */
+export type PaymentReceipt = {
+  /** Settled transaction hash, when the facilitator reported one. */
+  transaction?: string;
+  /** Network the payment settled on, as reported by the facilitator. */
+  network?: string;
+  /** Wall-clock time from submitting the signed payment to the paid response. */
+  settlementMs: number;
+};
 
 export type UseStellarPaymentParams = {
   paymentRequired: PaymentRequired;
   walletSigner: ClientStellarSigner | null;
   setStatus: (status: Status | null) => void;
   onSuccessfulResponse: (response: Response) => Promise<void>;
+  /**
+   * Invoked with the receipt once settlement succeeds, before the paid response
+   * is handed to `onSuccessfulResponse`. Awaited, so a caller that wants to show
+   * the receipt can hold the hand-off until the payer has seen it — otherwise
+   * the paid content replaces the page immediately and the receipt is never
+   * rendered.
+   */
+  onReceipt?: (receipt: PaymentReceipt) => void | Promise<void>;
 };
 
 export type UseStellarPaymentResult = {
@@ -57,7 +75,7 @@ export function createPaywallClient(
  * @returns Handlers to trigger payments and the current loading state.
  */
 export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPaymentResult {
-  const { walletSigner, paymentRequired, onSuccessfulResponse, setStatus } = params;
+  const { walletSigner, paymentRequired, onSuccessfulResponse, setStatus, onReceipt } = params;
   const [isPaying, setIsPaying] = useState(false);
   const inFlightRef = useRef(false);
 
@@ -73,6 +91,30 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
 
     inFlightRef.current = true;
     setIsPaying(true);
+
+    /**
+     * Reports the receipt for a settled response, then hands the response off.
+     * `onReceipt` is awaited so the caller can hold the hand-off — the paid
+     * content typically replaces the whole page.
+     */
+    const completePayment = async (response: Response, submittedAt: number) => {
+      setStatus(statusSuccess("Payment successful! Loading content..."));
+
+      if (onReceipt) {
+        const settled = parseX402Header<X402PaymentResponsePayload>(
+          response.headers.get("PAYMENT-RESPONSE"),
+          (err) => console.warn("Malformed x402 payment-response header:", err),
+        );
+        await onReceipt({
+          transaction: settled?.transaction,
+          network: settled?.network,
+          settlementMs: performance.now() - submittedAt,
+        });
+      }
+
+      await onSuccessfulResponse(response);
+    };
+
     try {
       setStatus(statusInfo("Waiting for user signature..."));
 
@@ -84,6 +126,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
 
       setStatus(statusInfo("Settling payment..."));
       const targetUrl = window.location.href;
+      const submittedAt = performance.now();
       const response = await fetch(targetUrl, {
         headers: {
           "PAYMENT-SIGNATURE": paymentHeader,
@@ -91,8 +134,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       });
 
       if (response.ok) {
-        setStatus(statusSuccess("Payment successful! Loading content..."));
-        await onSuccessfulResponse(response);
+        await completePayment(response, submittedAt);
         return;
       }
 
@@ -133,6 +175,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
             );
           }
 
+          const retrySubmittedAt = performance.now();
           const retryResponse = await fetch(targetUrl, {
             headers: {
               "PAYMENT-SIGNATURE": paymentHeader,
@@ -140,8 +183,7 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
           });
 
           if (retryResponse.ok) {
-            setStatus(statusSuccess("Payment successful! Loading content..."));
-            await onSuccessfulResponse(retryResponse);
+            await completePayment(retryResponse, retrySubmittedAt);
             return;
           }
 
@@ -180,7 +222,15 @@ export function useStellarPayment(params: UseStellarPaymentParams): UseStellarPa
       inFlightRef.current = false;
       setIsPaying(false);
     }
-  }, [walletSigner, x402, paymentRequired, onSuccessfulResponse, setStatus, runtimeRpcUrl]);
+  }, [
+    walletSigner,
+    x402,
+    paymentRequired,
+    onSuccessfulResponse,
+    setStatus,
+    runtimeRpcUrl,
+    onReceipt,
+  ]);
 
   return { isPaying, submitPayment };
 }
