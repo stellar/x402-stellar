@@ -3,6 +3,7 @@ import type { PaymentRequired, PaymentRequirements } from "@x402/core/types";
 import { getNetworkDisplayName } from "./utils";
 import { Spinner } from "./Spinner";
 import { statusError, statusInfo, type Status } from "./status";
+import { useAddTrustline } from "./useAddTrustline";
 import { useStellarBalance } from "./useStellarBalance";
 import { useStellarPayment } from "./useStellarPayment";
 import { useSWKConnection } from "./useSWKConnection";
@@ -20,6 +21,13 @@ type StellarPaywallMainProps = {
 };
 
 const STELLAR_PAYMENT_SCALE = 10_000_000;
+
+/**
+ * Lab's transaction builder, where a `change_trust` operation can be assembled.
+ * `/account/fund` — where this used to point — is the friendbot XLM funding
+ * page and has nothing to do with trustlines.
+ */
+const STELLAR_LAB_BUILD_TX_URL = "https://lab.stellar.org/transaction/build";
 
 /**
  * Paywall experience for Stellar networks. Validates that a Stellar payment
@@ -101,6 +109,14 @@ function StellarPaywallMain({
     network,
     asset,
     onStatus: setStatus,
+  });
+
+  const { isAddingTrustline, addTrustline } = useAddTrustline({
+    address,
+    network,
+    assetMetadata,
+    onStatus: setStatus,
+    onAdded: refreshBalance,
   });
 
   const walletSigner = useSWKSigner({
@@ -270,17 +286,28 @@ function StellarPaywallMain({
               </p>
               <p className="trustline-text">
                 Your account needs a <strong>{assetMetadata ? assetMetadata.code : "asset"}</strong>{" "}
-                trustline before you can hold or pay with this asset. Add one via{" "}
-                <a
-                  href="https://lab.stellar.org/account/fund"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Stellar Laboratory
-                </a>
-                : connect your wallet, add the {assetMetadata ? assetMetadata.code : "asset"}{" "}
-                trustline, and sign the transaction.
+                trustline before you can hold or pay with this asset.{" "}
+                {addTrustline ? (
+                  <>Add it with the wallet you already connected.</>
+                ) : (
+                  <>
+                    Build a <code>change_trust</code> operation in{" "}
+                    <a href={STELLAR_LAB_BUILD_TX_URL} target="_blank" rel="noopener noreferrer">
+                      Stellar Laboratory
+                    </a>
+                    , then sign and submit it.
+                  </>
+                )}
               </p>
+              {addTrustline && (
+                <button
+                  className="button button-secondary trustline-action"
+                  onClick={() => void addTrustline()}
+                  disabled={isAddingTrustline}
+                >
+                  {isAddingTrustline ? <Spinner /> : `Add ${assetMetadata?.code} trustline`}
+                </button>
+              )}
             </div>
           </div>
         )}

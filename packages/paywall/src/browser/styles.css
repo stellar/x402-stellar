@@ -359,3 +359,23 @@ body {
 .trustline-text a:hover {
   color: #4e2009;
 }
+
+.trustline-action {
+  margin-top: 0.625rem;
+  width: auto;
+  background-color: #ffffff;
+  border: 1px solid #ffb224;
+  color: #4e2009;
+}
+
+.trustline-action:hover:not(:disabled) {
+  background-color: #fdf0d5;
+}
+
+.trustline-text code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  padding: 0.0625rem 0.25rem;
+  border-radius: 0.1875rem;
+  background-color: rgba(173, 87, 0, 0.12);
+}
