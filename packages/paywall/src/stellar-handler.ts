@@ -24,6 +24,7 @@ interface StellarPaywallOptions {
   appName?: string;
   appLogo?: string;
   stellarRpcUrl?: string;
+  stellarWallets?: string[];
 }
 
 /**
@@ -41,7 +42,16 @@ function getStellarPaywallHtml(options: StellarPaywallOptions): string {
   if (!STELLAR_PAYWALL_TEMPLATE) {
     return `<!DOCTYPE html><html><body><h1>Stellar Paywall template not available</h1></body></html>`;
   }
-  const { amount, testnet, paymentRequired, currentUrl, appName, appLogo, stellarRpcUrl } = options;
+  const {
+    amount,
+    testnet,
+    paymentRequired,
+    currentUrl,
+    appName,
+    appLogo,
+    stellarRpcUrl,
+    stellarWallets,
+  } = options;
 
   const logOnTestnet = testnet
     ? "console.log('Stellar Payment required initialized:', window.x402);"
@@ -51,6 +61,9 @@ function getStellarPaywallHtml(options: StellarPaywallOptions): string {
 
   const currentUrlLine = currentUrl ? `\n      currentUrl: ${jsonForScript(currentUrl)},` : "";
   const rpcUrlLine = stellarRpcUrl ? `\n        rpcUrl: ${jsonForScript(stellarRpcUrl)},` : "";
+  const walletsLine = stellarWallets?.length
+    ? `\n        wallets: ${jsonForScript(stellarWallets)},`
+    : "";
 
   const configScript = `
   <script>
@@ -58,7 +71,7 @@ function getStellarPaywallHtml(options: StellarPaywallOptions): string {
       amount: ${amount},
       paymentRequired: ${jsonForScript(paymentRequired)},
       testnet: ${testnet},${currentUrlLine}
-      config: {${rpcUrlLine}
+      config: {${rpcUrlLine}${walletsLine}
         chainConfig: ${jsonForScript(config)},
       },
       appName: ${jsonForScript(appName || "")},
@@ -107,6 +120,7 @@ export const stellarPaywall: PaywallNetworkHandler = {
       appName: config.appName,
       appLogo: config.appLogo,
       stellarRpcUrl: config.stellarRpcUrl,
+      stellarWallets: config.stellarWallets,
     });
   },
 };
