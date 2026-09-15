@@ -303,7 +303,8 @@ body {
   height: 1rem;
 }
 
-.trustline-banner {
+.trustline-banner,
+.notice-banner {
   width: 100%;
   display: flex;
   align-items: flex-start;
@@ -318,7 +319,26 @@ body {
   line-height: 1.5;
 }
 
-.trustline-icon {
+/* Inline action rendered inside body copy — looks like a link, behaves like a
+   button (keyboard-focusable, no bogus href). */
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--button-primary-color, #6e56cf);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-button:disabled {
+  cursor: default;
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.trustline-icon,
+.notice-icon {
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -334,28 +354,35 @@ body {
   line-height: 1;
 }
 
-.trustline-body {
+.trustline-body,
+.notice-body {
   flex: 1;
   min-width: 0;
 }
 
-.trustline-title {
+.trustline-title,
+.notice-title {
   font-weight: 600;
   color: #4e2009;
   margin-bottom: 0.125rem;
   font-size: 0.8125rem;
 }
 
-.trustline-text {
+.trustline-text,
+.notice-text {
   color: #4e2009;
 }
 
-.trustline-text a {
+.trustline-text a,
+.notice-text a,
+.notice-text .link-button {
   color: #ad5700;
   text-decoration: underline;
   font-weight: 500;
 }
 
-.trustline-text a:hover {
+.trustline-text a:hover,
+.notice-text a:hover,
+.notice-text .link-button:hover:not(:disabled) {
   color: #4e2009;
 }
