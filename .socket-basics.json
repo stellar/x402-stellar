@@ -1,0 +1,11 @@
+{
+  "workspace": ".",
+  "javascript_sast_enabled": true,
+  "sast_ignore_overrides": "js-sensitive-data-in-logs:packages/paywall/src/browser/build.ts,js-sensitive-data-in-logs:packages/paywall/src/browser/entry.tsx,js-sensitive-data-in-logs:packages/paywall/src/browser/useSWKConnection.ts,js-sensitive-data-in-logs:packages/paywall/src/browser/useStellarBalance.ts,js-sensitive-data-in-logs:packages/paywall/src/browser/utils.ts,js-unhandled-promise-rejection:packages/paywall/src/browser/StellarPaywall.tsx,js-unhandled-promise-rejection:packages/paywall/src/browser/entry.tsx,js-unhandled-promise-rejection:packages/paywall/src/browser/useStellarBalance.ts,js-unhandled-promise-rejection:packages/paywall/src/browser/useStellarPayment.ts",
+  "secret_scanning_enabled": true,
+  "console_tabular_enabled": true,
+  "dockerfiles": "Dockerfile",
+  "socket_tier_1_enabled": false,
+  "trivy_vuln_enabled": false,
+  "trufflehog_exclude_dir": "node_modules,dist,build,.git,yarn.lock,package-lock.json,pnpm-lock.yaml,Cargo.lock,go.sum,poetry.lock,Gemfile.lock,composer.lock"
+}

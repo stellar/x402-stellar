@@ -12,8 +12,25 @@
 
 [[IgnoredVulns]]
 id = "GHSA-848j-6mx2-7j84"          # elliptic ECDSA leading-zero signature flaw
-ignoreUntil = 2026-10-01            # re-evaluate; no upstream fix as of 2026-07
+ignoreUntil = 2027-01-15            # re-evaluate; no upstream fix as of 2026-10
 reason = "No fixed version exists (6.6.1 is latest). Transitive only, via browserify-sign / create-ecdh / secp256k1 / tiny-secp256k1 pulled in by wallet SDKs. Re-check for a patched release."
+
+# stream-json 1.x: fixes only exist in 3.x (ESM-only, renamed module paths),
+# which jayson 4.x (required by the latest @solana/web3.js) cannot load.
+[[IgnoredVulns]]
+id = "GHSA-528h-pc64-c93x"
+ignoreUntil = 2027-01-15
+reason = "Transitive only, via @creit.tech/stellar-wallets-kit > @solana/web3.js > jayson@4. jayson's browser client, the only one bundled, does not import stream-json. Re-check when @solana/web3.js moves to jayson@5."
+
+[[IgnoredVulns]]
+id = "GHSA-hqr4-qq8f-hg3x"
+ignoreUntil = 2027-01-15
+reason = "Transitive only, via @creit.tech/stellar-wallets-kit > @solana/web3.js > jayson@4. jayson's browser client, the only one bundled, does not import stream-json. Re-check when @solana/web3.js moves to jayson@5."
+
+[[IgnoredVulns]]
+id = "GHSA-mjw6-4jj6-33hc"
+ignoreUntil = 2027-01-15
+reason = "Transitive only, via @creit.tech/stellar-wallets-kit > @solana/web3.js > jayson@4. jayson's browser client, the only one bundled, does not import stream-json. Re-check when @solana/web3.js moves to jayson@5."
 
 # --- Example: ignore a specific advisory ---
 # [[IgnoredVulns]]
