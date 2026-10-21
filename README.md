@@ -19,7 +19,7 @@ x402-stellar/
 
 ## Prerequisites
 
-- Node.js 22+
+- Node.js 22.23.4+
 - pnpm 10+
 
 ## Quick Start

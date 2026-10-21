@@ -22,7 +22,7 @@
 
 # ── Stage: base ──────────────────────────────────────────────
 # Install deps, build examples, then prune non-Stellar bloat.
-FROM node:22-alpine AS base
+FROM node:22.23.4-alpine AS base
 
 RUN corepack enable
 
@@ -185,7 +185,7 @@ RUN set -ex \
 
 
 # ── Stage: facilitator ──────────────────────────────────────
-FROM node:22-alpine AS facilitator
+FROM node:22.23.4-alpine AS facilitator
 
 WORKDIR /app
 
@@ -201,7 +201,7 @@ CMD ["node", "dist/index.js"]
 
 
 # ── Stage: server ────────────────────────────────────────────
-FROM node:22-alpine AS server
+FROM node:22.23.4-alpine AS server
 
 WORKDIR /app
 
