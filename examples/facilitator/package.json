@@ -29,7 +29,7 @@
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "proxy-addr": "^2.0.8",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
@@ -43,7 +43,7 @@
     "tsup": "^8.5.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.2",
-    "vite": "^8.1.6",
+    "vite": "^8.3.5",
     "vitest": "^4.1.12"
   }
 }
