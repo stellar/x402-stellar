@@ -12,6 +12,11 @@ export interface PaywallConfig {
   currentUrl?: string;
   testnet?: boolean;
   stellarRpcUrl?: string;
+  /**
+   * How long the Stellar paywall shows the payment receipt before loading the
+   * paid content. Defaults to 3000ms; `0` hands off immediately.
+   */
+  stellarReceiptDelayMs?: number;
 }
 
 export interface PaymentRequirements {

@@ -1,6 +1,6 @@
 import { describe, it, mock } from "node:test";
 import assert from "node:assert/strict";
-import { formatPaymentError } from "./utils.ts";
+import { formatDuration, formatPaymentError, getExplorerTxUrl, truncateHash } from "./utils.ts";
 
 describe("formatPaymentError", () => {
   it("returns status code when body is empty", () => {
@@ -137,5 +137,73 @@ describe("formatPaymentError", () => {
       formatPaymentError("Payment request rejected", 403, body),
       "Payment request rejected: timeout",
     );
+  });
+});
+
+describe("getExplorerTxUrl", () => {
+  const hash = "c1acc578032a3a06a88603f971d871703f45b1246e0f1aa8862500495edbfba6";
+
+  it("builds a testnet explorer URL", () => {
+    assert.equal(
+      getExplorerTxUrl("stellar:testnet", hash),
+      `https://stellar.expert/explorer/testnet/tx/${hash}`,
+    );
+  });
+
+  it("maps the CAIP-2 pubnet reference onto Stellar Expert's `public`", () => {
+    assert.equal(
+      getExplorerTxUrl("stellar:pubnet", hash),
+      `https://stellar.expert/explorer/public/tx/${hash}`,
+    );
+  });
+
+  it("returns null when either input is missing", () => {
+    assert.equal(getExplorerTxUrl(undefined, hash), null);
+    assert.equal(getExplorerTxUrl("stellar:testnet", undefined), null);
+  });
+
+  it("returns null for a non-Stellar network", () => {
+    assert.equal(getExplorerTxUrl("eip155:8453", hash), null);
+  });
+
+  it("returns null when the network has no reference", () => {
+    assert.equal(getExplorerTxUrl("stellar:", hash), null);
+  });
+
+  it("escapes a hash that would otherwise alter the path", () => {
+    assert.equal(
+      getExplorerTxUrl("stellar:testnet", "../../evil"),
+      "https://stellar.expert/explorer/testnet/tx/..%2F..%2Fevil",
+    );
+  });
+});
+
+describe("truncateHash", () => {
+  it("keeps both ends of a long hash", () => {
+    assert.equal(truncateHash("0123456789abcdef0123456789abcdef"), "01234567…89abcdef");
+  });
+
+  it("leaves a short value untouched", () => {
+    assert.equal(truncateHash("abcdef"), "abcdef");
+  });
+
+  it("honours a custom edge width", () => {
+    assert.equal(truncateHash("0123456789abcdef", 4), "0123…cdef");
+  });
+});
+
+describe("formatDuration", () => {
+  it("uses milliseconds below a second", () => {
+    assert.equal(formatDuration(820.4), "820ms");
+  });
+
+  it("uses seconds at and above a second", () => {
+    assert.equal(formatDuration(1000), "1.0s");
+    assert.equal(formatDuration(4137), "4.1s");
+  });
+
+  it("renders a placeholder for values that are not real durations", () => {
+    assert.equal(formatDuration(Number.NaN), "—");
+    assert.equal(formatDuration(-1), "—");
   });
 });

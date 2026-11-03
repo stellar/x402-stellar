@@ -244,6 +244,20 @@ body {
   display: none;
 }
 
+.receipt-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+}
+
+.receipt-mono a {
+  color: var(--button-primary-color);
+  text-decoration: none;
+}
+
+.receipt-mono a:hover {
+  text-decoration: underline;
+}
+
 .status {
   text-align: center;
   font-size: 0.875rem;

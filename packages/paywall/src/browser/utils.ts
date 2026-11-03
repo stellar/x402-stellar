@@ -48,6 +48,62 @@ export function formatUnits(value: bigint, decimals: number): string {
   return isNegative ? `-${result}` : result;
 }
 
+/**
+ * Builds the Stellar Expert URL for a settled transaction.
+ *
+ * Stellar Expert names the public network `public`, while x402 uses the CAIP-2
+ * reference `pubnet`; everything else maps straight through.
+ *
+ * @param network - CAIP-2 network id, e.g. "stellar:testnet".
+ * @param transactionHash - Hash of the settled transaction.
+ * @returns An explorer URL, or `null` when either input is missing or the
+ * network is not a Stellar one.
+ */
+export function getExplorerTxUrl(
+  network: string | undefined,
+  transactionHash: string | undefined,
+): string | null {
+  if (!network || !transactionHash || !network.startsWith("stellar:")) {
+    return null;
+  }
+
+  const reference = network.split(":")[1];
+  if (!reference) {
+    return null;
+  }
+
+  const explorerNetwork = reference === "pubnet" ? "public" : reference;
+  return `https://stellar.expert/explorer/${explorerNetwork}/tx/${encodeURIComponent(transactionHash)}`;
+}
+
+/**
+ * Shortens a hash for display, keeping enough of both ends to compare against
+ * an explorer by eye.
+ *
+ * @param value - The hash to shorten.
+ * @param edge - Characters to keep at each end.
+ * @returns The shortened hash, or the original when it is already short enough.
+ */
+export function truncateHash(value: string, edge = 8): string {
+  if (value.length <= edge * 2 + 1) {
+    return value;
+  }
+  return `${value.slice(0, edge)}…${value.slice(-edge)}`;
+}
+
+/**
+ * Formats a duration in milliseconds for the payment receipt.
+ *
+ * @param ms - Elapsed milliseconds.
+ * @returns A short human-readable duration, e.g. "820ms" or "4.1s".
+ */
+export function formatDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms < 0) {
+    return "—";
+  }
+  return ms < 1000 ? `${Math.round(ms)}ms` : `${(ms / 1000).toFixed(1)}s`;
+}
+
 export function formatPaymentError(
   prefix: string,
   status: number,
