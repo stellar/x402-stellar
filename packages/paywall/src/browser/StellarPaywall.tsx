@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { PaymentRequired, PaymentRequirements } from "@x402/core/types";
-import { getNetworkDisplayName } from "./utils";
+import { getNetworkDisplayName, isBalanceInsufficient } from "./utils";
 import { Spinner } from "./Spinner";
 import { statusError, statusInfo, type Status } from "./status";
 import { useStellarBalance } from "./useStellarBalance";
@@ -20,6 +20,9 @@ type StellarPaywallMainProps = {
 };
 
 const STELLAR_PAYMENT_SCALE = 10_000_000;
+
+/** Circle's testnet faucet, the only public source of Stellar testnet USDC. */
+const CIRCLE_FAUCET_URL = "https://faucet.circle.com/";
 
 /**
  * Paywall experience for Stellar networks. Validates that a Stellar payment
@@ -91,6 +94,7 @@ function StellarPaywallMain({
 
   const {
     isFetchingBalance,
+    tokenBalanceRaw,
     tokenBalanceFormatted,
     isMissingTrustline,
     assetMetadata,
@@ -123,6 +127,11 @@ function StellarPaywallMain({
 
   const chainName = getNetworkDisplayName(network);
 
+  // `null` while the balance is still unknown (not connected, still loading, or
+  // the read failed) — only `true` blocks the Pay button.
+  const insufficientBalance = isBalanceInsufficient(tokenBalanceRaw, stellarRequirement.amount);
+  const canFundFromFaucet = network === "stellar:testnet";
+
   const handleConnect = useCallback(async () => {
     await connect();
   }, [connect]);
@@ -147,17 +156,23 @@ function StellarPaywallMain({
       return;
     }
 
-    if (tokenBalanceFormatted === "") {
+    // Re-read the balance whenever it is not known, then block on the fresh
+    // value. Previously this only ran while the balance was unknown, so a
+    // connected wallet with a known-too-low balance went straight to signing
+    // and only failed at settlement.
+    let balanceRaw = tokenBalanceRaw;
+    if (balanceRaw === null) {
       setStatus(statusInfo(`Checking ${assetCode} balance...`));
-      const freshBalance = await refreshBalance();
-      if (Number(freshBalance) < amount) {
-        setStatus(
-          statusError(
-            `Insufficient balance. Make sure you have enough ${assetCode} on ${chainName}.`,
-          ),
-        );
-        return;
-      }
+      balanceRaw = await refreshBalance();
+    }
+
+    if (isBalanceInsufficient(balanceRaw, stellarRequirement.amount)) {
+      setStatus(
+        statusError(
+          `Insufficient balance. Make sure you have enough ${assetCode} on ${chainName}.`,
+        ),
+      );
+      return;
     }
 
     try {
@@ -169,12 +184,13 @@ function StellarPaywallMain({
     x402,
     walletSigner,
     address,
-    tokenBalanceFormatted,
-    amount,
+    tokenBalanceRaw,
+    stellarRequirement.amount,
     assetCode,
     chainName,
     refreshBalance,
     submitPayment,
+    setStatus,
   ]);
 
   return (
@@ -249,15 +265,61 @@ function StellarPaywallMain({
               <button
                 className="button button-primary"
                 onClick={handlePayment}
-                disabled={isPaying || isMissingTrustline === true}
+                disabled={isPaying || isMissingTrustline === true || insufficientBalance === true}
               >
-                {!isPaying ? "Pay" : <Spinner />}
+                {isPaying ? (
+                  <Spinner />
+                ) : insufficientBalance === true ? (
+                  `Insufficient ${assetCode}`
+                ) : (
+                  "Pay"
+                )}
               </button>
             </>
           )}
         </div>
 
         {status && <div className={`status status-${status.type}`}>{status.message}</div>}
+
+        {address && insufficientBalance === true && !isMissingTrustline && (
+          <div className="notice-banner">
+            <div className="notice-icon" aria-hidden="true">
+              !
+            </div>
+            <div className="notice-body">
+              <p className="notice-title">
+                Not enough {assetCode} to pay ${amount}
+              </p>
+              <p className="notice-text">
+                This account holds{" "}
+                <strong>
+                  {tokenBalanceFormatted || "0"} {assetCode}
+                </strong>{" "}
+                on {chainName}.{" "}
+                {canFundFromFaucet ? (
+                  <>
+                    Get testnet {assetCode} from the{" "}
+                    <a href={CIRCLE_FAUCET_URL} target="_blank" rel="noopener noreferrer">
+                      Circle faucet ↗
+                    </a>
+                    , then{" "}
+                  </>
+                ) : (
+                  <>Add {assetCode} to this account, then </>
+                )}
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => void refreshBalance()}
+                  disabled={isFetchingBalance}
+                >
+                  {isFetchingBalance ? "checking…" : "check again"}
+                </button>
+                .
+              </p>
+            </div>
+          </div>
+        )}
 
         {address && isMissingTrustline && (
           <div className="trustline-banner">

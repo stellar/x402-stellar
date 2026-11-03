@@ -48,6 +48,39 @@ export function formatUnits(value: bigint, decimals: number): string {
   return isNegative ? `-${result}` : result;
 }
 
+/**
+ * Compares a raw on-chain balance against the atomic amount a payment
+ * requirement asks for.
+ *
+ * Both values are in the asset's own atomic units, so the comparison is exact:
+ * it never converts through `Number`, and it does not need to know the asset's
+ * decimals.
+ *
+ * @param balanceRaw - Raw balance read from the asset contract, or `null` when unknown.
+ * @param requiredAmount - `PaymentRequirements.amount`, an atomic-unit string.
+ * @returns `true`/`false` when both values are known, `null` when the balance is
+ * not known yet or the required amount is unparseable — so callers can tell
+ * "not enough" apart from "don't know yet".
+ */
+export function isBalanceInsufficient(
+  balanceRaw: bigint | null,
+  requiredAmount: string | undefined,
+): boolean | null {
+  if (balanceRaw === null || !requiredAmount) {
+    return null;
+  }
+
+  let required: bigint;
+  try {
+    required = BigInt(requiredAmount);
+  } catch {
+    console.warn(`Unparseable payment requirement amount: ${requiredAmount}`);
+    return null;
+  }
+
+  return balanceRaw < required;
+}
+
 export function formatPaymentError(
   prefix: string,
   status: number,
