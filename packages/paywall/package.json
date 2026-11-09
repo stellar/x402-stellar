@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@x402-stellar/shared": "workspace:*",
-    "@x402/core": "^2.23.0"
+    "@x402/core": "^2.29.0"
   },
   "devDependencies": {
     "@craftamap/esbuild-plugin-html": "^0.9.0",
@@ -33,7 +33,7 @@
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
-    "@x402/stellar": "^2.23.0",
+    "@x402/stellar": "^2.29.0",
     "buffer": "^6.0.3",
     "esbuild": "^0.28.0",
     "react": "^19.2.7",
