@@ -11,6 +11,7 @@
 #   - No `pnpm deploy` — runs from workspace tree (fast builds)
 #   - Aggressive pruning of EVM/SVM/non-Stellar deps + client/build bloat
 #   - Build tools (turbo, typescript, eslint, etc.) excluded from runtime
+#   - Package managers (npm, npx, corepack, yarn) removed from runtime
 #
 # Build context MUST be the repository root.
 #
@@ -184,8 +185,25 @@ RUN set -ex \
        -mindepth 1 -maxdepth 1 ! -name 'linux-x64' -exec rm -rf {} + 2>/dev/null || true
 
 
+# ── Stage: runtime ──────────────────────────────────────────
+# Shared base for Node services. They run `node dist/index.js` and never
+# invoke a package manager, so drop the ones bundled in the Node image.
+# Their vendored dependencies are otherwise flagged by image scanners
+# on every Node base-image refresh.
+FROM node:22.23.4-alpine AS runtime
+
+RUN rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm \
+           /usr/local/bin/npx \
+           /usr/local/bin/corepack \
+           /usr/local/bin/yarn \
+           /usr/local/bin/yarnpkg \
+           /opt/yarn-v*
+
+
 # ── Stage: facilitator ──────────────────────────────────────
-FROM node:22.23.4-alpine AS facilitator
+FROM runtime AS facilitator
 
 WORKDIR /app
 
@@ -201,7 +219,7 @@ CMD ["node", "dist/index.js"]
 
 
 # ── Stage: server ────────────────────────────────────────────
-FROM node:22.23.4-alpine AS server
+FROM runtime AS server
 
 WORKDIR /app
 
