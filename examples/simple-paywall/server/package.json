@@ -15,9 +15,9 @@
   "dependencies": {
     "@x402-stellar/paywall": "workspace:*",
     "@x402-stellar/shared": "workspace:*",
-    "@x402/core": "^2.23.0",
-    "@x402/express": "^2.23.0",
-    "@x402/stellar": "^2.23.0",
+    "@x402/core": "^2.29.0",
+    "@x402/express": "^2.29.0",
+    "@x402/stellar": "^2.29.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.3.0",
@@ -35,7 +35,7 @@
     "supertest": "^7.3.1",
     "tsup": "^8.5.1",
     "tsx": "^4.22.4",
-    "vite": "^8.1.6",
+    "vite": "^8.3.5",
     "vitest": "^4.1.12"
   }
 }
