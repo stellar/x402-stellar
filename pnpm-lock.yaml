@@ -72,8 +72,8 @@ importers:
   examples/facilitator:
     dependencies:
       '@stellar/stellar-sdk':
-        specifier: ^17.0.1
-        version: 17.0.1
+        specifier: ^17.4.0
+        version: 17.4.0
       '@x402-stellar/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -109,7 +109,7 @@ importers:
         version: 2.0.8
       zod:
         specifier: ^4.6.6
-        version: 4.6.6
+        version: 4.6.7
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -271,8 +271,8 @@ importers:
         specifier: ^2.7.1
         version: 2.7.1(@types/react@19.2.16)(@x402/core@2.29.0)(@x402/extensions@2.29.0(bufferutil@4.1.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(typescript@5.9.3)(utf-8-validate@6.0.6))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@5.1.1)(react@19.2.7)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.6)
       '@stellar/stellar-sdk':
-        specifier: ^17.0.1
-        version: 17.0.1
+        specifier: ^17.4.0
+        version: 17.4.0
       '@types/node':
         specifier: ^25.9.1
         version: 25.9.1
@@ -697,12 +697,14 @@ packages:
 
   '@ledgerhq/errors@6.35.0':
     resolution: {integrity: sha512-qk9PbqIvze7NXGogVxNCsz60rNo5FrGj8gKqs7pcyDk+em5L6s70G7cRxR+1HTXdam4WoPfntUq+WX9zQUynkg==}
+    deprecated: This package is no longer maintained and will not receive updates. Published versions remain available.
 
   '@ledgerhq/hw-app-str@7.2.8':
     resolution: {integrity: sha512-VHICY9jyZW5LM/8zc/mSbW7fS2bAC1OTVOtRwdQLEDn6Gv9UaNcCWjaHI1UKAnDUqYX7DUQuIPiTP1b4O+mtUQ==}
 
   '@ledgerhq/hw-transport-webusb@6.29.12':
     resolution: {integrity: sha512-mMGKPYAUz9MNcURe+hSTSHwqPwCli6D0lCl15Z4hDOpcqhZ26vwoeWVKeQp53NNCetHOl0lauPkN43Gt9pIggg==}
+    deprecated: This package is no longer maintained. Use @ledgerhq/device-transport-kit-web-hid instead.
 
   '@ledgerhq/hw-transport@6.31.12':
     resolution: {integrity: sha512-FO5LRIXYC8ELtaohlO8qK0b3TfHUNBZ3+CXKPHiHj2jJwrxPf4s5kcgBYrmzuf1C/1vfrMOjzyty6OgrMIbU6Q==}
@@ -1575,8 +1577,8 @@ packages:
     engines: {node: '>=22.0.0'}
     hasBin: true
 
-  '@stellar/stellar-sdk@17.0.1':
-    resolution: {integrity: sha512-fsHHbzJ14N5Ttq5Qpz4AX0ytmPSLCzcy4XC3uIgSQz0cBkEgv0Zb4KE6tWEd3nDQUk/1qP8ZX9cRonIaUXO3Sw==}
+  '@stellar/stellar-sdk@17.4.0':
+    resolution: {integrity: sha512-IX6gi62yWQ+6Oz56LsVEEeSViSOWJL3BkttftwVmVsu+62nLTWNVsCmTWEzwgNLT/q5HGP25OnlU+hhy2E4wwA==}
     engines: {node: '>=22.12.0'}
     hasBin: true
 
@@ -4336,6 +4338,9 @@ packages:
   zod@4.6.6:
     resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
+
   zustand@5.0.3:
     resolution: {integrity: sha512-14fwWQtU3pH4dE0dOpdMiWjddcH+QzKIgk1cl8epwSE7yag43k/AD/m4L6+K7DytAOr9gGBe3/EXj9g7cdostg==}
     engines: {node: '>=12.20.0'}
@@ -4502,7 +4507,7 @@ snapshots:
       '@preact/signals': 2.9.0(preact@10.29.2)
       '@reown/appkit': 1.8.21(@types/react@19.2.16)(@x402/core@2.29.0)(@x402/extensions@2.29.0(bufferutil@4.1.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(typescript@5.9.3)(utf-8-validate@6.0.6))(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react@19.2.7)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.6)
       '@stellar/freighter-api': 6.0.0
-      '@stellar/stellar-sdk': 17.0.1
+      '@stellar/stellar-sdk': 17.4.0
       '@trezor/connect-web': 10.0.0-beta.1(bufferutil@4.1.0)(tslib@2.8.1)(utf-8-validate@6.0.6)
       '@twind/core': 1.1.3(typescript@5.9.3)
       '@twind/preset-autoprefix': 1.0.7(@twind/core@1.1.3(typescript@5.9.3))(typescript@5.9.3)
@@ -5431,12 +5436,12 @@ snapshots:
       '@noble/hashes': 1.8.0
       apg-js: 4.4.0
 
-  '@signinwithethereum/siwe@4.2.0(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(viem@2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.6))':
+  '@signinwithethereum/siwe@4.2.0(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(viem@2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.7))':
     dependencies:
       '@signinwithethereum/siwe-parser': 4.2.0
     optionalDependencies:
       ethers: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
-      viem: 2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.6)
+      viem: 2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.7)
 
   '@sinclair/typebox@0.34.52': {}
 
@@ -6000,7 +6005,7 @@ snapshots:
       - debug
       - supports-color
 
-  '@stellar/stellar-sdk@17.0.1':
+  '@stellar/stellar-sdk@17.4.0':
     dependencies:
       '@exodus/bytes': 1.15.1(@noble/hashes@2.2.0)
       '@noble/ed25519': 3.1.0
@@ -6959,7 +6964,7 @@ snapshots:
 
   '@x402/core@2.29.0':
     dependencies:
-      zod: 4.6.6
+      zod: 4.6.7
 
   '@x402/express@2.29.0(bufferutil@4.1.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(express@5.3.0)(typescript@5.9.3)(utf-8-validate@6.0.6)':
     dependencies:
@@ -6976,13 +6981,13 @@ snapshots:
     dependencies:
       '@noble/curves': 1.9.7
       '@scure/base': 1.2.6
-      '@signinwithethereum/siwe': 4.2.0(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(viem@2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.6))
+      '@signinwithethereum/siwe': 4.2.0(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(viem@2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.7))
       '@x402/core': 2.29.0
       ajv: 8.20.0
       jose: 5.10.0
       tweetnacl: 1.0.3
-      viem: 2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.6)
-      zod: 4.6.6
+      viem: 2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.7)
+      zod: 4.6.7
     transitivePeerDependencies:
       - bufferutil
       - ethers
@@ -7008,10 +7013,20 @@ snapshots:
       typescript: 5.9.3
       zod: 4.6.6
 
+  abitype@1.2.3(typescript@5.9.3)(zod@4.6.7):
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 4.6.7
+
   abitype@1.3.0(typescript@5.9.3)(zod@4.6.6):
     optionalDependencies:
       typescript: 5.9.3
       zod: 4.6.6
+
+  abitype@1.3.0(typescript@5.9.3)(zod@4.6.7):
+    optionalDependencies:
+      typescript: 5.9.3
+      zod: 4.6.7
 
   accepts@2.0.0:
     dependencies:
@@ -8276,6 +8291,21 @@ snapshots:
     transitivePeerDependencies:
       - zod
 
+  ox@0.14.54(typescript@5.9.3)(zod@4.6.7):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.1
+      '@noble/ciphers': 1.3.0
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.3.0(typescript@5.9.3)(zod@4.6.7)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - zod
+
   ox@0.6.9(typescript@5.9.3)(zod@4.6.6):
     dependencies:
       '@adraffy/ens-normalize': 1.11.1
@@ -9009,6 +9039,23 @@ snapshots:
       - utf-8-validate
       - zod
 
+  viem@2.57.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.6.7):
+    dependencies:
+      '@noble/curves': 1.9.1
+      '@noble/hashes': 1.8.0
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.6.7)
+      isows: 1.0.7(ws@8.22.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))
+      ox: 0.14.54(typescript@5.9.3)(zod@4.6.7)
+      ws: 8.22.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+    optionalDependencies:
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
   vite@8.3.5(@types/node@25.9.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4):
     dependencies:
       lightningcss: 1.33.0
@@ -9148,6 +9195,8 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zod@4.6.6: {}
+
+  zod@4.6.7: {}
 
   zustand@5.0.3(@types/react@19.2.16)(react@19.2.7):
     optionalDependencies:
