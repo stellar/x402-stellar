@@ -180,6 +180,9 @@ RUN set -ex \
     && rm -rf node_modules/.pnpm/*-android-*@* \
     && rm -rf node_modules/.pnpm/fsevents@* \
     #
+    # ── Stray Ruby manifests (js-xdr@4 publishes its dev Gemfile) ─
+    && find node_modules/.pnpm \( -name Gemfile -o -name Gemfile.lock \) -type f -delete \
+    #
     # ── Sodium native prebuilds: keep only linux-x64 ─────────
     && find node_modules/.pnpm/sodium-native@*/node_modules/sodium-native/prebuilds \
        -mindepth 1 -maxdepth 1 ! -name 'linux-x64' -exec rm -rf {} + 2>/dev/null || true
@@ -189,10 +192,12 @@ RUN set -ex \
 # Shared base for Node services. They run `node dist/index.js` and never
 # invoke a package manager, so drop the ones bundled in the Node image.
 # Their vendored dependencies are otherwise flagged by image scanners
-# on every Node base-image refresh.
+# on every Node base-image refresh. Also pick up Alpine security fixes
+# published after the base image was built.
 FROM node:22.23.4-alpine AS runtime
 
-RUN rm -rf /usr/local/lib/node_modules/npm \
+RUN apk upgrade --no-cache \
+    && rm -rf /usr/local/lib/node_modules/npm \
            /usr/local/lib/node_modules/corepack \
            /usr/local/bin/npm \
            /usr/local/bin/npx \
@@ -238,6 +243,9 @@ CMD ["node", "dist/index.js"]
 
 # ── Stage: client ────────────────────────────────────────────
 FROM nginx:alpine AS client
+
+# Pick up Alpine security fixes published after the base image was built.
+RUN apk upgrade --no-cache
 
 COPY --from=base /app/examples/simple-paywall/client/dist /usr/share/nginx/html
 COPY examples/simple-paywall/client/docker-entrypoint.sh /docker-entrypoint.d/40-runtime-config.sh
