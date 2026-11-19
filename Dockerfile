@@ -242,7 +242,7 @@ CMD ["node", "dist/index.js"]
 
 
 # ── Stage: client ────────────────────────────────────────────
-FROM nginx:alpine AS client
+FROM nginx:1.31.9-alpine AS client
 
 # Pick up Alpine security fixes published after the base image was built.
 RUN apk upgrade --no-cache
